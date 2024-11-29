@@ -1,8 +1,8 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { BUCKETEER_BUCKET_NAME } from '$env/static/private';
+import { PRIVATE_BUCKETEER_BUCKET_NAME } from '$env/static/private';
 
 export const GET: RequestHandler = async ({ params }) => {
-    const imageUrl = `https://${BUCKETEER_BUCKET_NAME}.s3.amazonaws.com/public/${params.image}`;
+    const imageUrl = `https://${PRIVATE_BUCKETEER_BUCKET_NAME}.s3.amazonaws.com/public/${params.image}`;
 
     const response = await fetch(imageUrl);
 

@@ -1,1 +1,0 @@
-web: uvicorn backend.src.main:app --reload

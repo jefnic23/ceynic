@@ -1,8 +1,9 @@
 import type { ProductsOut } from '$lib/interfaces/product';
+import { PUBLIC_API_URL } from "$env/static/public";
 
 export const load = async ({ fetch }) => {
     const fetchProducts = async (): Promise<ProductsOut[]> => {
-        const response = await fetch('http://127.0.0.1:8000/products');
+        const response = await fetch(`${PUBLIC_API_URL}/products`);
 
         if (!response.ok) {
             console.log("Error retrieving products.");

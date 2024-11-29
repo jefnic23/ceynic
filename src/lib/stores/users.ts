@@ -1,8 +1,9 @@
 import type { Writable } from "svelte/store";
 import { writable } from "svelte/store";
+import { PUBLIC_API_URL } from "$env/static/public";
 
 export async function getUser(accessToken: string): Promise<string | null> {
-    const response = await fetch(`http://127.0.0.1:8000/users`, {
+    const response = await fetch(`${PUBLIC_API_URL}/users`, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },

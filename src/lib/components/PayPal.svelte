@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { loadScript } from '@paypal/paypal-js';
 	import { onMount } from 'svelte';
-	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
+	import { PUBLIC_PAYPAL_CLIENT_ID, PUBLIC_API_URL } from '$env/static/public';
 
 	export let productId: number;
 
@@ -20,37 +20,37 @@
 
 		await paypal
 			.Buttons({
-				onShippingChange: function(_, actions) {
+				onShippingChange: function (_, actions) {
 					return actions.resolve();
 				},
-				createOrder: async function() {
-					const response = await fetch("http://127.0.0.1:8000/orders", {
-						method: "POST",
+				createOrder: async function () {
+					const response = await fetch(`${PUBLIC_API_URL}/orders`, {
+						method: 'POST',
 						headers: {
-							"Content-Type": "application/json"
+							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({ product_id: productId })
 					});
 
 					if (!response.ok) {
-						console.log("Error creating order.");
+						console.log('Error creating order.');
 					}
 
 					const json = await response.json();
 
 					return json.order_id;
 				},
-				onApprove: async function(data, actions) {
-					const response = await fetch(`http://127.0.0.1:8000/orders/${data.orderID}`, {
-						method: "POST",
+				onApprove: async function (data, actions) {
+					const response = await fetch(`${PUBLIC_API_URL}/orders/${data.orderID}`, {
+						method: 'POST',
 						headers: {
-							"Content-Type": "application/json"
+							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({ product_id: productId })
 					});
 
 					if (!response.ok) {
-						console.log("Error creating order.");
+						console.log('Error creating order.');
 					}
 
 					const json = await response.json();

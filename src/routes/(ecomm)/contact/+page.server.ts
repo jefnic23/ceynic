@@ -1,10 +1,11 @@
 import type { Actions } from "@sveltejs/kit";
+import { PUBLIC_API_URL } from "$env/static/public";
 
 export const actions = {
     default: async ({ request }) => {
         const formData = await request.formData();
 
-        const response = await fetch("http://127.0.0.1:8000/contact", {
+        const response = await fetch(`${PUBLIC_API_URL}/contact`, {
             method: "POST",
             body: formData
         });

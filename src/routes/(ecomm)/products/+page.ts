@@ -1,3 +1,5 @@
+import { PUBLIC_API_URL } from '$env/static/public';
+
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async (sort: string = "") => {
         const queryParams = new URLSearchParams();
@@ -6,7 +8,7 @@ export const load = async ({ fetch, url }) => {
             queryParams.append("sort", sort);
         }
 
-        const response = await fetch(`http://127.0.0.1:8000/products?${queryParams.toString()}`);
+        const response = await fetch(`${PUBLIC_API_URL}/products?${queryParams.toString()}`);
 
         if (!response.ok) {
             console.log("Error retrieving products.");

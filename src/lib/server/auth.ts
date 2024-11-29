@@ -1,5 +1,6 @@
 import type { Token } from '$lib/interfaces/token';
 import { type Cookies } from '@sveltejs/kit';
+import { PUBLIC_API_URL } from '$env/static/public';
 
 export function setCookie(name: string, token: string, maxAge: number, cookies: Cookies) {
     cookies.set(name, token, {
@@ -14,7 +15,7 @@ export function setCookie(name: string, token: string, maxAge: number, cookies: 
 export async function handleLogin({ request, cookies }: { request: Request, cookies: Cookies }) {
     const formData = await request.formData();
 
-    const response = await fetch("http://127.0.0.1:8000/login", {
+    const response = await fetch(`${PUBLIC_API_URL}/login`, {
         method: request.method,
         body: formData
     });
@@ -34,7 +35,7 @@ export async function handleLogin({ request, cookies }: { request: Request, cook
 export async function handleRefresh(cookies: Cookies ) {
     const refreshToken = cookies.get("refresh");
 
-    const response = await fetch("http://127.0.0.1:8000/refresh", {
+    const response = await fetch(`${PUBLIC_API_URL}/refresh`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

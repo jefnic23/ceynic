@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
-import Dropzone from '$lib/components/Dropzone.svelte';
+	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import type { ProductOut, ProductsOut } from '$lib/interfaces/product';
 	import type { PageData } from './$types';
+	import { PUBLIC_API_URL } from '$env/static/public';
 
 	export let data: PageData;
 
@@ -14,7 +15,7 @@ import Dropzone from '$lib/components/Dropzone.svelte';
 	async function openEditModal(product: ProductsOut) {
 		showModal = true;
 		loadingModal = true;
-		const response = await fetch(`http://127.0.0.1:8000/products/${product.id}`);
+		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
 
 		if (response.status !== 200) {
 			console.log('Error retrieving product.');

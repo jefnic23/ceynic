@@ -14,7 +14,7 @@
         <a
             href="https://www.instagram.com/traceynicholas_art/"
             target="_blank"
-            class="icon instagram"
+            class="icon insta"
         >
             <Instagram />
         </a>
@@ -64,7 +64,7 @@
 		color: white;
 	}
 
-	.instagram {
+	.insta {
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
 	}

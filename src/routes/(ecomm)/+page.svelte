@@ -17,7 +17,7 @@
 </svelte:head>
 
 <div class="wrapper">
-	<h1 class="header-text">Original Abstract Oil Paintings on Canvas and Prints</h1>
+	<div class="header-text">Original Abstract Oil Paintings on Canvas and Prints</div>
 	<div class="masonry-layout">
 		{#await data.products}
 			{#each Array(placeholderCount) as _, index}
@@ -53,7 +53,10 @@
 		font-family: 'Sarina', cursive;
 		font-weight: 400;
 		font-style: normal;
+		font-size: xx-large;
 		color: #62b2b2;
+		margin-bottom: 21px;
+		text-align: center;
 	}
 
 	.wrapper {
@@ -128,6 +131,10 @@
 			column-count: 3;
 			width: 743px;
 		}
+
+		.header-text {
+			font-size: x-large;
+		}
 	}
 
 	/* Masonry on small screens */
@@ -136,12 +143,20 @@
 			column-count: 2;
 			width: 484px;
 		}
+
+		.header-text {
+			font-size: larger;
+		}
 	}
 
 	@media only screen and (max-width: 599px) {
 		.masonry-layout {
 			column-count: 1;
 			width: 225px;
+		}
+
+		.header-text {
+			font-size: large;
 		}
 	}
 </style>

@@ -35,14 +35,14 @@
 	}
 
 	/* Header text on medium-sized screens */
-	@media only screen and (max-width: 1099px) and (min-width: 900px) {
+	@media only screen and (max-width: 1099px) and (min-width: 850px) {
 		.header-text {
 			font-size: x-large;
 		}
 	}
 
 	/* Header text on small screens */
-	@media only screen and (max-width: 899px) and (min-width: 600px) {
+	@media only screen and (max-width: 849px) and (min-width: 600px) {
 		.header-text {
 			font-size: larger;
 		}

@@ -1,4 +1,6 @@
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { PriceRange } from '$lib/interfaces/priceRange.js';
+import type { ProductsOut } from '$lib/interfaces/product.js';
 
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async (sort: string = "") => {
@@ -15,7 +17,20 @@ export const load = async ({ fetch, url }) => {
             return [];
         }
 
-        const responseData = await response.json();
+        const responseData: ProductsOut[] = await response.json();
+
+        return responseData;
+    }
+
+    const fetchPriceRange = async () => {
+        const response = await fetch(`${PUBLIC_API_URL}/products/priceRange`);
+
+        if (!response.ok) {
+            console.log("Error retrieving price range.");
+            return;
+        }
+
+        const responseData: PriceRange = await response.json();
 
         return responseData;
     }
@@ -23,6 +38,7 @@ export const load = async ({ fetch, url }) => {
     const sort = url.searchParams.get("sort") || "";
 
     return {
-        products: fetchProducts(sort)
+        products: fetchProducts(sort),
+        priceRange: fetchPriceRange()
     }
 }

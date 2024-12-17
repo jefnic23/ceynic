@@ -3,6 +3,8 @@
 	import MasonryItem from './MasonryItem.svelte';
 	import type { ProductsOut } from '$lib/interfaces/product';
 
+	export let placeholderCount: number = 12;
+
 	export let data: Promise<ProductsOut[]>;
 	let loadedImages = new Set<number>();
 
@@ -14,7 +16,7 @@
 
 <div class="masonry-layout">
 	{#await data}
-		<Skeleton placeholderCount={12} />
+		<Skeleton placeholderCount={placeholderCount} />
 	{:then products}
 		{#each products as product}
 			<MasonryItem
@@ -44,7 +46,7 @@
 	}
 
 	/* Masonry on medium-sized screens */
-	@media only screen and (max-width: 1099px) and (min-width: 900px) {
+	@media only screen and (max-width: 1099px) and (min-width: 850px) {
 		.masonry-layout {
 			column-count: 3;
 			width: 743px;
@@ -52,7 +54,7 @@
 	}
 
 	/* Masonry on small screens */
-	@media only screen and (max-width: 899px) and (min-width: 600px) {
+	@media only screen and (max-width: 849px) and (min-width: 600px) {
 		.masonry-layout {
 			column-count: 2;
 			width: 484px;
@@ -61,8 +63,9 @@
 
 	@media only screen and (max-width: 599px) {
 		.masonry-layout {
-			column-count: 1;
-			width: 225px;
+			column-count: 2;
+			column-gap: 13px;
+			width: 363px;
 		}
 	}
 </style>

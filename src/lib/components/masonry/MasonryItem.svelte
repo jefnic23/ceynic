@@ -42,4 +42,10 @@
 		transition: all 0.5s ease-in-out;
 		backface-visibility: hidden;
 	}
+
+	@media only screen and (max-width: 599px) {
+		img {
+			width: 175px;
+		}
+	}
 </style>

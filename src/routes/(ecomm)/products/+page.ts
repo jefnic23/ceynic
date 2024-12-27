@@ -1,6 +1,8 @@
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { MediumCount } from '$lib/interfaces/mediumCount';
 import type { PriceRange } from '$lib/interfaces/priceRange.js';
 import type { ProductsOut } from '$lib/interfaces/product.js';
+import type { SizeRanges } from '$lib/interfaces/sizeRanges';
 
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async (sort: string = "") => {
@@ -22,15 +24,41 @@ export const load = async ({ fetch, url }) => {
         return responseData;
     }
 
-    const fetchPriceRange = async () => {
+    const fetchPriceRange = async (): Promise<PriceRange> => {
         const response = await fetch(`${PUBLIC_API_URL}/products/priceRange`);
 
         if (!response.ok) {
             console.log("Error retrieving price range.");
-            return;
+            return {minimum: 0, maximum: 0};
         }
 
         const responseData: PriceRange = await response.json();
+
+        return responseData;
+    }
+
+    const fetchMediumCounts = async (): Promise<MediumCount[]> => {
+        const response = await fetch(`${PUBLIC_API_URL}/products/mediumCounts`);
+
+        if (!response.ok) {
+            console.log("Error retrieving price range.");
+            return [];
+        }
+
+        const responseData: MediumCount[] = await response.json();
+
+        return responseData;
+    }
+
+    const fetchSizeRanges = async (): Promise<SizeRanges> => {
+        const response = await fetch(`${PUBLIC_API_URL}/products/sizeRanges`);
+
+        if (!response.ok) {
+            console.log("Error retrieving price range.");
+            return {widthMinimum: 0, widthMaximum: 0, heightMinimum: 0, heightMaximum: 0};
+        }
+
+        const responseData: SizeRanges = await response.json();
 
         return responseData;
     }
@@ -39,6 +67,8 @@ export const load = async ({ fetch, url }) => {
 
     return {
         products: fetchProducts(sort),
-        priceRange: fetchPriceRange()
+        priceRange: fetchPriceRange(),
+        mediumCounts: fetchMediumCounts(),
+        sizeRanges: fetchSizeRanges()
     }
 }

@@ -3,8 +3,6 @@
 	import MasonryItem from './MasonryItem.svelte';
 	import type { ProductsOut } from '$lib/interfaces/product';
 
-	export let placeholderCount: number = 12;
-
 	export let data: Promise<ProductsOut[]>;
 	let loadedImages = new Set<number>();
 
@@ -16,7 +14,7 @@
 
 <div class="masonry-layout">
 	{#await data}
-		<Skeleton placeholderCount={placeholderCount} />
+		<Skeleton randomizeHeights={true} />
 	{:then products}
 		{#each products as product}
 			<MasonryItem

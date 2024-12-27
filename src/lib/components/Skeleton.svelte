@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let placeholderCount: number = 12;
+	export let randomizeHeights: boolean = false;
 
 	const randomHeights = Array(placeholderCount)
 		.fill(0)
@@ -7,25 +8,19 @@
 </script>
 
 {#each Array(placeholderCount) as _, index}
-    <div class="masonry-item skeleton">
+    <div class="skeleton">
         <div
             class="skeleton-box"
-            style="height: {randomHeights[index]}px;"
+            style="height: {randomizeHeights ? randomHeights[index] : 225}px;"
         ></div>
     </div>
 {/each}
 
 <style>
-	.masonry-item {
+	.skeleton {
 		margin-bottom: 34px;
 		display: inline-block;
 		vertical-align: top;
-		opacity: 0;
-		transition: opacity 0.5s ease-in-out;
-	}
-
-	.masonry-item.skeleton {
-		opacity: 1;
 		animation: shimmer 1.5s infinite;
 	}
 

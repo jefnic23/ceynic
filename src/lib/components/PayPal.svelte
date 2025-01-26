@@ -40,7 +40,7 @@
 
 					return json.order_id;
 				},
-				onApprove: async function (data, actions) {
+				onApprove: async function (data, _) {
 					const response = await fetch(`${PUBLIC_API_URL}/orders/${data.orderID}`, {
 						method: 'POST',
 						headers: {

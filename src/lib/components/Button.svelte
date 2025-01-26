@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { ButtonStyle } from '$lib/enums/buttonStyle';
+	import { ButtonSize } from '$lib/enums/buttonSize';
+	import { Position } from '$lib/enums/position';
 	import { createEventDispatcher } from 'svelte';
 
 	export let text: string;
-	export let style: 'submit' | 'cancel' | 'info' | 'warning' = 'submit';
+	export let style: ButtonStyle = ButtonStyle.Submit;
 	export let icon: string | null = null;
-	export let iconPosition: 'left' | 'right' = 'left';
-	export let size: 'small' | 'medium' | 'large' = 'medium';
+	export let iconPosition: Position = Position.Left;
+	export let size: ButtonSize = ButtonSize.Medium;
 	export let disabled: boolean = false;
 	export let loading: boolean = false;
 	export let fullWidth: boolean = false;

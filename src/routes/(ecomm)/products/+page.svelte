@@ -3,6 +3,9 @@
 	import { goto } from '$app/navigation';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import { ButtonStyle } from '$lib/enums/buttonStyle';
+	import { ProductFilter } from '$lib/enums/productFilter';
 
 	export let data: PageData;
 
@@ -15,14 +18,23 @@
 		{ value: 'size_asc', label: 'Smallest' },
 		{ value: 'size_desc', label: 'Largest' }
 	];
+	
+	let filters: string[] = [];
+	let mediumsChanged: boolean = false;
+	let minPriceChanged: boolean = false;
+	let maxPriceChanged: boolean = false;
+	let minWidthChanged: boolean = false;
+	let maxWidthChanged: boolean = false;
+	let minHeightChanged: boolean = false;
+	let maxHeightChanged: boolean = false;
 
-	async function handleSort(event: CustomEvent) {
-		sort = event.detail;
-		goto(`products?sort=${sort}`, { replaceState: true, keepFocus: true });
-	}
-
+	let mediums: number[];
 	let minPrice: number = 0;
 	let maxPrice: number = 0;
+
+	function handleMediums() {
+		// todo
+	}
 
 	async function loadPriceRange() {
 		const range = await data.priceRange;
@@ -48,6 +60,43 @@
 	}
 
 	let sizeRangesPromise = loadSizeRanges();
+
+	async function handleSort(event: CustomEvent) {
+		sort = event.detail;
+
+		let queryParams = `sort=${sort}`;
+
+		if (filters.length > 0) queryParams = `${queryParams}&${filters.join('&')}`;
+
+		goto(`products?sort=${sort}`, { replaceState: true, keepFocus: true });
+	}
+
+	function addFilter(name: string, value: number) {
+		filters = [...filters, `${name}=${value}`];
+	}
+
+	async function handleFilter() {
+		if (minPriceChanged) addFilter(ProductFilter.MinPrice, minPrice);
+		if (maxPriceChanged) addFilter(ProductFilter.MaxPrice, maxPrice);
+		if (minWidthChanged) addFilter(ProductFilter.MinWidth, minWidth);
+		if (maxWidthChanged) addFilter(ProductFilter.MaxWidth, maxPrice);
+		if (minHeightChanged) addFilter(ProductFilter.MinHeight, minHeight);
+		if (maxHeightChanged) addFilter(ProductFilter.MaxHeight, maxHeight);
+
+		if (filters.length === 0)  return;
+
+		let queryParams = filters.join('&');
+		
+		if (sort) queryParams = `sort=${sort}&${queryParams}` ;
+
+		goto(`products?${queryParams}`, { replaceState: true, keepFocus: true });
+	}
+
+	async function handleClear() {
+		if (filters.length === 0) return;
+		filters = [];
+		goto('products');
+	}
 </script>
 
 <div class="row gap">
@@ -65,7 +114,8 @@
 								type="checkbox"
 								id={mediumCount.name}
 								name={mediumCount.name}
-								value={mediumCount.name}
+								value={mediumCount.id}
+								on:click={() => mediumsChanged = true}
 							/>
 							<label for={mediumCount.name}>{mediumCount.name} ({mediumCount.count})</label>
 						{/each}
@@ -89,7 +139,9 @@
 								type="number"
 								min={priceRange?.minimum}
 								max={priceRange?.maximum}
+								step="1"
 								bind:value={minPrice}
+								on:change={() => minPriceChanged = true}
 							/>
 						</div>
 						<div class="input-container">
@@ -99,7 +151,9 @@
 								type="number"
 								min={priceRange?.minimum}
 								max={priceRange?.maximum}
+								step="1"
 								bind:value={maxPrice}
+								on:change={() => maxPriceChanged = true}
 							/>
 						</div>
 					</div>
@@ -127,7 +181,9 @@
 										type="number"
 										min={sizeRanges?.widthMinimum}
 										max={sizeRanges?.widthMaximum}
+										step="1"
 										bind:value={minWidth}
+										on:change={() => minWidthChanged = true}
 									/>
 								</div>
 								<div class="input-container">
@@ -137,7 +193,9 @@
 										type="number"
 										min={sizeRanges?.widthMinimum}
 										max={sizeRanges?.widthMaximum}
+										step="1"
 										bind:value={maxWidth}
+										on:change={() => maxWidthChanged = true}
 									/>
 								</div>
 							</div>
@@ -156,7 +214,9 @@
 										type="number"
 										min={sizeRanges?.heightMinimum}
 										max={sizeRanges?.heightMaximum}
+										step="1"
 										bind:value={minHeight}
+										on:change={() => minHeightChanged = true}
 									/>
 								</div>
 								<div class="input-container">
@@ -166,7 +226,9 @@
 										type="number"
 										min={sizeRanges?.heightMinimum}
 										max={sizeRanges?.heightMaximum}
+										step="1"
 										bind:value={maxHeight}
+										on:change={() => maxHeightChanged = true}
 									/>
 								</div>
 							</div>
@@ -174,6 +236,10 @@
 					</div>
 				{/await}
 			</div>
+		</div>
+		<div class="row">
+			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
+			<Button text={"Filter"} on:click={handleFilter} />
 		</div>
 	</div>
 	<div class="column large">

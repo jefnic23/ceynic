@@ -104,7 +104,7 @@
 		<div class="row">Filter</div>
 		<div class="row">
 			<div class="column">
-				<div>Medium</div>
+				<h4>Medium</h4>
 				{#await data.mediumCounts}
 					<p>Loading mediums...</p>
 				{:then mediumCounts}
@@ -162,16 +162,13 @@
 		</div>
 		<div class="row">
 			<div class="column">
-				<div class="row">
-					<h4>Size</h4>
-				</div>
 				{#await sizeRangesPromise}
 					<p>Loading size range...</p>
 				{:then sizeRanges}
 					<div class="row">
 						<div class="column">
 							<div class="row">
-								<p>Width</p>
+								<h4>Width</h4>
 							</div>
 							<div class="row">
 								<div class="input-container">
@@ -204,7 +201,7 @@
 					<div class="row">
 						<div class="column">
 							<div class="row">
-								<p>Height</p>
+								<h4>Height</h4>
 							</div>
 							<div class="row">
 								<div class="input-container">
@@ -237,9 +234,9 @@
 				{/await}
 			</div>
 		</div>
-		<div class="row">
-			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
+		<div class="row justify-left">
 			<Button text={"Filter"} on:click={handleFilter} />
+			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
 		</div>
 	</div>
 	<div class="column large">
@@ -308,6 +305,7 @@
 
 	.small {
 		flex: 1;
+		row-gap: 1rem;
 		/* border-right: 1px solid #e7e7e7; */
 	}
 

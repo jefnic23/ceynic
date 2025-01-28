@@ -14,7 +14,7 @@
 		<nav>
 			<a href="/" data-sveltekit-preload-data>Home</a>
 			<a href="/products" data-sveltekit-preload-data>Browse</a>
-			<a href="/about">About</a>
+			<a href="/about" data-sveltekit-preload-data>About</a>
 			<a href="/contact">Contact</a>
 		</nav>
 	</Header>

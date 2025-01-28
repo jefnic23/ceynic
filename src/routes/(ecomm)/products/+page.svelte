@@ -97,6 +97,43 @@
 		filters = [];
 		goto('products');
 	}
+
+	function handleWheel(
+		event: WheelEvent,
+		value: number,
+		setValue: (newValue: number) => void,
+		relatedValue?: number,
+		isMin?: boolean
+	): void {
+		const input = event.target as HTMLInputElement;
+
+		if (document.activeElement === input) {
+			event.preventDefault(); // Prevent page scrolling behavior
+
+			const step = Number(input.step) || 1;
+			const min = Number(input.min) || -Infinity;
+			const max = Number(input.max) || Infinity;
+
+			// Determine new value based on scroll direction
+			let newValue = value + (event.deltaY < 0 ? step : -step);
+
+			// Clamp the value between min and max
+			newValue = Math.max(min, Math.min(max, newValue));
+
+			// If this is a min value, make sure it doesn't exceed max
+			if (isMin && relatedValue !== undefined) {
+				newValue = Math.min(newValue, relatedValue);
+			}
+
+			// If this is a max value, make sure it doesn't go below min
+			if (!isMin && relatedValue !== undefined) {
+				newValue = Math.max(newValue, relatedValue);
+			}
+
+			// Update the bound value
+			setValue(newValue);
+		}
+	}
 </script>
 
 <div class="row gap">
@@ -142,6 +179,7 @@
 								step="1"
 								bind:value={minPrice}
 								on:change={() => minPriceChanged = true}
+								on:wheel={(e) => handleWheel(e, minPrice, (newValue) => minPrice = newValue, maxPrice, true)}
 							/>
 						</div>
 						<div class="input-container">
@@ -154,6 +192,7 @@
 								step="1"
 								bind:value={maxPrice}
 								on:change={() => maxPriceChanged = true}
+								on:wheel={(e) => handleWheel(e, maxPrice, (newValue) => maxPrice = newValue, minPrice, false)}
 							/>
 						</div>
 					</div>
@@ -181,6 +220,7 @@
 										step="1"
 										bind:value={minWidth}
 										on:change={() => minWidthChanged = true}
+										on:wheel={(e) => handleWheel(e, minWidth, (newValue) => minWidth = newValue, maxWidth, true)}
 									/>
 								</div>
 								<div class="input-container">
@@ -193,6 +233,7 @@
 										step="1"
 										bind:value={maxWidth}
 										on:change={() => maxWidthChanged = true}
+										on:wheel={(e) => handleWheel(e, maxWidth, (newValue) => maxWidth = newValue, minWidth, false)}
 									/>
 								</div>
 							</div>
@@ -214,6 +255,7 @@
 										step="1"
 										bind:value={minHeight}
 										on:change={() => minHeightChanged = true}
+										on:wheel={(e) => handleWheel(e, minHeight, (newValue) => minHeight = newValue, maxHeight, true)}
 									/>
 								</div>
 								<div class="input-container">
@@ -226,6 +268,7 @@
 										step="1"
 										bind:value={maxHeight}
 										on:change={() => maxHeightChanged = true}
+										on:wheel={(e) => handleWheel(e, maxHeight, (newValue) => maxHeight = newValue, minHeight, true)}
 									/>
 								</div>
 							</div>

@@ -8,7 +8,7 @@ export const load = async ({ fetch }) => {
             console.log("Error retrieving about content.");
         }
     
-        const responseData = await response.json();
+        const responseData: string = await response.json();
 
         return responseData;
     }

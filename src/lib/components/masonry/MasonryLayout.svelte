@@ -14,7 +14,7 @@
 
 <div class="masonry-layout">
 	{#await data}
-		<Skeleton randomizeHeights={true} />
+		<Skeleton randomizeHeights={true} type="image" />
 	{:then products}
 		{#each products as product}
 			<MasonryItem

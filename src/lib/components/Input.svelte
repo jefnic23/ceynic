@@ -7,7 +7,7 @@
 	export let value: string | number;
 </script>
 
-<div class="input-container">
+<div class="container">
 	<label for={id}>{label}</label>
 	{#if type === 'number'}
 		<input {id} type="number" {min} {max} {value} placeholder=" " />
@@ -17,13 +17,13 @@
 </div>
 
 <style>
-	.input-container {
+	.container {
 		position: relative;
 		display: inline-block;
 		width: 100%;
 	}
 
-	.input-container label {
+	.container label {
 		position: absolute;
 		top: 21%;
 		left: 13px;
@@ -34,15 +34,15 @@
 		transition: all 0.2s ease;
 	}
 
-	.input-container input {
+	.container input {
 		width: 100%;
 		padding: 10px;
 		font-size: 1em;
 		box-sizing: border-box;
 	}
 
-	.input-container input:focus + label,
-	.input-container input:not(:placeholder-shown) + label {
+	.container input:focus + label,
+	.container input:not(:placeholder-shown) + label {
 		top: -10px;
 		font-size: 0.7em;
 		color: #007bff;

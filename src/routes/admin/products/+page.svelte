@@ -5,6 +5,7 @@
 	import type { ProductOut, ProductsOut } from '$lib/interfaces/product';
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';
+	import { ButtonStyle } from '$lib/enums/buttonStyle';
 
 	export let data: PageData;
 
@@ -184,7 +185,7 @@
 
 				<div class="form-buttons">
 					<Button text="Submit" on:click={handleSubmit} />
-					<Button text="Cancel" style="cancel" on:click={() => showModal = false} />
+					<Button text="Cancel" style={ButtonStyle.Cancel} on:click={() => showModal = false} />
 				</div>
 
 				<!-- <div class="image-container">

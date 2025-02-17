@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -19,7 +20,8 @@
 		{ value: 'size_desc', label: 'Largest' }
 	];
 	
-	let filters: string[] = [];
+	let filters = $page.url.searchParams;
+	// let filters: string[] = [];
 	let mediumsChanged: boolean = false;
 	let minPriceChanged: boolean = false;
 	let maxPriceChanged: boolean = false;
@@ -62,39 +64,32 @@
 	let sizeRangesPromise = loadSizeRanges();
 
 	async function handleSort(event: CustomEvent) {
-		sort = event.detail;
-
-		let queryParams = `sort=${sort}`;
-
-		if (filters.length > 0) queryParams = `${queryParams}&${filters.join('&')}`;
-
-		goto(`products?sort=${sort}`, { replaceState: true, keepFocus: true });
-	}
-
-	function addFilter(name: string, value: number) {
-		filters = [...filters, `${name}=${value}`];
+		const url = new URL(window.location.href);
+		url.searchParams.set('sort', event.detail);
+		goto(url, { replaceState: true, keepFocus: true });
 	}
 
 	async function handleFilter() {
-		if (minPriceChanged) addFilter(ProductFilter.MinPrice, minPrice);
-		if (maxPriceChanged) addFilter(ProductFilter.MaxPrice, maxPrice);
-		if (minWidthChanged) addFilter(ProductFilter.MinWidth, minWidth);
-		if (maxWidthChanged) addFilter(ProductFilter.MaxWidth, maxPrice);
-		if (minHeightChanged) addFilter(ProductFilter.MinHeight, minHeight);
-		if (maxHeightChanged) addFilter(ProductFilter.MaxHeight, maxHeight);
+		const url = new URL(window.location.href);
 
-		if (filters.length === 0)  return;
+		if (minPriceChanged) url.searchParams.set(ProductFilter.MinPrice, minPrice.toString());
+		if (maxPriceChanged) url.searchParams.set(ProductFilter.MaxPrice, maxPrice.toString());
+		if (minWidthChanged) url.searchParams.set(ProductFilter.MinWidth, minWidth.toString());
+		if (maxWidthChanged) url.searchParams.set(ProductFilter.MaxWidth, maxWidth.toString());
+		if (minHeightChanged) url.searchParams.set(ProductFilter.MinHeight, minHeight.toString());
+		if (maxHeightChanged) url.searchParams.set(ProductFilter.MaxHeight, maxHeight.toString());
 
-		let queryParams = filters.join('&');
+		if (url.searchParams.size === 0)  return;
+
+		// let queryParams = filters.join('&');
 		
-		if (sort) queryParams = `sort=${sort}&${queryParams}` ;
+		// if (sort) queryParams = `sort=${sort}&${queryParams}` ;
 
-		goto(`products?${queryParams}`, { replaceState: true, keepFocus: true });
+		goto(url, { replaceState: true, keepFocus: true });
 	}
 
 	async function handleClear() {
-		if (filters.length === 0) return;
-		filters = [];
+		if (filters.size === 0) return;
 		goto('products');
 	}
 
@@ -102,8 +97,9 @@
 		event: WheelEvent,
 		value: number,
 		setValue: (newValue: number) => void,
+		setFlag: (newFlag: boolean) => void,
 		relatedValue?: number,
-		isMin?: boolean
+		isMin?: boolean,
 	): void {
 		const input = event.target as HTMLInputElement;
 
@@ -132,6 +128,8 @@
 
 			// Update the bound value
 			setValue(newValue);
+
+			setFlag(true);
 		}
 	}
 </script>
@@ -179,7 +177,7 @@
 								step="1"
 								bind:value={minPrice}
 								on:change={() => minPriceChanged = true}
-								on:wheel={(e) => handleWheel(e, minPrice, (newValue) => minPrice = newValue, maxPrice, true)}
+								on:wheel={(e) => handleWheel(e, minPrice, (newValue) => minPrice = newValue, (newFlag) => minPriceChanged = newFlag, maxPrice, true)}
 							/>
 						</div>
 						<div class="input-container">
@@ -192,7 +190,7 @@
 								step="1"
 								bind:value={maxPrice}
 								on:change={() => maxPriceChanged = true}
-								on:wheel={(e) => handleWheel(e, maxPrice, (newValue) => maxPrice = newValue, minPrice, false)}
+								on:wheel={(e) => handleWheel(e, maxPrice, (newValue) => maxPrice = newValue, (newFlag) => maxPriceChanged = newFlag, minPrice, false)}
 							/>
 						</div>
 					</div>
@@ -220,7 +218,7 @@
 										step="1"
 										bind:value={minWidth}
 										on:change={() => minWidthChanged = true}
-										on:wheel={(e) => handleWheel(e, minWidth, (newValue) => minWidth = newValue, maxWidth, true)}
+										on:wheel={(e) => handleWheel(e, minWidth, (newValue) => minWidth = newValue, (newFlag) => minWidthChanged = newFlag, maxWidth, true)}
 									/>
 								</div>
 								<div class="input-container">
@@ -233,7 +231,7 @@
 										step="1"
 										bind:value={maxWidth}
 										on:change={() => maxWidthChanged = true}
-										on:wheel={(e) => handleWheel(e, maxWidth, (newValue) => maxWidth = newValue, minWidth, false)}
+										on:wheel={(e) => handleWheel(e, maxWidth, (newValue) => maxWidth = newValue, (newFlag) => maxWidthChanged = newFlag, minWidth, false)}
 									/>
 								</div>
 							</div>
@@ -255,7 +253,7 @@
 										step="1"
 										bind:value={minHeight}
 										on:change={() => minHeightChanged = true}
-										on:wheel={(e) => handleWheel(e, minHeight, (newValue) => minHeight = newValue, maxHeight, true)}
+										on:wheel={(e) => handleWheel(e, minHeight, (newValue) => minHeight = newValue, (newFlag) => minHeightChanged = newFlag, maxHeight, true)}
 									/>
 								</div>
 								<div class="input-container">
@@ -268,7 +266,7 @@
 										step="1"
 										bind:value={maxHeight}
 										on:change={() => maxHeightChanged = true}
-										on:wheel={(e) => handleWheel(e, maxHeight, (newValue) => maxHeight = newValue, minHeight, true)}
+										on:wheel={(e) => handleWheel(e, maxHeight, (newValue) => maxHeight = newValue, (newFlag) => maxHeightChanged = newFlag, minHeight, false)}
 									/>
 								</div>
 							</div>

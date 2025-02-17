@@ -7,6 +7,8 @@
 	import Button from '$lib/components/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ProductFilter } from '$lib/enums/productFilter';
+	import type { SizeRanges } from '$lib/interfaces/sizeRanges';
+	import type { PriceRange } from '$lib/interfaces/priceRange';
 
 	export let data: PageData;
 
@@ -20,8 +22,6 @@
 		{ value: 'size_desc', label: 'Largest' }
 	];
 	
-	let filters = $page.url.searchParams;
-	// let filters: string[] = [];
 	let mediumsChanged: boolean = false;
 	let minPriceChanged: boolean = false;
 	let maxPriceChanged: boolean = false;
@@ -30,34 +30,40 @@
 	let minHeightChanged: boolean = false;
 	let maxHeightChanged: boolean = false;
 
-	let mediums: number[];
-	let minPrice: number = 0;
-	let maxPrice: number = 0;
+	let mediums: string[] = $page.url.searchParams.getAll('medium') || [];
 
-	function handleMediums() {
-		// todo
+	function handleMedium(medium: string) {
+		if (mediums.includes(medium)) {
+			mediums = mediums.filter(m => m !== medium);
+		} else {
+			mediums = [...mediums, medium];
+		}
+		mediumsChanged = true;
 	}
 
-	async function loadPriceRange() {
+	let minPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MinPrice) as string) || 0;
+	let maxPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MaxPrice) as string) || 0;
+
+	async function loadPriceRange(): Promise<PriceRange> {
 		const range = await data.priceRange;
-		minPrice = range?.minimum || 0;
-		maxPrice = range?.maximum || 0;
+		minPrice = Math.floor(range?.minimum) || 0;
+		maxPrice = Math.floor(range?.maximum) || 0;
 		return range;
 	}
 
 	let priceRangePromise = loadPriceRange();
 
-	let minWidth: number = 0;
-	let maxWidth: number = 0;
-	let minHeight: number = 0;
-	let maxHeight: number = 0;
+	let minWidth: number = parseInt($page.url.searchParams.get(ProductFilter.MinWidth) as string) || 0;
+	let maxWidth: number = parseInt($page.url.searchParams.get(ProductFilter.MaxWidth) as string) || 0;
+	let minHeight: number = parseInt($page.url.searchParams.get(ProductFilter.MinHeight) as string) || 0;
+	let maxHeight: number = parseInt($page.url.searchParams.get(ProductFilter.MaxHeight) as string) || 0;
 
-	async function loadSizeRanges() {
+	async function loadSizeRanges(): Promise<SizeRanges> {
 		const range = await data.sizeRanges;
-		minWidth = range?.widthMinimum || 0;
-		maxWidth = range?.widthMaximum || 0;
-		minHeight = range?.heightMinimum || 0;
-		maxHeight = range?.heightMaximum || 0;
+		minWidth = Math.floor(range?.widthMinimum) || 0;
+		maxWidth = Math.floor(range?.widthMaximum) || 0;
+		minHeight = Math.floor(range?.heightMinimum) || 0;
+		maxHeight = Math.floor(range?.heightMaximum) || 0;
 		return range;
 	}
 
@@ -66,11 +72,16 @@
 	async function handleSort(event: CustomEvent) {
 		const url = new URL(window.location.href);
 		url.searchParams.set('sort', event.detail);
-		goto(url, { replaceState: true, keepFocus: true });
+		await goto(url, { replaceState: true, keepFocus: true });
 	}
 
 	async function handleFilter() {
 		const url = new URL(window.location.href);
+
+		if (mediumsChanged) {
+			url.searchParams.delete('medium');
+			mediums.forEach(m => url.searchParams.append(ProductFilter.Medium, m));
+		}
 
 		if (minPriceChanged) url.searchParams.set(ProductFilter.MinPrice, minPrice.toString());
 		if (maxPriceChanged) url.searchParams.set(ProductFilter.MaxPrice, maxPrice.toString());
@@ -81,16 +92,15 @@
 
 		if (url.searchParams.size === 0)  return;
 
-		// let queryParams = filters.join('&');
-		
-		// if (sort) queryParams = `sort=${sort}&${queryParams}` ;
-
-		goto(url, { replaceState: true, keepFocus: true });
+		await goto(url, { replaceState: true, keepFocus: true });
 	}
 
 	async function handleClear() {
-		if (filters.size === 0) return;
-		goto('products');
+		if ($page.url.searchParams.size === 0) return;
+		mediums = [];
+		await loadPriceRange();
+		await loadSizeRanges();
+		await goto('products', { replaceState: true, keepFocus: true });
 	}
 
 	function handleWheel(
@@ -129,6 +139,7 @@
 			// Update the bound value
 			setValue(newValue);
 
+			// Mark the value as updated
 			setFlag(true);
 		}
 	}
@@ -150,7 +161,8 @@
 								id={mediumCount.name}
 								name={mediumCount.name}
 								value={mediumCount.id}
-								on:click={() => mediumsChanged = true}
+								checked={mediums.includes(mediumCount.name)}
+								on:click={() => handleMedium(mediumCount.name)}
 							/>
 							<label for={mediumCount.name}>{mediumCount.name} ({mediumCount.count})</label>
 						{/each}
@@ -167,7 +179,7 @@
 					<p>Loading price range...</p>
 				{:then priceRange}
 					<div class="row">
-						<div class="input-container">
+						<div class="input-container price">
 							<label for="minimum">Min</label>
 							<input
 								id="minimum"
@@ -180,7 +192,7 @@
 								on:wheel={(e) => handleWheel(e, minPrice, (newValue) => minPrice = newValue, (newFlag) => minPriceChanged = newFlag, maxPrice, true)}
 							/>
 						</div>
-						<div class="input-container">
+						<div class="input-container price">
 							<label for="maximum">Max</label>
 							<input
 								id="maximum"
@@ -208,7 +220,7 @@
 								<h4>Width</h4>
 							</div>
 							<div class="row">
-								<div class="input-container">
+								<div class="input-container size">
 									<label for="minWidth">Min</label>
 									<input
 										id="minWidth"
@@ -221,7 +233,7 @@
 										on:wheel={(e) => handleWheel(e, minWidth, (newValue) => minWidth = newValue, (newFlag) => minWidthChanged = newFlag, maxWidth, true)}
 									/>
 								</div>
-								<div class="input-container">
+								<div class="input-container size">
 									<label for="maxWidth">Max</label>
 									<input
 										id="maxWidth"
@@ -243,7 +255,7 @@
 								<h4>Height</h4>
 							</div>
 							<div class="row">
-								<div class="input-container">
+								<div class="input-container size">
 									<label for="minHeight">Min</label>
 									<input
 										id="minHeight"
@@ -256,7 +268,7 @@
 										on:wheel={(e) => handleWheel(e, minHeight, (newValue) => minHeight = newValue, (newFlag) => minHeightChanged = newFlag, maxHeight, true)}
 									/>
 								</div>
-								<div class="input-container">
+								<div class="input-container size">
 									<label for="maxHeight">Max</label>
 									<input
 										id="maxHeight"
@@ -402,6 +414,33 @@
 		padding: 10px;
 		font-size: 1em;
 		box-sizing: border-box;
+	}
+
+	.price input {
+		padding-left: 1rem; /* Add space for the dollar sign */
+	}
+
+	.price::before {
+		content: '$';
+		position: absolute;
+		left: 0.5em; /* Adjust positioning as needed */
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 1em;
+		font-weight: bold;
+		color: #333; /* Adjust color as needed */
+	}
+
+	.size::after {
+		content: 'in.';
+		position: absolute;
+		right: 2rem; /* Adjust positioning as needed */
+		top: 50%;
+		transform: translateY(-50%);
+		line-height: normal;
+		font-size: 1em;
+		font-weight: bold;
+		color: #333; /* Adjust color as needed */
 	}
 
 	.input-container input:focus + label,

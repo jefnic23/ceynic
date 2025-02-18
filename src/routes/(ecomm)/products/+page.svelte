@@ -100,6 +100,13 @@
 		mediums = [];
 		await loadPriceRange();
 		await loadSizeRanges();
+		mediumsChanged = false;
+		minPriceChanged = false;
+		maxPriceChanged = false;
+		minWidthChanged = false;
+		maxWidthChanged = false;
+		minHeightChanged = false;
+		maxHeightChanged = false;
 		await goto('products', { replaceState: true, keepFocus: true });
 	}
 

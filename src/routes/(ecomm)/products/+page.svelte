@@ -161,17 +161,19 @@
 				{#await data.mediumCounts}
 					<p>Loading mediums...</p>
 				{:then mediumCounts}
-					<div class="row justify-left">
+					<div class="column">
 						{#each mediumCounts as mediumCount}
-							<input
-								type="checkbox"
-								id={mediumCount.name}
-								name={mediumCount.name}
-								value={mediumCount.id}
-								checked={mediums.includes(mediumCount.name)}
-								on:click={() => handleMedium(mediumCount.name)}
-							/>
-							<label for={mediumCount.name}>{mediumCount.name} ({mediumCount.count})</label>
+							<div class="row justify-left">
+								<input
+									type="checkbox"
+									id={mediumCount.name}
+									name={mediumCount.name}
+									value={mediumCount.id}
+									checked={mediums.includes(mediumCount.name)}
+									on:click={() => handleMedium(mediumCount.name)}
+								/>
+								<label for={mediumCount.name}>{mediumCount.name} ({mediumCount.count})</label>
+							</div>
 						{/each}
 					</div>
 				{/await}
@@ -336,7 +338,6 @@
 		flex-direction: row;
 		width: 100%;
 		justify-content: space-between;
-		align-items: center;
 		column-gap: 1rem;
 	}
 

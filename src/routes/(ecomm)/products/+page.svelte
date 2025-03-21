@@ -4,11 +4,12 @@
 	import { goto } from '$app/navigation';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
-	import Button from '$lib/components/Button.svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ProductFilter } from '$lib/enums/productFilter';
 	import type { SizeRanges } from '$lib/interfaces/sizeRanges';
 	import type { PriceRange } from '$lib/interfaces/priceRange';
+	import ProductCard from '$lib/components/ProductCard.svelte';
 
 	export let data: PageData;
 
@@ -152,8 +153,8 @@
 	}
 </script>
 
-<div class="row gap">
-	<div class="column small">
+<div class="row gap justify-center">
+	<aside class="column filters">
 		<div class="row">Filter</div>
 		<div class="row">
 			<div class="column">
@@ -296,34 +297,28 @@
 				{/await}
 			</div>
 		</div>
-		<div class="row justify-left">
+		<div class="row justify-left filter-buttons">
 			<Button text={"Filter"} on:click={handleFilter} />
 			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
 		</div>
-	</div>
-	<div class="column large">
+	</aside>
+	<div class="column products">
 		{#await data.products}
-			<div class="container">
+			<div class="product-grid">
 				<Skeleton />
 			</div>
 		{:then products}
-			<div class="row">
+			<div class="row justify-between">
 				<div>
 					Results: {products.length}
 				</div>
 				<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
 			</div>
-			<div class="container">
+			<div class="product-grid">
 				{#each products as product}
-					<div class="item">
-						{#if product.imageUrl}
-							<a href="/products/{product.id}" data-sveltekit-preload-data>
-								<img src={product.imageUrl} alt={product.title} />
-							</a>
-						{/if}
-						<div class="item-title">{product.title}</div>
-						<div style="font-weight: 500;">${product.price}</div>
-					</div>
+					{#if product.imageUrl}
+						<ProductCard product={product} />
+					{/if}
 				{/each}
 			</div>
 		{:catch error}
@@ -337,7 +332,6 @@
 		display: flex;
 		flex-direction: row;
 		width: 100%;
-		justify-content: space-between;
 		column-gap: 1rem;
 	}
 
@@ -348,56 +342,33 @@
 		width: 100%;
 	}
 
-	.container {
-		display: grid;
-		grid-auto-columns: max-content;
-		grid-auto-flow: dense;
-		grid-auto-rows: minmax(100px, auto);
-		grid-gap: 25px;
-	}
-
-	.item {
-		grid-row: span 1;
-		grid-column: span 1;
-		margin: auto;
-		max-width: 225px;
-		line-height: normal;
-	}
-
-	.small {
+	.products {
 		flex: 1;
-		row-gap: 1rem;
-		/* border-right: 1px solid #e7e7e7; */
+		max-width: 1144px;
 	}
 
-	.large {
-		flex: 3;
-		row-gap: 1rem;
+	.product-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 25px;
+		justify-content: flex-start;
+		margin-top: 13px;
+	}
+
+	.justify-center {
+		justify-content: center;
 	}
 
 	.justify-left {
 		justify-content: left;
 	}
 
+	.justify-between {
+		justify-content: space-between;
+	}
+
 	.gap {
 		column-gap: 1rem;
-	}
-
-	img {
-		max-width: 225px;
-		max-height: 225px;
-		object-fit: contain;
-	}
-
-	.item-title {
-		width: 100%;
-		max-width: 225px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		display: inline-block;
-		white-space: nowrap;
-		font-style: italic;
-		color: rgb(112, 112, 112);
 	}
 
 	.input-container {
@@ -458,31 +429,34 @@
 		color: #007bff; /* Change color for emphasis */
 	}
 
-	/* Masonry on large screens */
-	@media only screen and (min-width: 1100px) {
-		.container {
-			grid-template-columns: repeat(4, 1fr);
+	.filters {
+		max-width: 250px;
+		min-width: 250px;
+	}
+
+	.filter-buttons {
+		margin-top: 1.33em;
+	}
+
+	@media only screen and (max-width: 1440px) and (min-width: 1150px) {
+		.products {
+			max-width: 854px;
 		}
 	}
 
-	/* Masonry on medium-sized screens */
-	@media only screen and (max-width: 1099px) and (min-width: 850px) {
-		.container {
-			grid-template-columns: repeat(3, 1fr);
+	@media only screen and (max-width: 1149px) and (min-width: 857px) {
+		.products {
+			max-width: 560px;
 		}
 	}
 
-	/* Masonry on small screens */
-	@media only screen and (max-width: 849px) and (min-width: 600px) {
-		.container {
-			grid-template-columns: repeat(2, 1fr);
+	@media only screen and (max-width: 856px) {
+		.products {
+			max-width: calc(100% - 250px);
 		}
-	}
 
-	@media only screen and (max-width: 599px) {
-		img {
-			width: 175px;
-			height: 175px;
+		.product-grid {
+			justify-content: center;
 		}
 	}
 </style>

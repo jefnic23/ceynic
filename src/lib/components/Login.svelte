@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
+	import Modal from '$lib/components/shared/Modal.svelte';
 	import Person from '$lib/icons/Person.svelte';
 	import Lock from '$lib/icons/Lock.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import Button from './Button.svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 	
 	export let invalid: boolean = false;
 	export let credentials: boolean = false;

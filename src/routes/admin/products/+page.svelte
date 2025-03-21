@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 	import Dropzone from '$lib/components/Dropzone.svelte';
-	import Modal from '$lib/components/Modal.svelte';
+	import Modal from '$lib/components/shared/Modal.svelte';
 	import type { ProductOut, ProductsOut } from '$lib/interfaces/product';
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';

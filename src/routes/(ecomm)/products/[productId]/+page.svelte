@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import PayPal from '$lib/components/PayPal.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
+	import Tooltip from '$lib/components/shared/Tooltip.svelte';
 
 	export let data: PageData;
 

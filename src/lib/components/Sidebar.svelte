@@ -4,7 +4,7 @@
     import Home from '$lib/icons/Home.svelte';
 	import Listing from '$lib/icons/Listing.svelte';
 	import Logout from "$lib/icons/Logout.svelte";
-	import Button from "./Button.svelte";
+	import Button from "$lib/components/shared/Button.svelte";
 
     let open: boolean = false
 </script>

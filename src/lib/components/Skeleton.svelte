@@ -5,11 +5,11 @@
 
 	const randomHeights = Array(placeholderCount)
 		.fill(0)
-		.map(() => Math.floor(Math.random() * (300 - 150 + 1) + 150));
+		.map(() => `${Math.floor(Math.random() * (300 - 150 + 1) + 150)}px`);
 
 	// Define sizes for different skeleton types
 	const typeStyles = {
-		image: { width: '100%', height: '200px' },
+		image: { width: '225px', height: '225px' },
 		'table-row': { width: '100%', height: '40px' },
 		square: { width: '150px', height: '150px' },
 		paragraph: { width: '100%', height: '24px' } // Default line height

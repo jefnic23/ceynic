@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Skeleton from '$lib/components/Skeleton.svelte';
-	import MasonryItem from './MasonryItem.svelte';
+	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
 	import type { ProductsOut } from '$lib/interfaces/product';
 
-	export let data: Promise<ProductsOut[]>;
+	export let products: ProductsOut[] = [];
 	let loadedImages = new Set<number>();
 
 	const handleImageLoad = (id: number) => {
@@ -13,9 +13,9 @@
 </script>
 
 <div class="masonry-layout">
-	{#await data}
-		<Skeleton randomizeHeights={true} type="image" />
-	{:then products}
+	{#if products.length === 0}
+		<Skeleton placeholderCount={12} randomizeHeights={true} type="image" />
+	{:else}
 		{#each products as product}
 			<MasonryItem
 				product={product}
@@ -23,9 +23,7 @@
 				on:load={() => handleImageLoad(product.id)}
 			/>
 		{/each}
-	{:catch error}
-		<p style="color: red">{error.message}</p>
-	{/await}
+	{/if}
 </div>
 
 <style>

@@ -11,7 +11,13 @@
 
 <div class="wrapper">
 	<div class="header-text">Original Abstract Oil Paintings on Canvas and Prints</div>
-	<MasonryLayout data={data.products} />
+	{#await data.products}
+		<MasonryLayout />
+	{:then products} 
+		<MasonryLayout products={products} />
+	{:catch error}
+		<p style="color: red">{error.message}</p>
+	{/await}
 </div>
 
 <style>

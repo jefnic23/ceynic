@@ -10,8 +10,28 @@
 	import type { SizeRanges } from '$lib/interfaces/sizeRanges';
 	import type { PriceRange } from '$lib/interfaces/priceRange';
 	import ProductCard from '$lib/components/ProductCard.svelte';
+	import { onMount } from 'svelte';
+	import Filter from '$lib/icons/Filter.svelte';
+	import type { MediumCount } from '$lib/interfaces/mediumCount';
 
 	export let data: PageData;
+
+	let isMobile = false;
+	let showFilters = false;
+
+	onMount(() => {
+		const checkMobile = () => {
+			isMobile = window.matchMedia("(max-width: 856px)").matches;
+		};
+
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	});
+
+	function toggleSidebar() {
+		showFilters = !showFilters;
+	}
 
 	let sort: string = '';
 	const sortOptions = [
@@ -41,6 +61,12 @@
 		}
 		mediumsChanged = true;
 	}
+
+	async function loadMediumCounts(): Promise<MediumCount[]> {
+		return await data.mediumCounts;
+	}
+
+	let mediumCountsPromise = loadMediumCounts();
 
 	let minPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MinPrice) as string) || 0;
 	let maxPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MaxPrice) as string) || 0;
@@ -154,14 +180,25 @@
 </script>
 
 <div class="row gap justify-center">
-	<aside class="column filters">
-		<div class="row">Filter</div>
+	<aside class="column filters" class:is-mobile={isMobile} class:open={showFilters}>
+		<div class="row">
+			{#if isMobile && showFilters}
+				<div class="column">
+					Filter
+				</div>
+				<div class="column">
+					<button on:click={toggleSidebar}>Close</button>
+				</div>
+			{:else}
+				Filter
+			{/if}
+		</div>
 		<div class="row">
 			<div class="column">
-				<h4>Medium</h4>
-				{#await data.mediumCounts}
-					<p>Loading mediums...</p>
+				{#await mediumCountsPromise}
+					<Skeleton placeholderCount={1} type={"table-row"} />
 				{:then mediumCounts}
+					<h4>Medium</h4>
 					<div class="column">
 						{#each mediumCounts as mediumCount}
 							<div class="row justify-left">
@@ -182,12 +219,12 @@
 		</div>
 		<div class="row">
 			<div class="column">
-				<div class="row">
-					<h4>Price</h4>
-				</div>
 				{#await priceRangePromise}
-					<p>Loading price range...</p>
+					<Skeleton placeholderCount={2} type={"table-row"} />
 				{:then priceRange}
+					<div class="row">
+						<h4>Price</h4>
+					</div>
 					<div class="row">
 						<div class="input-container price">
 							<label for="minimum">Min</label>
@@ -222,7 +259,7 @@
 		<div class="row">
 			<div class="column">
 				{#await sizeRangesPromise}
-					<p>Loading size range...</p>
+					<Skeleton placeholderCount={2} type={"table-row"} />
 				{:then sizeRanges}
 					<div class="row">
 						<div class="column">
@@ -302,17 +339,23 @@
 			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
 		</div>
 	</aside>
-	<div class="column products">
+	<div class="column products" class:is-blurred={isMobile && showFilters}>
 		{#await data.products}
 			<div class="product-grid">
 				<Skeleton />
 			</div>
 		{:then products}
-			<div class="row justify-between">
-				<div>
+			<div class="row justify-between {isMobile ? "align-center" : ""}">
+				<div class="row justify-start">
 					Results: {products.length}
 				</div>
-				<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+				<div class="row justify-end">
+					{#if isMobile}
+						<button on:click={toggleSidebar}><Filter /> Filter & Sort</button>
+					{:else}
+						<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+					{/if}
+				</div>
 			</div>
 			<div class="product-grid">
 				{#each products as product}
@@ -345,6 +388,7 @@
 	.products {
 		flex: 1;
 		max-width: 1144px;
+		transition: filter 0.3s ease;
 	}
 
 	.product-grid {
@@ -353,6 +397,14 @@
 		gap: 25px;
 		justify-content: flex-start;
 		margin-top: 13px;
+	}
+
+	.justify-start {
+		justify-content: flex-start;
+	}
+
+	.justify-end {
+		justify-content: flex-end;
 	}
 
 	.justify-center {
@@ -365,6 +417,10 @@
 
 	.justify-between {
 		justify-content: space-between;
+	}
+
+	.align-center {
+		align-items: center;
 	}
 
 	.gap {
@@ -432,6 +488,35 @@
 	.filters {
 		max-width: 250px;
 		min-width: 250px;
+		transition: transform 0.3s ease-in-out;
+		z-index: 1000;
+	}
+
+	  /* Desktop: always visible */
+	.filters:not(.is-mobile) {
+		transform: translateX(0);
+		position: relative;
+		float: left;
+	}
+
+	/* Mobile: hidden by default */
+	.is-mobile {
+		transform: translateX(-200%);
+	}
+
+	/* When open */
+	.is-mobile.open {
+		transform: translateX(0);
+		background-color: #fff;
+		backdrop-filter: blur(10px);
+		left: 0;
+		top: 0;
+		padding: 1rem;
+	}
+
+	.is-blurred {
+		filter: blur(4px);
+		pointer-events: none; /* Optional: prevent interaction when blurred */
 	}
 
 	.filter-buttons {
@@ -440,7 +525,7 @@
 
 	@media only screen and (max-width: 1440px) and (min-width: 1150px) {
 		.products {
-			max-width: 854px;
+			max-width: 852px;
 		}
 	}
 
@@ -450,13 +535,39 @@
 		}
 	}
 
-	@media only screen and (max-width: 856px) {
+	@media only screen and (max-width: 856px) and (min-width: 591px) {
 		.products {
-			max-width: calc(100% - 250px);
+			max-width: 560px;
+			margin: auto;
 		}
 
+		.filters {
+			position: fixed;
+		}
+	}
+
+	@media only screen and (max-width: 590px) and (min-width: 491px) {
+		.products {
+			max-width: 460px;
+			margin: auto;
+		}
+
+		.filters {
+			position: fixed;
+		}
+	}
+
+	@media only screen and (max-width: 490px) {
 		.product-grid {
 			justify-content: center;
+		}
+
+		.products {
+			margin: auto;
+		}
+
+		.filters {
+			position: fixed;
 		}
 	}
 </style>

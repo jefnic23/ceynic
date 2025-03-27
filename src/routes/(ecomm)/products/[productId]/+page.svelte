@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import PayPal from '$lib/components/PayPal.svelte';
 	import Tooltip from '$lib/components/shared/Tooltip.svelte';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -14,35 +15,34 @@
 
 <div class="wrapper">
 	{#await data.product}
-		<p>Loading product...</p>
+		<Skeleton placeholderCount={1} type={'image'} />
+		<Skeleton placeholderCount={5} type={"table-row"} />
 	{:then product}
-		<div class="row">
-			<div class="column flex-5 center">
-				<img src={product.images[0]} alt={product.title} />
+		<div class="image">
+			<img src={product.images[0]} alt={product.title} />
+		</div>
+		<div class="details">
+			<div>
+				<div class="title">{product.title}</div>
+				<div class="description">{product.description}</div>
 			</div>
-			<div class="column flex-3 left">
-				<div>
-					<div class="title">{product.title}</div>
-					<div class="description">{product.description}</div>
-				</div>
-				<div>
-					<div class="price">${product.price}</div>
-					<div class="shipping">+ <i>free shipping</i></div>
-				</div>
-				<PayPal productId={product.id} />
-				<div>
-					{#await data.location}
-						<div>Ships from: <div class="loader"></div></div>
-					{:then location}
-						<div>
-							Ships from: <b>{location.city ? `${location.city}, ${location.state}` : `${location.state}`}</b>
-						</div>
-					{/await}
-				</div>
-                <Tooltip content={returnsTooltipContent.trim()} position={'bottom'}>
-                    <div class="returns">Returns & exchanges accepted within 14 days</div>
-                </Tooltip>
+			<div>
+				<div class="price">${product.price}</div>
+				<div class="shipping">+ <i>free shipping</i></div>
 			</div>
+			<PayPal productId={product.id} />
+			<div>
+				{#await data.location}
+					<div>Ships from: <div class="loader"></div></div>
+				{:then location}
+					<div>
+						Ships from: <b>{location.city ? `${location.city}, ${location.state}` : `${location.state}`}</b>
+					</div>
+				{/await}
+			</div>
+			<Tooltip content={returnsTooltipContent.trim()} position={'bottom'}>
+				<div class="returns">Returns & exchanges accepted within 14 days</div>
+			</Tooltip>
 		</div>
 	{/await}
 </div>
@@ -50,43 +50,29 @@
 <style>
 	.wrapper {
 		display: flex;
-		flex-direction: column;
-		align-items: center;
+		flex-direction: row;
+		align-items: flex-start;
 		width: 100%;
 		padding: 1rem 0;
-	}
-
-	.row {
-		display: flex;
-		flex-direction: row;
 		column-gap: 1rem;
+		max-width: 1144px;
 	}
 
-	.column {
+	.image {
+		flex: 5;
+		padding: 1rem;
+	}
+
+	.image img {
+		width: 100%;
+	}
+
+	.details {
+		flex: 3;
+		padding: 1rem;
 		display: flex;
 		flex-direction: column;
-		align-items: left;
 		row-gap: 1rem;
-	}
-
-    .left {
-        align-items: left;
-    }
-
-    .center {
-        align-items: center;
-    }
-
-	.flex-5 {
-		flex: 5;
-	}
-
-	.flex-3 {
-		flex: 3;
-	}
-
-	img {
-		width: 89%;
 	}
 
 	.title {
@@ -97,6 +83,7 @@
 
 	.description {
 		text-align: justify;
+		text-align-last: center;
 		hyphens: auto;
 	}
 
@@ -129,4 +116,11 @@
     .returns:hover {
         cursor: help;
     }
+
+	@media only screen and (max-width: 900px) {
+		.wrapper {
+			flex-direction: column;
+			align-items: center;
+		}
+	}
 </style>

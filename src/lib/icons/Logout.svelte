@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" {...$$props}
+<script lang="ts">
+	export let size: number = 24;
+</script>
+
+<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" {...$$props}
 	><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"
 		><path d="M19.5 12H8" /><path
 			stroke-linejoin="round"

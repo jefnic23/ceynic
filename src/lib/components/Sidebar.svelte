@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import Hamburger from "$lib/icons/Hamburger.svelte";
     import Home from '$lib/icons/Home.svelte';
 	import Listing from '$lib/icons/Listing.svelte';
 	import Logout from "$lib/icons/Logout.svelte";
@@ -10,8 +9,10 @@
 </script>
 
 <div class="wrapper">
-	<button class="hamburger-button" on:click={() => open = !open}>
-		<Hamburger />
+	<button class="hamburger-button" on:click={() => open = !open} class:open>
+		<span></span>
+		<span></span>
+		<span></span>
 	</button>
 
 	<aside class:open>
@@ -35,20 +36,9 @@
 		position: relative;
 	}
 
-	.hamburger-button {
-		position: absolute;
-		top: 1rem;
-		left: 1rem;
-		z-index: 2;
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.5rem;
-	}
-
 	aside {
 		height: 100vh;
-		width: 80px;
+		width: 72px;
 		overflow: hidden;
 		background-color: #f9f9f9;
 		border-right: 1px solid #e0e0e0;
@@ -95,5 +85,42 @@
 
 	nav form {
 		margin: 0;
+	}
+
+	/* hamburger button */
+	.hamburger-button {
+		position: absolute;
+		top: 1rem;
+		left: 24px;
+		z-index: 2;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+	}
+
+	.hamburger-button span {
+		height: 3px;
+		background: #333;
+		border-radius: 2px;
+		transition: 0.3s ease;
+	}
+
+	/* Animate into X when open */
+	.hamburger-button.open span:nth-child(1) {
+		transform: rotate(45deg) translateY(15px);
+	}
+
+	.hamburger-button.open span:nth-child(2) {
+		opacity: 0;
+	}
+
+	.hamburger-button.open span:nth-child(3) {
+		transform: rotate(-45deg) translateY(-15px);
 	}
 </style>

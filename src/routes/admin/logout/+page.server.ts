@@ -13,6 +13,6 @@ export const actions: Actions = {
         handleLogout(cookies);
 
         // redirect the user
-        redirect(302, '/admin')
+        redirect(302, '/login')
     },
 }

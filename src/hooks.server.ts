@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { handleRefresh } from '$lib/server/auth';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -7,7 +7,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const refreshToken = event.cookies.get("refresh");
 
 		if (!accessToken && !refreshToken) {
-			return await resolve(event);
+			throw redirect(303, '/login');
 		}
 
 		// If access token is missing, attempt a refresh if refresh token is available
@@ -16,28 +16,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (attemptRefresh) {
 				event.locals.user = "me";
 			} else {
-				return await resolve(event);
+				throw redirect(303, '/login');
 			}
 		}
 
 		// Either access token exists or refresh was successful
 		// return await resolve(event);
 	}
-
-	// todo: get user
-	// const user = await db.user.findUnique({
-	// 	where: { userAuthToken: session },
-	// 	select: { username: true, role: true },
-	// })
-
-	event.locals.user = "me";
-
-	// if (user) {
-	// 	event.locals.user = {
-	// 		name: user.username,
-	// 		role: user.role.name,
-	// 	}
-	// }
 
 	return await resolve(event);
 };

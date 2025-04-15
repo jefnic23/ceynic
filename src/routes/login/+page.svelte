@@ -1,35 +1,45 @@
 <script lang="ts">
-	import type { ActionData } from './$types';
+	import Modal from '$lib/components/shared/Modal.svelte';
 	import Person from '$lib/icons/Person.svelte';
 	import Lock from '$lib/icons/Lock.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import Button from '$lib/components/shared/Button.svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
 	export let form: ActionData;
 </script>
 
-<div class="body">
-	<h2>Log In</h2>
-	<form action="?/login" method="POST">
-		<div class="input-container">
-			<Person />
-			<input id="email" name="username" value="" placeholder="Email" type="email" required />
-		</div>
-		<div class="input-container">
-			<Lock />
-			<input
-				id="password"
-				name="password"
-				value=""
-				placeholder="Password"
-				type="password"
-				required
-			/>
-		</div>
-		{#if form?.credentials}
-			<p class="error">You have entered the wrong credentials.</p>
-		{/if}
-		<button>Submit</button>
-	</form>
-</div>
+<Modal showModal={true} showClose={false} title="Log In">
+	<div class="body">
+		<form method="POST" use:enhance>
+			<div class="input-container">
+				<Person />
+				<input id="email" name="username" value="" placeholder="Email" type="email" required />
+			</div>
+			<div class="input-container">
+				<Lock />
+				<input
+					id="password"
+					name="password"
+					value=""
+					placeholder="Password"
+					type="password"
+					required
+				/>
+			</div>
+			<!-- {#if form?.invalid}
+				<p class="error">Username and password is required.</p>
+			{/if} -->
+
+			{#if form?.credentials}
+				<p class="error">You have entered the wrong credentials.</p>
+			{/if}
+			<Button text="Submit" />
+		</form>
+	</div>
+</Modal>
 
 <style>
 	.body {
@@ -37,10 +47,6 @@
 		flex-direction: column;
 		align-items: center;
 		width: 377px;
-	}
-
-	h2 {
-		text-transform: uppercase;
 	}
 
 	form {
@@ -81,20 +87,5 @@
 
 	.input-container:focus-within {
 		border-bottom-color: #007bff; /* Change this to your desired color */
-	}
-
-	button {
-		margin-top: 1rem;
-		padding: 0.75rem;
-		background-color: #007bff;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		width: 34%;
-	}
-
-	button:hover {
-		background-color: #0056b3;
 	}
 </style>

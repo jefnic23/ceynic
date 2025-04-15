@@ -1,10 +1,20 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
-	import { cubicIn, cubicOut } from 'svelte/easing';
 	import image from '$lib/header.jpg';
 	import type { PageData } from './$types';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { onNavigate } from '$app/navigation';
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	export let data: PageData;
 </script>
@@ -22,10 +32,7 @@
 	<img class="hero" src={image} alt="header.jpg" />
 
 	{#key data.url}
-		<main
-			in:fly={{ y: -34, duration: 144, delay: 233, easing: cubicOut }}
-			out:fly={{ y: 34, duration: 144, easing: cubicIn }}
-		>
+		<main>
 			<slot />
 		</main>
 	{/key}
@@ -70,7 +77,6 @@
 		border-bottom: 1px solid #e7e7e7;
 		position: relative;
 		margin-top: 50px;
-
 	}
 
 	.wrapper {

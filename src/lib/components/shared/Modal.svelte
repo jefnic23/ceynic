@@ -13,7 +13,7 @@
 <dialog bind:this={dialog} on:close={() => (showModal = false)} class={type}>
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click|stopPropagation>
-		<div class="header">
+		<div class="header {showClose ? 'justify-between' : 'justify-center'}">
 			<h2>{title}</h2>
 			<!-- svelte-ignore a11y-autofocus -->
 			{#if showClose}
@@ -39,6 +39,7 @@
 
 	dialog > div {
 		padding: 1em 1em 1em 1.34em;
+		transition: max-height 0.3s ease, height 0.3s ease;
 	}
 
 	dialog[open] {
@@ -70,9 +71,16 @@
 	.header {
 		display: flex;
 		flex-direction: row;
-		justify-content: space-between;
 		align-items: center;
 		text-transform: uppercase;
+	}
+
+	.justify-between {
+		justify-content: space-between;
+	}
+
+	.justify-center {
+		justify-content: center;
 	}
 
 	/* Close button styling */

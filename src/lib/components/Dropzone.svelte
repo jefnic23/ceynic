@@ -139,7 +139,6 @@
 		width: 144px;
 		height: 144px;
 		object-fit: cover;
-		border-radius: 5px;
 	}
 
 	.remove-btn {
@@ -169,11 +168,9 @@
 		color: white;
 		padding: 2px 5px;
 		font-size: 0.8em;
-		border-radius: 0 0 0 3px;
 	}
 
 	.image-wrapper.thumbnail {
 		border: 2px solid green;
-		border-radius: 5px;
 	}
 </style>

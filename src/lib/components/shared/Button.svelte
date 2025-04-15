@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ButtonSize } from '$lib/enums/buttonSize';
-	import { Position } from '$lib/enums/position';
 	import { createEventDispatcher } from 'svelte';
 
-	export let text: string;
+	export let text: string = "";
 	export let style: ButtonStyle = ButtonStyle.Submit;
-	export let icon: string | null = null;
-	export let iconPosition: Position = Position.Left;
 	export let size: ButtonSize = ButtonSize.Medium;
 	export let disabled: boolean = false;
 	export let loading: boolean = false;
@@ -24,7 +21,7 @@
 </script>
 
 <button
-	class="{style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
+	class="base-button {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
 	on:click={handleClick}
 	{disabled}
 	title={tooltip}
@@ -32,13 +29,8 @@
 	{#if loading}
 		<span class="spinner"></span>
 	{:else}
-		{#if icon && iconPosition === 'left'}
-			<img src={icon} alt="" class="icon-left" />
-		{/if}
-		<span>{text}</span>
-		{#if icon && iconPosition === 'right'}
-			<img src={icon} alt="" class="icon-right" />
-		{/if}
+		{text}
+		<slot />
 	{/if}
 </button>
 
@@ -49,9 +41,11 @@
 		justify-content: center;
 		border: none;
 		cursor: pointer;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 1.5rem;
 		font-size: 1rem;
 		border-radius: 0.25rem;
+		overflow: hidden;
+		position: relative;
 		transition:
 			background-color 0.3s ease,
 			transform 0.2s ease,
@@ -79,15 +73,15 @@
 	/* Size Variants */
 	.small {
 		font-size: 0.75rem;
-		padding: 0.25rem 0.5rem;
+		padding: 0.25rem 0.75rem;
 	}
 	.medium {
 		font-size: 1rem;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 1.5rem;
 	}
 	.large {
 		font-size: 1.25rem;
-		padding: 0.75rem 1.5rem;
+		padding: 0.75rem 2rem;
 	}
 
 	/* Full Width */

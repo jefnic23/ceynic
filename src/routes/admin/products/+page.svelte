@@ -1,11 +1,15 @@
 <script lang="ts">
 	import Button from '$lib/components/shared/Button.svelte';
+	import Card from '$lib/components/shared/Card.svelte';
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import type { ProductOut, ProductsOut } from '$lib/interfaces/product';
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
+	import Edit from '$lib/icons/Edit.svelte';
+	import Trash from '$lib/icons/Trash.svelte';
+	import AnimatedButton from '$lib/components/shared/AnimatedButton.svelte';
 
 	export let data: PageData;
 
@@ -43,24 +47,6 @@
 		minimumFractionDigits: 2
 	});
 
-	let hoverImage: string | null = null;
-	let hoverPosition = { x: 0, y: 0 };
-	let tableElement: Element;
-
-	function showImage(product: ProductsOut, event: MouseEvent) {
-		hoverImage = product.imageUrl;
-		const tableRect = tableElement.getBoundingClientRect();
-		const isCursorOnLeft = event.clientX < tableRect.left + tableRect.width / 2;
-		hoverPosition = {
-			x: isCursorOnLeft ? event.clientX + 20 : event.clientX - 220, // Adjust for image width
-			y: event.clientY - 50
-		};
-	}
-
-	function hideImage() {
-		hoverImage = null;
-	}
-
 	let images: File[] = [];
 
 	function handleImagesChange(event: CustomEvent<{ files: File[] }>) {
@@ -80,47 +66,52 @@
 	}
 </script>
 
-<table bind:this={tableElement}>
-	{#await data.products}
-		<div>loading products...</div>
-	{:then products}
-		<thead>
-			<tr>
-				<th>Title</th>
-				<th>Price</th>
-				<th>Height</th>
-				<th>Width</th>
-				<th>Medium</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each products as product}
-				<tr on:mouseenter={(event) => showImage(product, event)} on:mouseleave={hideImage}>
-					<td>{product.title}</td>
-					<td>{currencyFormatter.format(product.price)}</td>
-					<td>{product.height}</td>
-					<td>{product.width}</td>
-					<td>{product.medium}</td>
-					<td>
-						<button on:click={async () => await openEditModal(product)}>Edit</button>
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	{:catch error}
-		<div>Something went wrong: {error.message}</div>
-	{/await}
-</table>
-
-{#if hoverImage}
-	<img
-		src={hoverImage}
-		class="hover-image visible"
-		alt={hoverImage}
-		style="top: {hoverPosition.y}px; left: {hoverPosition.x}px"
-	/>
-{/if}
+<div class="container">
+	<h1>Products</h1>
+	<Card>
+		<table>
+			{#await data.products}
+				<div>loading products...</div>
+			{:then products}
+				<thead>
+					<tr>
+						<th></th>
+						<th>Title</th>
+						<th>Price</th>
+						<th>Height</th>
+						<th>Width</th>
+						<th>Medium</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each products as product}
+						<tr>
+							<td class="thumbnail">
+								<img src="{product.imageUrl}" alt="{product.thumbnail}" />
+							</td>
+							<td>{product.title}</td>
+							<td>{currencyFormatter.format(product.price)}</td>
+							<td>{product.height}</td>
+							<td>{product.width}</td>
+							<td>{product.medium}</td>
+							<td>
+								<AnimatedButton text="Edit" style={ButtonStyle.Info} on:click={async () => await openEditModal(product)}>
+									<Edit />
+								</AnimatedButton>
+								<AnimatedButton text="Delete" style={ButtonStyle.Cancel}>
+									<Trash />
+								</AnimatedButton>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			{:catch error}
+				<div>Something went wrong: {error.message}</div>
+			{/await}
+		</table>
+	</Card>
+</div>
 
 {#if showModal}
 	<Modal bind:showModal title="Edit Product">
@@ -206,15 +197,34 @@
 {/if}
 
 <style>
+	.container {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
 	table {
-		width: 89%;
-		border-radius: 8px;
+		width: 100%;
+		max-width: 1500px;
 		border-collapse: collapse;
+		border: 1px solid black;
 		text-align: left;
+		font-size: 18px;
+		margin: auto;
+	}
+
+	th {
+		background-color: #04AA6D;
+		color: white;
 	}
 
 	tr {
-		height: 34px;
+		height: 55px;
+		vertical-align: middle;
+	}
+
+	tbody tr:nth-of-type(odd) {
+		background-color: #e9e9e9;
 	}
 
 	textarea {
@@ -224,19 +234,6 @@
 
 	input {
 		width: 100%;
-	}
-
-	.hover-image {
-		position: fixed;
-		display: none;
-		border: 1px solid #ccc;
-		max-width: 200px;
-		max-height: 200px;
-		pointer-events: none;
-	}
-
-	.hover-image.visible {
-		display: block;
 	}
 
 	.edit {
@@ -307,5 +304,30 @@
 		font-size: 1em;
 		font-weight: bold;
 		color: #333; /* Adjust color as needed */
+	}
+
+	.thumbnail {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: inherit;
+	}
+
+	.thumbnail img {
+		width: 32px;
+		height: 32px;
+		transition: transform 0.13s ease-in-out;
+	}
+
+	:is(tbody > tr):hover {
+		outline: 2px solid #666;
+		outline-offset: -2px;
+	}
+
+	tr:hover .thumbnail img {
+		transform: scale(5) translateX(-34%);
+		z-index: 10;
+		position: relative;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	}
 </style>

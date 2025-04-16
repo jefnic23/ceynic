@@ -3,6 +3,6 @@
 
 <div class="wrapper">
 	<div>
-		some content
+		This will be a dashboard page, showing things like outstanding orders, sales reports, and site traffic analytics.
 	</div>
 </div>

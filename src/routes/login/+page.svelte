@@ -1,47 +1,57 @@
 <script lang="ts">
-	import Modal from '$lib/components/shared/Modal.svelte';
 	import Person from '$lib/icons/Person.svelte';
 	import Lock from '$lib/icons/Lock.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/shared/Button.svelte';
-	import { redirect } from '@sveltejs/kit';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
+	import Card from '$lib/components/shared/Card.svelte';
 
 	export let form: ActionData;
 </script>
 
-<Modal showModal={true} showClose={false} title="Log In">
-	<div class="body">
-		<form method="POST" use:enhance>
-			<div class="input-container">
-				<Person />
-				<input id="email" name="username" value="" placeholder="Email" type="email" required />
-			</div>
-			<div class="input-container">
-				<Lock />
-				<input
-					id="password"
-					name="password"
-					value=""
-					placeholder="Password"
-					type="password"
-					required
-				/>
-			</div>
-			<!-- {#if form?.invalid}
-				<p class="error">Username and password is required.</p>
-			{/if} -->
+<div class="wrapper">
+	<Card>
+		<div class="body">
+			<h2>Log in</h2>
+			<form method="POST" use:enhance>
+				<div class="input-container">
+					<Person />
+					<input id="email" name="username" value="" placeholder="Email" type="email" required />
+				</div>
+				<div class="input-container">
+					<Lock />
+					<input
+						id="password"
+						name="password"
+						value=""
+						placeholder="Password"
+						type="password"
+						required
+					/>
+				</div>
+				<!-- {#if form?.invalid}
+					<p class="error">Username and password is required.</p>
+				{/if} -->
+	
+				{#if form?.credentials}
+					<p class="error">You have entered the wrong credentials.</p>
+				{/if}
+				<Button text="Submit" />
+			</form>
+		</div>
+	</Card>
+</div>
 
-			{#if form?.credentials}
-				<p class="error">You have entered the wrong credentials.</p>
-			{/if}
-			<Button text="Submit" />
-		</form>
-	</div>
-</Modal>
 
 <style>
+	.wrapper {
+		display: flex;
+		width: fit-content;
+		height: 100vh;
+		margin: auto;
+		align-items: center;
+	}
+
 	.body {
 		display: flex;
 		flex-direction: column;

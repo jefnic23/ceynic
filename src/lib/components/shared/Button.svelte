@@ -46,6 +46,7 @@
 		border-radius: 0.25rem;
 		overflow: hidden;
 		position: relative;
+		height: 100%;
 		transition:
 			background-color 0.3s ease,
 			transform 0.2s ease,

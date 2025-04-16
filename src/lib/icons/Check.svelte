@@ -1,17 +1,17 @@
 <script lang="ts">
 	export let size: number = 24;
-	export let color: string = 'currentColor';
+    export let color: string = "currentColor";
 </script>
 
 <svg 
 	xmlns="http://www.w3.org/2000/svg" 
-	width={size}
-	height={size}
+	width={size} 
+	height={size} 
 	viewBox="0 0 24 24" 
 	{...$$props}
 >
 	<path
 		fill={color}
-		d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z"
+		d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"
 	/>
 </svg>

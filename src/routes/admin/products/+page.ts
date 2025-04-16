@@ -21,7 +21,8 @@ export const load = async ({ fetch }) => {
             width: item.width, 
             medium: item.mediumId === 1 ? "Painting" : "Print",
             thumbnail: item.thumbnail,
-            imageUrl: item.imageUrl
+            imageUrl: item.imageUrl,
+            enabled: item.enabled
         }));
     }
 

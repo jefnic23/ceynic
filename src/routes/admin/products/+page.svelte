@@ -10,6 +10,9 @@
 	import Edit from '$lib/icons/Edit.svelte';
 	import Trash from '$lib/icons/Trash.svelte';
 	import AnimatedButton from '$lib/components/shared/AnimatedButton.svelte';
+	import Add from '$lib/icons/Add.svelte';
+	import Check from '$lib/icons/Check.svelte';
+	import Cancel from '$lib/icons/Cancel.svelte';
 
 	export let data: PageData;
 
@@ -67,7 +70,12 @@
 </script>
 
 <div class="container">
-	<h1>Products</h1>
+	<div class="header">
+		<h1>Products</h1>
+		<Button text="Add" style={ButtonStyle.Info}>
+			<Add />
+		</Button>
+	</div>
 	<Card>
 		<table>
 			{#await data.products}
@@ -81,6 +89,7 @@
 						<th>Height</th>
 						<th>Width</th>
 						<th>Medium</th>
+						<th>Enabled</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -96,11 +105,18 @@
 							<td>{product.width}</td>
 							<td>{product.medium}</td>
 							<td>
+								{#if product.enabled}
+									<Check color={"green"} size={32} />
+								{:else}
+									<Cancel color={"red"} size={32} />
+								{/if}
+							</td>
+							<td>
 								<AnimatedButton text="Edit" style={ButtonStyle.Info} on:click={async () => await openEditModal(product)}>
-									<Edit />
+									<Edit size={16} />
 								</AnimatedButton>
 								<AnimatedButton text="Delete" style={ButtonStyle.Cancel}>
-									<Trash />
+									<Trash size={16} />
 								</AnimatedButton>
 							</td>
 						</tr>
@@ -167,6 +183,15 @@
 					</div>
 				</div>
 
+				<div class="form-row">
+					<div class="form-input">
+						<label for="enabled">Enabled</label>
+						<div class="checkbox">
+							<input id="enabled" type="checkbox" value={selectedProduct.enabled} bind:checked={selectedProduct.enabled} />
+						</div>
+					</div>
+				</div>
+
 				<Dropzone
 					on:change={handleImagesChange}
 					on:thumbnailChange={handleThumbnailChange}
@@ -203,11 +228,17 @@
 		width: 100%;
 	}
 
+	.header {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
 	table {
 		width: 100%;
 		max-width: 1500px;
 		border-collapse: collapse;
-		border: 1px solid black;
 		text-align: left;
 		font-size: 18px;
 		margin: auto;
@@ -304,6 +335,17 @@
 		font-size: 1em;
 		font-weight: bold;
 		color: #333; /* Adjust color as needed */
+	}
+
+	.checkbox {
+		display: flex;
+		justify-content: flex-start;
+	}
+
+	.checkbox input {
+		height: 21px;
+		width: 21px;
+		margin: 0;
 	}
 
 	.thumbnail {

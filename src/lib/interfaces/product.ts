@@ -6,6 +6,7 @@ interface Product {
     width: number;
     medium: "Painting" | "Print";
     thumbnail: string;
+    enabled: boolean;
 }
 
 export interface ProductsOut extends Product {

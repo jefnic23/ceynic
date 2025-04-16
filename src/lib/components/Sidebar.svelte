@@ -4,6 +4,8 @@
 	import Listing from '$lib/icons/Listing.svelte';
 	import Logout from "$lib/icons/Logout.svelte";
 	import Button from "$lib/components/shared/Button.svelte";
+	import ShoppingCart from "$lib/icons/ShoppingCart.svelte";
+	import Settings from "$lib/icons/Settings.svelte";
 
     let open: boolean = true;
 </script>
@@ -13,19 +15,36 @@
 		<span></span>
 		<span></span>
 		<span></span>
+		<span></span>
 	</button>
 
 	<aside class:open>
-	
-		{#if open}
-			<nav>
-				<a href="/admin"><Home /> <span>Home</span></a>
-				<a href="/admin/products"><Listing /> <span>Products</span></a>
-				<form action="/admin/logout" method="POST" use:enhance>
-					<button type="submit"><Logout /> <span>Log Out</span></button>
-				</form>
-			</nav>
-		{/if}
+		<nav>
+			<div>
+				<a href="/admin">
+					<Home /> 
+					<span class="label">Home</span>
+				</a>
+				<a href="/admin/products">
+					<Listing /> 
+					<span class="label">Products</span>
+				</a>
+				<a href="/admin/orders">
+					<ShoppingCart />
+					<span class="label">Orders</span>
+				</a>
+				<a href="/admin/settings">
+					<Settings />
+					<span class="label">Settings</span>
+				</a>
+			</div>
+			<form action="/admin/logout" method="POST" use:enhance>
+				<button type="submit">
+					<Logout /> 
+					<span class="label">Log Out</span>
+				</button>
+			</form>
+		</nav>
 	</aside>
 </div>
 
@@ -46,6 +65,7 @@
 		display: flex;
 		flex-direction: column;
 		padding-top: 3rem; /* Leave room for the hamburger */
+		align-items: stretch;
 	}
 
 	aside.open {
@@ -55,11 +75,19 @@
 	nav {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		justify-content: space-between;
+		align-items: flex-start;
+		height: 100%;
 		padding: 1rem;
 	}
 
-	nav a,
+	nav div {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	nav div a,
 	nav form button {
 		display: flex;
 		align-items: center;
@@ -75,9 +103,10 @@
 		border-radius: 4px;
 		width: 100%;
 		cursor: pointer;
+		line-height: normal;
 	}
 
-	nav a:hover,
+	nav div a:hover,
 	nav form button:hover {
 		background-color: #eaeaea;
 		color: #000;
@@ -87,6 +116,17 @@
 		margin: 0;
 	}
 
+	/* Hide label when sidebar is collapsed */
+	aside:not(.open) .label {
+		display: none;
+	}
+
+	/* Optional: Center icon in collapsed mode */
+	aside:not(.open) a,
+	aside:not(.open) form button {
+		justify-content: center;
+	}
+
 	/* hamburger button */
 	.hamburger-button {
 		position: absolute;
@@ -94,33 +134,72 @@
 		left: 24px;
 		z-index: 2;
 		width: 24px;
-		height: 24px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
+		height: 16px;
 		background: none;
 		border: none;
 		cursor: pointer;
 		padding: 0;
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+		-webkit-transition: .5s ease-in-out;
+		-moz-transition: .5s ease-in-out;
+		-o-transition: .5s ease-in-out;
+		transition: .5s ease-in-out;
 	}
 
 	.hamburger-button span {
+		display: block;
+		position: absolute;
 		height: 3px;
+		width: 100%;
 		background: #333;
 		border-radius: 2px;
-		transition: 0.3s ease;
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+		-webkit-transition: .25s ease-in-out;
+		-moz-transition: .25s ease-in-out;
+		-o-transition: .25s ease-in-out;
+		transition: .25s ease-in-out;
+	}
+
+	.hamburger-button span:nth-child(1) {
+		top: 0px;
+	}
+
+	.hamburger-button span:nth-child(2), .hamburger-button span:nth-child(3) {
+		top: 6px;
+	}
+
+	.hamburger-button span:nth-child(4) {
+		top: 12px;
 	}
 
 	/* Animate into X when open */
 	.hamburger-button.open span:nth-child(1) {
-		transform: rotate(45deg) translateY(15px);
+		top: 6px;
+		width: 0%;
 	}
 
 	.hamburger-button.open span:nth-child(2) {
-		opacity: 0;
+		-webkit-transform: rotate(45deg);
+		-moz-transform: rotate(45deg);
+		-o-transform: rotate(45deg);
+		transform: rotate(45deg);
 	}
 
 	.hamburger-button.open span:nth-child(3) {
-		transform: rotate(-45deg) translateY(-15px);
+		-webkit-transform: rotate(-45deg);
+		-moz-transform: rotate(-45deg);
+		-o-transform: rotate(-45deg);
+		transform: rotate(-45deg);
+	}
+
+	.hamburger-button.open span:nth-child(4) {
+		top: 6px;
+		width: 0%;
 	}
 </style>

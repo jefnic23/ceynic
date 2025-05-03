@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 
-	export let duration = '233ms';
+	export let duration = '377ms';
 	export let offset = 0;
 	export let tolerance = 0;
 
@@ -46,11 +46,12 @@
 
 <style>
 	div {
-		position: fixed;
+		position: sticky;
 		width: 100%;
 		top: 0;
-		transition: transform 233ms linear;
-		z-index: 999;
+		transition: transform 377ms ease-in-out;
+		z-index: 9999;
+		will-change: transform !important;
 	}
 
 	.pin {

@@ -4,6 +4,8 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let text: string = "";
+	export let name: string = "";
+	export let value: string = "";
 	export let style: ButtonStyle = ButtonStyle.Submit;
 	export let size: ButtonSize = ButtonSize.Medium;
 	export let disabled: boolean = false;
@@ -25,8 +27,11 @@
 	on:click={handleClick}
 	{disabled}
 	title={tooltip}
+	name={name}
+	value={value}
 >
 	{#if loading}
+		<!-- todo: use <Skeleton /> instead -->
 		<span class="spinner"></span>
 	{:else}
 		{text}

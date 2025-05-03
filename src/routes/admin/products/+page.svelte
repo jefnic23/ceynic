@@ -70,13 +70,13 @@
 </script>
 
 <div class="container">
-	<div class="header">
-		<h1>Products</h1>
-		<Button text="Add" style={ButtonStyle.Info}>
-			<Add />
-		</Button>
-	</div>
 	<Card>
+		<div class="header">
+			<h1>Products</h1>
+			<Button text="Add New Product" style={ButtonStyle.Info}>
+				<Add />
+			</Button>
+		</div>
 		<table>
 			{#await data.products}
 				<div>loading products...</div>
@@ -101,8 +101,8 @@
 							</td>
 							<td>{product.title}</td>
 							<td>{currencyFormatter.format(product.price)}</td>
-							<td>{product.height}</td>
-							<td>{product.width}</td>
+							<td>{product.height}"</td>
+							<td>{product.width}"</td>
 							<td>{product.medium}</td>
 							<td>
 								{#if product.enabled}

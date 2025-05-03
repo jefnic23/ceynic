@@ -6,6 +6,7 @@
 	import Button from "$lib/components/shared/Button.svelte";
 	import ShoppingCart from "$lib/icons/ShoppingCart.svelte";
 	import Settings from "$lib/icons/Settings.svelte";
+	import Person from "$lib/icons/Person.svelte";
 
     let open: boolean = true;
 </script>
@@ -36,6 +37,10 @@
 				<a href="/admin/settings">
 					<Settings />
 					<span class="label">Settings</span>
+				</a>
+				<a href="/admin/account">
+					<Person />
+					<span class="label">Account</span>
 				</a>
 			</div>
 			<form action="/admin/logout" method="POST" use:enhance>
@@ -94,7 +99,7 @@
 		gap: 0.5rem;
 		text-transform: uppercase;
 		color: rgba(0, 0, 0, 0.65);
-		font-size: 0.875rem;
+		font-size: 1rem;
 		text-decoration: none;
 		background: none;
 		border: none;

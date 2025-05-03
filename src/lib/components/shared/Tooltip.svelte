@@ -16,6 +16,15 @@
 		display: inline-block;
 	}
 
+	.tooltip-container :global(> :first-child) {
+		text-decoration: underline dashed;
+        text-underline-position: under;
+	}
+
+	.tooltip-container :global(> :first-child):hover {
+		cursor: help;
+	}
+	
 	.tooltip {
 		position: absolute;
 		background-color: #333;

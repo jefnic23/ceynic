@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let placeholderCount: number = 12;
 	export let randomizeHeights: boolean = false;
-	export let type: 'image' | 'table-row' | 'paragraph' | 'square' = 'square'; // Add types
+	export let type: 'image' | 'table-row' | 'paragraph' | 'square' | 'fill' = 'square'; // Add types
 
 	const randomHeights = Array(placeholderCount)
 		.fill(0)
@@ -12,7 +12,8 @@
 		image: { width: '225px', height: '225px' },
 		'table-row': { width: '100%', height: '40px' },
 		square: { width: '150px', height: '150px' },
-		paragraph: { width: '100%', height: '24px' } // Default line height
+		paragraph: { width: '100%', height: '24px' }, // Default line height
+		fill: { width: '100%', height: '100%' }
 	};
 
 </script>

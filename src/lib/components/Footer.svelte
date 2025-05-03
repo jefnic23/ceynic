@@ -3,6 +3,8 @@
 	import Instagram from '$lib/icons/Instagram.svelte';
 	import Pinterest from '$lib/icons/Pinterest.svelte';
 
+	export let copyright: string = "";
+
     let year: number = new Date().getFullYear();
 </script>
 
@@ -23,9 +25,9 @@
         </a>
     </div>
     <div class="copyright">
-        Copyright © {year}, Tracey Nicholas. All rights reserved. |
-        <a href="/admin" style="color: #666666; text-decoration: none;" target="_blank">Administration</a> | Site by
-        <a href="https://github.com/jefnic23" target="_blank">Jeff Nicholas</a>
+        Copyright © {year}{copyright ? `, ${copyright}` : ""}. All rights reserved. |
+        <a href="/admin" style="color: #666666; text-decoration: none;" target="_blank">Administration</a> | 
+		Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.org</a>
     </div>
 </div>
 

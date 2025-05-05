@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 
 	export let duration = '377ms';
 	export let offset = 0;
@@ -29,16 +29,31 @@
 		node.style.transitionDuration = duration;
 	}
 
-	$: {
+	function handleScroll() {
+		if (typeof window !== 'undefined') {
+			y = window.scrollY;
+		}
 		headerClass = updateClass(y);
 		if (headerClass !== lastHeaderClass) {
 			dispatch(headerClass);
 		}
 		lastHeaderClass = headerClass;
 	}
-</script>
 
-<svelte:window bind:scrollY={y} />
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			window.addEventListener('scroll', handleScroll, { passive: true });
+		}
+	});
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('scroll', handleScroll);
+		}
+	});
+
+
+</script>
 
 <div use:action class={headerClass}>
 	<slot />
@@ -51,7 +66,7 @@
 		top: 0;
 		transition: transform 377ms ease-in-out;
 		z-index: 9999;
-		will-change: transform !important;
+		will-change: transform;
 		view-transition-name: header;
 	}
 

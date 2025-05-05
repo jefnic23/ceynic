@@ -10,24 +10,26 @@
 
 <div class="footer">
     <div class="icons">
-        <a href="https://www.etsy.com/shop/TraceyNicholasArt" target="_blank" class="icon etsy">
-            <Etsy />
+        <a href="https://www.etsy.com/shop/TraceyNicholasArt" target="_blank">
+            <Etsy size={32} />
         </a>
-        <a
-            href="https://www.instagram.com/traceynicholas_art/"
-            target="_blank"
-            class="icon insta"
-        >
-            <Instagram />
+        <a href="https://www.instagram.com/traceynicholas_art/" target="_blank">
+            <Instagram size={32} />
         </a>
-        <a href="https://www.pinterest.com/tnicholas48169/" target="_blank" class="icon pinterest">
-            <Pinterest />
+        <a href="https://www.pinterest.com/tnicholas48169/" target="_blank">
+            <Pinterest size={32} color={"#E60023"} />
         </a>
     </div>
     <div class="copyright">
-        Copyright © {year}{copyright ? `, ${copyright}` : ""}. All rights reserved. |
-        <a href="/admin" style="color: #666666; text-decoration: none;" target="_blank">Administration</a> | 
-		Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.org</a>
+		<div>
+			Copyright © {year}{copyright ? `, ${copyright}` : ""}. All rights reserved.
+		</div>
+		<div>
+			<a href="/admin" style:color="#666666" style:text-decoration="none" target="_blank">Administration</a>
+		</div>
+		<div>
+			Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.org</a>
+		</div>
     </div>
 </div>
 
@@ -49,33 +51,20 @@
 		gap: 1rem;
 	}
 
-	.icon {
+	.copyright {
 		display: flex;
 		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		height: 32px;
-		width: 32px;
+		font-size: 12px;
 	}
 
-	.etsy {
-		border: #fd7e14 solid 1px;
-		border-radius: 50%;
-		background-color: #fd7e14;
-		padding: 3px;
-		color: white;
+	.copyright > div {
+		position: relative;
+		padding: 0 0.5rem;
 	}
 
-	.insta {
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
-	}
-
-	.pinterest {
-		color: red;
-	}
-
-	.copyright {
-		font-size: 10px;
+	.copyright > div:not(:last-child)::after {
+		content: "|";
+		position: absolute;
+		right: 0;
 	}
 </style>

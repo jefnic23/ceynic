@@ -21,6 +21,7 @@
 		flex-direction: column;
 		align-items: center;
 		width: 100%;
+		max-width: 2000px;
 		margin-right: auto;
 		margin-left: auto;
 	}

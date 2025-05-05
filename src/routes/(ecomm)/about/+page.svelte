@@ -20,7 +20,7 @@
 
 <div class="wrapper">
 	{#await aboutContentPromise}
-		<Skeleton type="paragraph" />
+		<Skeleton />
 	{:then aboutContent} 
 		{@html aboutContent}
 	{/await}

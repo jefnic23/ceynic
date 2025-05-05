@@ -52,6 +52,7 @@
 		transition: transform 377ms ease-in-out;
 		z-index: 9999;
 		will-change: transform !important;
+		view-transition-name: header;
 	}
 
 	.pin {

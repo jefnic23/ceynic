@@ -126,7 +126,8 @@
 	}
 
 	textarea {
-		resize: none;
+		resize: vertical;
+		height: 144px;
 	}
 
 	:global(.grecaptcha-badge) {

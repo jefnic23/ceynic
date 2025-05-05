@@ -73,6 +73,7 @@
 	}
 
 	nav a {
+		position: relative;
 		text-transform: uppercase;
 		margin: 0 0.5rem;
 		color: rgba(0, 0, 0, 0.55);
@@ -84,8 +85,18 @@
 	}
 
 	nav a.active {
-		border-bottom: 2px solid currentColor;
 		font-weight: bold;
+	}
+
+	nav a.active::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		height: 2px;
+		background: currentColor;
+		view-transition-name: active-page;
 	}
 
 	a {

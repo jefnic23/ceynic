@@ -196,7 +196,7 @@
 		<div class="row">
 			<div class="column">
 				{#await mediumCountsPromise}
-					<Skeleton placeholderCount={1} type={"table-row"} />
+					<Skeleton />
 				{:then mediumCounts}
 					<h4>Medium</h4>
 					<div class="column">
@@ -220,7 +220,7 @@
 		<div class="row">
 			<div class="column">
 				{#await priceRangePromise}
-					<Skeleton placeholderCount={2} type={"table-row"} />
+					<Skeleton />
 				{:then priceRange}
 					<div class="row">
 						<h4>Price</h4>
@@ -259,7 +259,7 @@
 		<div class="row">
 			<div class="column">
 				{#await sizeRangesPromise}
-					<Skeleton placeholderCount={2} type={"table-row"} />
+					<Skeleton />
 				{:then sizeRanges}
 					<div class="row">
 						<div class="column">
@@ -501,7 +501,7 @@
 
 	/* Mobile: hidden by default */
 	.is-mobile {
-		transform: translateX(-200%);
+		transform: translateX(-250%);
 	}
 
 	/* When open */
@@ -529,13 +529,13 @@
 		}
 	}
 
-	@media only screen and (max-width: 1149px) and (min-width: 857px) {
+	@media only screen and (max-width: 1149px) and (min-width: 889px) {
 		.products {
 			max-width: 560px;
 		}
 	}
 
-	@media only screen and (max-width: 856px) and (min-width: 591px) {
+	@media only screen and (max-width: 888px) and (min-width: 591px) {
 		.products {
 			max-width: 560px;
 			margin: auto;
@@ -543,6 +543,7 @@
 
 		.filters {
 			position: fixed;
+			z-index: 99999;
 		}
 	}
 
@@ -554,6 +555,7 @@
 
 		.filters {
 			position: fixed;
+			z-index: 99999;
 		}
 	}
 
@@ -568,6 +570,7 @@
 
 		.filters {
 			position: fixed;
+			z-index: 99999;
 		}
 	}
 </style>

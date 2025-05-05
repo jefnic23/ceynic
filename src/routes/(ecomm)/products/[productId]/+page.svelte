@@ -7,7 +7,7 @@
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 
-	// todo: Stripe needs to be added here as well
+	// todo: Stripe/Amazon Pay needs to be added here as well
 
 	export let data: PageData;
 
@@ -38,12 +38,10 @@
 		</div>
 		<div class="product">
 			<div class="image">
-				<Skeleton placeholderCount={1} type={'image'} />
+				<Skeleton />
 			</div>
 			<div class="details">
-				<Skeleton placeholderCount={1} type={'fill'} />
-				<Skeleton placeholderCount={1} type={'paragraph'} />
-				<Skeleton placeholderCount={2} type={'fill'} />
+				<Skeleton />
 			</div>
 		</div>
 	{:then product}

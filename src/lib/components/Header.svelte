@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	export let duration = '377ms';
 	export let offset = 0;
@@ -13,6 +13,12 @@
 	const dispatch = createEventDispatcher();
 
 	function deriveClass(y: number = 0, scrolled: number = 0): string {
+		if (y <= 0) {
+			headerClass = 'pin';
+			lastY = 0;
+			lastHeaderClass = 'pin';
+			return 'pin';
+		}
 		if (y < offset) return 'pin';
 		if (!scrolled || Math.abs(scrolled) < tolerance) return headerClass;
 		return scrolled < 0 ? 'unpin' : 'pin';
@@ -29,31 +35,16 @@
 		node.style.transitionDuration = duration;
 	}
 
-	function handleScroll() {
-		if (typeof window !== 'undefined') {
-			y = window.scrollY;
-		}
+	$: {
 		headerClass = updateClass(y);
 		if (headerClass !== lastHeaderClass) {
 			dispatch(headerClass);
 		}
 		lastHeaderClass = headerClass;
 	}
-
-	onMount(() => {
-		if (typeof window !== 'undefined') {
-			window.addEventListener('scroll', handleScroll, { passive: true });
-		}
-	});
-
-	onDestroy(() => {
-		if (typeof window !== 'undefined') {
-			window.removeEventListener('scroll', handleScroll);
-		}
-	});
-
-
 </script>
+
+<svelte:window bind:scrollY={y} />
 
 <div use:action class={headerClass}>
 	<slot />

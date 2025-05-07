@@ -11,12 +11,16 @@
 	let isMobile = false;
 	let headerElement: HTMLElement;
 
-	$: {
+	function updateBodyClass() {
         if (open) {
             document.body.classList.add('menu-open');
         } else {
             document.body.classList.remove('menu-open');
         }
+    }
+
+	$: if (typeof window !== 'undefined') {
+        updateBodyClass();
     }
 
 	function checkIsMobile() {
@@ -26,6 +30,7 @@
 	function handleOutsideClick(event: MouseEvent) {
 		if (headerElement && !headerElement.contains((event.target as HTMLElement))) {
 			open = false;
+			updateBodyClass();
 		}
 	}
 

@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import PayPal from '$lib/components/PayPal.svelte';
 	import Tooltip from '$lib/components/shared/Tooltip.svelte';
-	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';

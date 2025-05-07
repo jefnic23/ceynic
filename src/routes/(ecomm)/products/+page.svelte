@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ProductFilter } from '$lib/enums/productFilter';
@@ -536,6 +536,10 @@
 	}
 
 	@media only screen and (max-width: 888px) and (min-width: 591px) {
+		.product-grid {
+			justify-content: center;
+		}
+		
 		.products {
 			max-width: 560px;
 			margin: auto;
@@ -547,25 +551,13 @@
 		}
 	}
 
-	@media only screen and (max-width: 590px) and (min-width: 491px) {
-		.products {
-			max-width: 460px;
-			margin: auto;
-		}
-
-		.filters {
-			position: fixed;
-			z-index: 99999;
-		}
-	}
-
-	@media only screen and (max-width: 490px) {
+	@media only screen and (max-width: 590px) {
 		.product-grid {
 			justify-content: center;
 		}
-
+		
 		.products {
-			margin: auto;
+			max-width: 100%;
 		}
 
 		.filters {

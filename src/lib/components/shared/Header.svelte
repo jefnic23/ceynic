@@ -4,6 +4,7 @@
 	export let duration = '377ms';
 	export let offset = 0;
 	export let tolerance = 0;
+	export let open: boolean = false;
 
 	let headerClass = 'pin';
 	let lastHeaderClass = 'pin';
@@ -13,13 +14,13 @@
 	const dispatch = createEventDispatcher();
 
 	function deriveClass(y: number = 0, scrolled: number = 0): string {
-		if (y <= 0) {
-			headerClass = 'pin';
-			lastY = 0;
-			lastHeaderClass = 'pin';
-			return 'pin';
-		}
-		if (y < offset) return 'pin';
+		// if (y <= 0) {
+		// 	headerClass = 'pin';
+		// 	lastHeaderClass = 'pin';
+		// 	lastY = 0;
+		// 	return 'pin';
+		// }
+		if (y <= offset) return 'pin';
 		if (!scrolled || Math.abs(scrolled) < tolerance) return headerClass;
 		return scrolled < 0 ? 'unpin' : 'pin';
 	}
@@ -36,11 +37,15 @@
 	}
 
 	$: {
-		headerClass = updateClass(y);
-		if (headerClass !== lastHeaderClass) {
-			dispatch(headerClass);
+		if (!open) {
+			headerClass = updateClass(y);
+			if (headerClass !== lastHeaderClass) {
+				dispatch(headerClass);
+			}
+			lastHeaderClass = headerClass;
+		} else {
+			lastY = y;
 		}
-		lastHeaderClass = headerClass;
 	}
 </script>
 

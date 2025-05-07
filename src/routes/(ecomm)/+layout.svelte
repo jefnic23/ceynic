@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
-	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { onNavigate } from '$app/navigation';
-	import Cart from '$lib/icons/Cart.svelte';
+	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -34,24 +33,8 @@
 </svelte:head>
 
 <div class="wrapper">
-	<Header>
-		<div class="header">
-			<div class="header-left"></div>
-			<div class="header-center">
-				<a href="/" data-sveltekit-preload-data class="header-text">{name}</a>
-				<nav>
-					<a href="/" data-sveltekit-preload-data class:active={$page.url.pathname === '/'}>Home</a>
-					<a href="/products" data-sveltekit-preload-data class:active={$page.url.pathname.startsWith('/products')}>Browse</a>
-					<a href="/about" data-sveltekit-preload-data class:active={$page.url.pathname === '/about'}>About</a>
-					<a href="/contact" class:active={$page.url.pathname === '/contact'}>Contact</a>
-				</nav>
-			</div>
-			<div class="header-right">
-				<a href="/cart" class:active={$page.url.pathname === '/cart'}><Cart size={32} /></a>
-			</div>
-		</div>
-	</Header>
-	
+	<EcommHeader url={$page.url} name={name} />
+
 	{#key data.url}
 		<main>
 			<slot />
@@ -62,81 +45,6 @@
 </div>
 
 <style>
-	.header {
-		min-height: 150px;
-		background-color: #f8f8f8;
-		border: 1px solid #e7e7e7;
-		padding: 1rem;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		align-items: center;
-	}
-
-	nav a {
-		position: relative;
-		text-transform: uppercase;
-		margin: 0 0.5rem;
-		color: rgba(0, 0, 0, 0.55);
-		font-size: 13px;
-		transition:
-			color 0.15s ease-in-out,
-			background-color 0.15s ease-in-out,
-			border-color 0.15s ease-in-out;
-	}
-
-	nav a.active {
-		font-weight: bold;
-	}
-
-	nav a.active::after {
-		content: '';
-		position: absolute;
-		left: 0;
-		bottom: 0;
-		width: 100%;
-		height: 2px;
-		background: currentColor;
-		view-transition-name: active-page;
-	}
-
-	a {
-		text-decoration: none;
-	}
-
-	.header-left {
-		display: flex;
-		justify-content: flex-end;
-		align-items: center;
-	}
-
-	.header-center {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.header-right {
-		display: flex;
-		justify-content: flex-end;
-		align-items: center;
-	}
-
-	.header-right a {
-		color: rgba(0, 0, 0, 0.55);
-	}
-
-	.header-text {
-		font-family: 'Dancing Script', cursive;
-		font-weight: 700;
-		font-style: normal;
-		font-size: xxx-large;
-		color: #62b2b2;
-		text-align: center;
-		text-transform: none;
-		margin: 0;
-	}
-
 	main {
 		position: relative;
 		display: flex;

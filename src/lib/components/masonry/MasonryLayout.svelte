@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
 	import type { ProductsOut } from '$lib/interfaces/product';
 

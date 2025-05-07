@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { marked } from "marked";
-	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 
 	export let data: PageData;
 

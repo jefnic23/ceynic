@@ -67,4 +67,15 @@
 		position: absolute;
 		right: 0;
 	}
+
+	@media (max-width: 768px) {
+        .copyright {
+            flex-direction: column;
+			text-align: center;
+        }
+
+		.copyright > div:not(:last-child)::after {
+			content: '';
+		}
+    }
 </style>

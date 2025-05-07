@@ -45,11 +45,4 @@
     .price {
         font-weight: 500;
     }
-
-    @media only screen and (max-width: 590px) and (min-width: 491px) {
-        .image {
-            width: 175px;
-            height: 175px;
-        }
-	}
 </style>

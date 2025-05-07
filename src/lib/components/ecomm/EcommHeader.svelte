@@ -3,6 +3,7 @@
 	import Header from "$lib/components/shared/Header.svelte";
 	import { onDestroy, onMount } from "svelte";
 	import Hamburger from "../Hamburger.svelte";
+	import { slide } from "svelte/transition";
 
     export let url: URL;
     export let name: string = "";
@@ -185,7 +186,7 @@
 		flex-direction: column;
 		overflow: hidden;
 		max-height: 0;
-		transition: max-height 0.3s linear;
+		transition: max-height 377ms ease-in-out 210ms;
 		background-color: #f8f8f8;
 		border-bottom: 1px solid #e7e7e7;
 		position: absolute;
@@ -204,16 +205,6 @@
 	nav.mobile-menu.open {
 		max-height: 500px; /* large enough to fit all items */
 		opacity: 1;
-	}
-
-	nav.mobile-menu::before {
-		content: '';
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0,0,0,0.3);
-		z-index: -1;  /* behind the menu */
+		transition: max-height 377ms ease-in-out;
 	}
 </style>

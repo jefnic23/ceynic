@@ -118,6 +118,8 @@
 	}
 
 	async function handleFilter() {
+		if (isMobile) toggleSidebar();
+
 		const url = new URL(window.location.href);
 
 		if (mediumsChanged) {
@@ -138,6 +140,7 @@
 	}
 
 	async function handleClear() {
+		if (isMobile) toggleSidebar();
 		if ($page.url.searchParams.size === 0 && !filterApplied) return;
 		mediums = [];
 		await loadPriceRange();

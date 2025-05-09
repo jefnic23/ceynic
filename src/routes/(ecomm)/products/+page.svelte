@@ -11,7 +11,7 @@
 	import type { SizeRanges } from '$lib/interfaces/sizeRanges';
 	import type { PriceRange } from '$lib/interfaces/priceRange';
 	import ProductCard from '$lib/components/ProductCard.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Filter from '$lib/icons/Filter.svelte';
 	import type { MediumCount } from '$lib/interfaces/mediumCount';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
@@ -21,6 +21,14 @@
 	let isMobile = false;
 	let showFilters = false;
 
+	$: {
+		if (showFilters) {
+			document.body.classList.add('no-scroll');
+		} else {
+			document.body.classList.remove('no-scroll');
+		}
+	}
+
 	onMount(() => {
 		const checkMobile = () => {
 			isMobile = window.matchMedia("(max-width: 974px)").matches;
@@ -29,6 +37,10 @@
 		checkMobile();
 		window.addEventListener("resize", checkMobile);
 		return () => window.removeEventListener("resize", checkMobile);
+	});
+
+	onDestroy(() => {
+		document.body.classList.remove('no-scroll');
 	});
 
 	function toggleSidebar() {
@@ -140,6 +152,10 @@
 		await goto('products', { replaceState: true, keepFocus: true });
 	}
 </script>
+
+{#if isMobile && showFilters}
+    <div class="backdrop" on:click={toggleSidebar}></div>
+{/if}
 
 <div class="container">
 	<aside 
@@ -303,7 +319,7 @@
 			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
 		</div>
 	</aside>
-	<div class="column products" class:is-blurred={isMobile && showFilters}>
+	<div class="column products">
 		{#await data.products}
 			<div class="product-grid">
 				<Skeleton />
@@ -356,13 +372,6 @@
 		z-index: 1000;
 	}
 
-	  /* Desktop: always visible */
-	.filters:not(.is-mobile) {
-		transform: translateX(0);
-		position: relative;
-		float: left;
-	}
-
 	.row {
 		display: flex;
 		flex-direction: row;
@@ -375,26 +384,6 @@
 		flex-direction: column;
 		width: 100%;
 		height: 100%;
-	}
-
-	/* Mobile: hidden by default */
-	.is-mobile {
-		transform: translateX(-250%);
-	}
-
-	/* When open */
-	.is-mobile.open {
-		transform: translateX(0);
-		background-color: #fff;
-		backdrop-filter: blur(10px);
-		left: 0;
-		top: 0;
-		padding: 1rem;
-	}
-
-	.is-blurred {
-		filter: blur(4px);
-		pointer-events: none; /* Optional: prevent interaction when blurred */
 	}
 
 	.filter-buttons {
@@ -445,6 +434,19 @@
 
 		aside.open {
 			transform: translateX(0);
+			z-index: 99999;
+		}
+
+		.backdrop {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0,0,0,0.4);
+			filter: blur(4px);
+			pointer-events: auto;
+			z-index: 9999;
 		}
 	}
 

@@ -438,6 +438,7 @@
 		aside.open {
 			transform: translateX(0);
 			z-index: 99999;
+			overflow-y: scroll;
 		}
 
 		.backdrop {

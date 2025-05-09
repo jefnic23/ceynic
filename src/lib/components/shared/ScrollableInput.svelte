@@ -91,7 +91,7 @@
         max={max}
         step="1"
         bind:value={value}
-        on:input={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+        on:blur={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
         on:wheel={(e) => handleWheel(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
     />
 </div>

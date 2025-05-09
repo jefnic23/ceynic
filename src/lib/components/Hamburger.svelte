@@ -2,7 +2,7 @@
     export let open: boolean = false;
 </script>
 
-<button class="hamburger-button" class:open on:click={() => open = !open}>
+<button class:open on:click={() => open = !open}>
     <span></span>
     <span></span>
     <span></span>
@@ -10,9 +10,9 @@
 </button>
 
 <style>
-    .hamburger-button {
-        width: 34px;
-        height: 21px;
+    button {
+        width: 21px;
+        height: 13px;
         position: relative;
         -webkit-transform: rotate(0deg);
         -moz-transform: rotate(0deg);
@@ -27,10 +27,10 @@
         border: none;
 	}
 
-	.hamburger-button span {
+	button span {
 		display: block;
         position: absolute;
-        height: 5px;
+        height: 3px;
         width: 100%;
         background: #666;
         border-radius: 5px;
@@ -46,40 +46,40 @@
         transition: .25s ease-in-out;
 	}
 
-	.hamburger-button span:nth-child(1) {
+	button span:nth-child(1) {
         top: 0px;
     }
 
-    .hamburger-button span:nth-child(2),.hamburger-button span:nth-child(3) {
-        top: 10px;
+    button span:nth-child(2),button span:nth-child(3) {
+        top: 8px;
     }
 
-    .hamburger-button span:nth-child(4) {
-        top: 20px;
+    button span:nth-child(4) {
+        top: 16px;
     }
 
-    .hamburger-button.open span:nth-child(1) {
-        top: 10px;
+    button.open span:nth-child(1) {
+        top: 8px;
         width: 0%;
         left: 50%;
     }
 
-    .hamburger-button.open span:nth-child(2) {
+    button.open span:nth-child(2) {
         -webkit-transform: rotate(45deg);
         -moz-transform: rotate(45deg);
         -o-transform: rotate(45deg);
         transform: rotate(45deg);
     }
 
-    .hamburger-button.open span:nth-child(3) {
+    button.open span:nth-child(3) {
         -webkit-transform: rotate(-45deg);
         -moz-transform: rotate(-45deg);
         -o-transform: rotate(-45deg);
         transform: rotate(-45deg);
     }
 
-    .hamburger-button.open span:nth-child(4) {
-        top: 10px;
+    button.open span:nth-child(4) {
+        top: 8px;
         width: 0%;
         left: 50%;
     }

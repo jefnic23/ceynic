@@ -23,17 +23,18 @@
 
     .product{
         width: min-content;
+        margin: auto;
     }
 
     .image {
-		width: 225px;
-		height: 225px;
+		width: 256px;
+		height: 256px;
 		object-fit: cover;
 	}
 
     .title {
 		width: 100%;
-		max-width: 225px;
+		max-width: 256px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		display: inline-block;
@@ -45,4 +46,11 @@
     .price {
         font-weight: 500;
     }
+
+    @media only screen and (max-width: 400px) {
+		.image {
+			width: 225px;
+            height: 225px;
+		}
+	}
 </style>

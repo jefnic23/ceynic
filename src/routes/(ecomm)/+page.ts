@@ -11,7 +11,8 @@ export const load = async ({ fetch }) => {
 
         const responseData: ProductsOut[] = await response.json();
 
-        return responseData;
+        // only show paintings on home page
+        return responseData.filter(product => product.mediumId === 1);
     }
 
     return {

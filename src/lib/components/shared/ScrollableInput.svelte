@@ -1,0 +1,157 @@
+<script lang="ts">
+    export let value: number;
+    export let relatedValue: number;
+    export let isChanged: boolean;
+    export let isMinimum: boolean;
+
+    export let id: string = "";
+	export let label: string = "";
+	export let min: number | null;
+	export let max: number | null;
+
+    export let className: "price" | "size" | "" = "";
+
+    function handleInput(
+        event: Event,
+		setValue: (newValue: number) => void,
+		setFlag: (newFlag: boolean) => void,
+		relatedValue?: number,
+		isMin?: boolean
+    ): void {
+        const input = event.target as HTMLInputElement;
+        
+        let newValue = Number(input.value);
+
+        const min = Number(input.min) || -Infinity;
+        const max = Number(input.max) || Infinity;
+
+        // Clamp between min/max
+        newValue = Math.max(min, Math.min(max, newValue));
+
+        if (isMin && relatedValue !== undefined) {
+            // If this is a min value, make sure it doesn't exceed max
+            newValue = Math.min(newValue, relatedValue);
+        } else if (!isMin && relatedValue !== undefined) {
+            // If this is a max value, make sure it doesn't go below min
+            newValue = Math.max(newValue, relatedValue);
+        }
+
+        // Update the bound value
+        setValue(newValue);
+
+        // Mark the value as updated
+        setFlag(true);
+    }
+
+    function handleWheel(
+		event: WheelEvent,
+		setValue: (newValue: number) => void,
+		setFlag: (newFlag: boolean) => void,
+		relatedValue?: number,
+		isMin?: boolean
+	): void {
+		const input = event.target as HTMLInputElement;
+
+		if (document.activeElement === input) {
+			event.preventDefault(); // Prevent page scrolling behavior
+
+			const step = Number(input.step) || 1;
+			const min = Number(input.min) || -Infinity;
+			const max = Number(input.max) || Infinity;
+
+			// Determine new value based on scroll direction
+			let newValue = Number(input.value) + (event.deltaY < 0 ? step : -step);
+
+			// Clamp the value between min and max
+			newValue = Math.max(min, Math.min(max, newValue));
+
+			if (isMin && relatedValue !== undefined) {
+                // If this is a min value, make sure it doesn't exceed max
+                newValue = Math.min(newValue, relatedValue);
+            } else if (!isMin && relatedValue !== undefined) {
+                // If this is a max value, make sure it doesn't go below min
+                newValue = Math.max(newValue, relatedValue);
+            }
+
+			// Update the bound value
+			setValue(newValue);
+
+			// Mark the value as updated
+			setFlag(true);
+		}
+	}
+</script>
+
+<div class="container {className}">
+    <label for={id}>{label}</label>
+    <input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        step="1"
+        bind:value={value}
+        on:input={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+        on:wheel={(e) => handleWheel(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+    />
+</div>
+
+<style>
+	.container {
+		position: relative;
+		display: inline-block;
+		width: 100%;
+	}
+
+	.container label {
+		position: absolute;
+		top: 21%;
+		left: 13px;
+		transform: translateY(-100%);
+		background: white;
+		padding: 0 5px;
+		font-size: 0.8em;
+		transition: all 0.2s ease;
+	}
+
+	.container input {
+		width: 100%;
+		padding: 10px;
+		font-size: 1em;
+		box-sizing: border-box;
+	}
+
+	.container input:focus + label,
+	.container input:not(:placeholder-shown) + label {
+		top: -10px;
+		font-size: 0.7em;
+		color: #007bff;
+	}
+
+    .price input {
+		padding-left: 1rem; /* Add space for the dollar sign */
+	}
+
+    .price::before {
+		content: '$';
+		position: absolute;
+		left: 0.5em; /* Adjust positioning as needed */
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 1em;
+		font-weight: bold;
+		color: #333; /* Adjust color as needed */
+	}
+
+	.size::after {
+		content: 'in.';
+		position: absolute;
+		right: 2rem; /* Adjust positioning as needed */
+		top: 50%;
+		transform: translateY(-50%);
+		line-height: normal;
+		font-size: 1em;
+		font-weight: bold;
+		color: #333; /* Adjust color as needed */
+	}
+</style>

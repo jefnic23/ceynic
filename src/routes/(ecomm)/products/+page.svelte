@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -13,6 +14,7 @@
 	import { onMount } from 'svelte';
 	import Filter from '$lib/icons/Filter.svelte';
 	import type { MediumCount } from '$lib/interfaces/mediumCount';
+	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
 
 	export let data: PageData;
 
@@ -21,7 +23,7 @@
 
 	onMount(() => {
 		const checkMobile = () => {
-			isMobile = window.matchMedia("(max-width: 856px)").matches;
+			isMobile = window.matchMedia("(max-width: 974px)").matches;
 		};
 
 		checkMobile();
@@ -50,6 +52,7 @@
 	let maxWidthChanged: boolean = false;
 	let minHeightChanged: boolean = false;
 	let maxHeightChanged: boolean = false;
+	$: filterApplied = mediumsChanged || minPriceChanged || maxPriceChanged || minWidthChanged || maxWidthChanged || minHeightChanged || maxHeightChanged;
 
 	let mediums: string[] = $page.url.searchParams.getAll('medium') || [];
 
@@ -123,7 +126,7 @@
 	}
 
 	async function handleClear() {
-		if ($page.url.searchParams.size === 0) return;
+		if ($page.url.searchParams.size === 0 && !filterApplied) return;
 		mediums = [];
 		await loadPriceRange();
 		await loadSizeRanges();
@@ -136,63 +139,36 @@
 		maxHeightChanged = false;
 		await goto('products', { replaceState: true, keepFocus: true });
 	}
-
-	function handleWheel(
-		event: WheelEvent,
-		value: number,
-		setValue: (newValue: number) => void,
-		setFlag: (newFlag: boolean) => void,
-		relatedValue?: number,
-		isMin?: boolean,
-	): void {
-		const input = event.target as HTMLInputElement;
-
-		if (document.activeElement === input) {
-			event.preventDefault(); // Prevent page scrolling behavior
-
-			const step = Number(input.step) || 1;
-			const min = Number(input.min) || -Infinity;
-			const max = Number(input.max) || Infinity;
-
-			// Determine new value based on scroll direction
-			let newValue = value + (event.deltaY < 0 ? step : -step);
-
-			// Clamp the value between min and max
-			newValue = Math.max(min, Math.min(max, newValue));
-
-			// If this is a min value, make sure it doesn't exceed max
-			if (isMin && relatedValue !== undefined) {
-				newValue = Math.min(newValue, relatedValue);
-			}
-
-			// If this is a max value, make sure it doesn't go below min
-			if (!isMin && relatedValue !== undefined) {
-				newValue = Math.max(newValue, relatedValue);
-			}
-
-			// Update the bound value
-			setValue(newValue);
-
-			// Mark the value as updated
-			setFlag(true);
-		}
-	}
 </script>
 
-<div class="row gap justify-center">
-	<aside class="column filters" class:is-mobile={isMobile} class:open={showFilters}>
+<div class="container">
+	<aside 
+		class="column filters" 
+		class:is-mobile={isMobile} 
+		class:open={showFilters}
+		transition:slide="{{ duration: 377 }}"
+	>
 		<div class="row">
 			{#if isMobile && showFilters}
 				<div class="column">
 					Filter
 				</div>
 				<div class="column">
-					<button on:click={toggleSidebar}>Close</button>
+					<button  class="close-button" on:click={toggleSidebar}>&times;</button>
 				</div>
 			{:else}
-				Filter
+				<div class="column">
+					Filter
+				</div>
 			{/if}
 		</div>
+		{#if isMobile}
+			<div class="row" style:margin-top="1.33em">
+				<div class="column">
+					<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+				</div>
+			</div>
+		{/if}
 		<div class="row">
 			<div class="column">
 				{#await mediumCountsPromise}
@@ -226,32 +202,28 @@
 						<h4>Price</h4>
 					</div>
 					<div class="row">
-						<div class="input-container price">
-							<label for="minimum">Min</label>
-							<input
-								id="minimum"
-								type="number"
-								min={priceRange?.minimum}
-								max={priceRange?.maximum}
-								step="1"
-								bind:value={minPrice}
-								on:change={() => minPriceChanged = true}
-								on:wheel={(e) => handleWheel(e, minPrice, (newValue) => minPrice = newValue, (newFlag) => minPriceChanged = newFlag, maxPrice, true)}
-							/>
-						</div>
-						<div class="input-container price">
-							<label for="maximum">Max</label>
-							<input
-								id="maximum"
-								type="number"
-								min={priceRange?.minimum}
-								max={priceRange?.maximum}
-								step="1"
-								bind:value={maxPrice}
-								on:change={() => maxPriceChanged = true}
-								on:wheel={(e) => handleWheel(e, maxPrice, (newValue) => maxPrice = newValue, (newFlag) => maxPriceChanged = newFlag, minPrice, false)}
-							/>
-						</div>
+						<ScrollableInput
+							bind:value={minPrice}
+							bind:relatedValue={maxPrice}
+							bind:isChanged={minPriceChanged}
+							isMinimum={true}
+							id={"minPrice"}
+							label={"Min"}
+							min={priceRange?.minimum}
+							max={priceRange?.maximum}
+							className={"price"}
+						/>
+						<ScrollableInput
+							bind:value={maxPrice}
+							bind:relatedValue={minPrice}
+							bind:isChanged={maxPriceChanged}
+							isMinimum={false}
+							id={"maxPrice"}
+							label={"Max"}
+							min={priceRange?.minimum}
+							max={priceRange?.maximum}
+							className={"price"}
+						/>
 					</div>
 				{/await}
 			</div>
@@ -267,32 +239,28 @@
 								<h4>Width</h4>
 							</div>
 							<div class="row">
-								<div class="input-container size">
-									<label for="minWidth">Min</label>
-									<input
-										id="minWidth"
-										type="number"
-										min={sizeRanges?.widthMinimum}
-										max={sizeRanges?.widthMaximum}
-										step="1"
-										bind:value={minWidth}
-										on:change={() => minWidthChanged = true}
-										on:wheel={(e) => handleWheel(e, minWidth, (newValue) => minWidth = newValue, (newFlag) => minWidthChanged = newFlag, maxWidth, true)}
-									/>
-								</div>
-								<div class="input-container size">
-									<label for="maxWidth">Max</label>
-									<input
-										id="maxWidth"
-										type="number"
-										min={sizeRanges?.widthMinimum}
-										max={sizeRanges?.widthMaximum}
-										step="1"
-										bind:value={maxWidth}
-										on:change={() => maxWidthChanged = true}
-										on:wheel={(e) => handleWheel(e, maxWidth, (newValue) => maxWidth = newValue, (newFlag) => maxWidthChanged = newFlag, minWidth, false)}
-									/>
-								</div>
+								<ScrollableInput
+									bind:value={minWidth}
+									bind:relatedValue={maxWidth}
+									bind:isChanged={minWidthChanged}
+									isMinimum={true}
+									id={"minWidth"}
+									label={"Min"}
+									min={sizeRanges?.widthMinimum}
+									max={sizeRanges?.widthMaximum}
+									className={"size"}
+								/>
+								<ScrollableInput
+									bind:value={maxWidth}
+									bind:relatedValue={minWidth}
+									bind:isChanged={maxWidthChanged}
+									isMinimum={false}
+									id={"maxWidth"}
+									label={"Max"}
+									min={sizeRanges?.widthMinimum}
+									max={sizeRanges?.widthMaximum}
+									className={"size"}
+								/>
 							</div>
 						</div>
 					</div>
@@ -302,39 +270,35 @@
 								<h4>Height</h4>
 							</div>
 							<div class="row">
-								<div class="input-container size">
-									<label for="minHeight">Min</label>
-									<input
-										id="minHeight"
-										type="number"
-										min={sizeRanges?.heightMinimum}
-										max={sizeRanges?.heightMaximum}
-										step="1"
-										bind:value={minHeight}
-										on:change={() => minHeightChanged = true}
-										on:wheel={(e) => handleWheel(e, minHeight, (newValue) => minHeight = newValue, (newFlag) => minHeightChanged = newFlag, maxHeight, true)}
-									/>
-								</div>
-								<div class="input-container size">
-									<label for="maxHeight">Max</label>
-									<input
-										id="maxHeight"
-										type="number"
-										min={sizeRanges?.heightMinimum}
-										max={sizeRanges?.heightMaximum}
-										step="1"
-										bind:value={maxHeight}
-										on:change={() => maxHeightChanged = true}
-										on:wheel={(e) => handleWheel(e, maxHeight, (newValue) => maxHeight = newValue, (newFlag) => maxHeightChanged = newFlag, minHeight, false)}
-									/>
-								</div>
+								<ScrollableInput
+									bind:value={minHeight}
+									bind:relatedValue={maxHeight}
+									bind:isChanged={minHeightChanged}
+									isMinimum={true}
+									id={"minHeight"}
+									label={"Min"}
+									min={sizeRanges?.heightMinimum}
+									max={sizeRanges?.heightMaximum}
+									className={"size"}
+								/>
+								<ScrollableInput
+									bind:value={maxHeight}
+									bind:relatedValue={minHeight}
+									bind:isChanged={maxHeightChanged}
+									isMinimum={false}
+									id={"maxHeight"}
+									label={"Max"}
+									min={sizeRanges?.heightMinimum}
+									max={sizeRanges?.heightMaximum}
+									className={"size"}
+								/>
 							</div>
 						</div>
 					</div>
 				{/await}
 			</div>
 		</div>
-		<div class="row justify-left filter-buttons">
+		<div class="filter-buttons">
 			<Button text={"Filter"} on:click={handleFilter} />
 			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
 		</div>
@@ -345,17 +309,13 @@
 				<Skeleton />
 			</div>
 		{:then products}
-			<div class="row justify-between {isMobile ? "align-center" : ""}">
-				<div class="row justify-start">
-					Results: {products.length}
-				</div>
-				<div class="row justify-end">
-					{#if isMobile}
-						<button on:click={toggleSidebar}><Filter /> Filter & Sort</button>
-					{:else}
-						<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
-					{/if}
-				</div>
+			<div class="row {isMobile ? "align-center" : ""}" style:justify-content={"space-between"}>
+				Results: {products.length}
+				{#if isMobile}
+					<button on:click={toggleSidebar}><Filter /> Filter & Sort</button>
+				{:else}
+					<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+				{/if}
 			</div>
 			<div class="product-grid">
 				{#each products as product}
@@ -371,123 +331,27 @@
 </div>
 
 <style>
-	.row {
-		display: flex;
-		flex-direction: row;
-		width: 100%;
-		column-gap: 1rem;
-	}
-
-	.column {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		width: 100%;
+	.container {
+		display: grid;
+		grid-template-columns: 250px 1fr;
+		gap: 1rem;
+		padding: 1rem;
+		width: 100%; 
+		max-width: 1600px;
 	}
 
 	.products {
-		flex: 1;
-		max-width: 1144px;
+		row-gap: 1rem;
 		transition: filter 0.3s ease;
 	}
 
 	.product-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 25px;
-		justify-content: flex-start;
-		margin-top: 13px;
-	}
-
-	.justify-start {
-		justify-content: flex-start;
-	}
-
-	.justify-end {
-		justify-content: flex-end;
-	}
-
-	.justify-center {
-		justify-content: center;
-	}
-
-	.justify-left {
-		justify-content: left;
-	}
-
-	.justify-between {
-		justify-content: space-between;
-	}
-
-	.align-center {
-		align-items: center;
-	}
-
-	.gap {
-		column-gap: 1rem;
-	}
-
-	.input-container {
-		position: relative;
-		display: inline-block;
-		width: 100%;
-	}
-
-	.input-container label {
-		position: absolute;
-		top: 21%; /* Adjust as needed */
-		left: 13px; /* Adjust for padding */
-		transform: translateY(-100%); /* Moves it upwards */
-		background: white; /* To overlay on input without blending */
-		padding: 0 5px; /* Space around the text */
-		font-size: 0.8em; /* Adjust the size */
-		transition: all 0.2s ease;
-	}
-
-	.input-container input {
-		width: 100%;
-		padding: 10px;
-		font-size: 1em;
-		box-sizing: border-box;
-	}
-
-	.price input {
-		padding-left: 1rem; /* Add space for the dollar sign */
-	}
-
-	.price::before {
-		content: '$';
-		position: absolute;
-		left: 0.5em; /* Adjust positioning as needed */
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 1em;
-		font-weight: bold;
-		color: #333; /* Adjust color as needed */
-	}
-
-	.size::after {
-		content: 'in.';
-		position: absolute;
-		right: 2rem; /* Adjust positioning as needed */
-		top: 50%;
-		transform: translateY(-50%);
-		line-height: normal;
-		font-size: 1em;
-		font-weight: bold;
-		color: #333; /* Adjust color as needed */
-	}
-
-	.input-container input:focus + label,
-	.input-container input:not(:placeholder-shown) + label {
-		top: -10px; /* Move the label further up */
-		font-size: 0.7em; /* Shrink the label */
-		color: #007bff; /* Change color for emphasis */
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(298px, 1fr));
+		gap: 1rem;
 	}
 
 	.filters {
-		max-width: 250px;
-		min-width: 250px;
 		transition: transform 0.3s ease-in-out;
 		z-index: 1000;
 	}
@@ -497,6 +361,20 @@
 		transform: translateX(0);
 		position: relative;
 		float: left;
+	}
+
+	.row {
+		display: flex;
+		flex-direction: row;
+		column-gap: 1rem;
+		width: 100%;
+	}
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
 	}
 
 	/* Mobile: hidden by default */
@@ -523,46 +401,56 @@
 		margin-top: 1.33em;
 	}
 
-	@media only screen and (max-width: 1440px) and (min-width: 1150px) {
-		.products {
-			max-width: 852px;
-		}
+	.close-button {
+		background: none;
+		border: none;
+		font-size: 1.5em;
+		cursor: pointer;
+		color: #333;
+		margin-left: auto;
+		transition:
+			transform 0.2s ease,
+			color 0.2s ease;
 	}
 
-	@media only screen and (max-width: 1149px) and (min-width: 889px) {
-		.products {
-			max-width: 560px;
-		}
+	.close-button:hover {
+		transform: scale(1.2);
+		color: #000;
 	}
 
-	@media only screen and (max-width: 888px) and (min-width: 591px) {
-		.product-grid {
-			justify-content: center;
-		}
-		
-		.products {
-			max-width: 560px;
-			margin: auto;
-		}
-
+	@media only screen and (max-width: 974px) {
 		.filters {
 			position: fixed;
 			z-index: 99999;
 		}
+
+		.container {
+			grid-template-columns: 1fr;
+		}
+
+		aside {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 80%;
+			max-width: 300px;
+			height: 100%;
+			background: white;
+			z-index: 20;
+			padding: 1rem;
+			box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+			transform: translateX(-100%);
+			transition: transform 0.3s ease;
+		}
+
+		aside.open {
+			transform: translateX(0);
+		}
 	}
 
-	@media only screen and (max-width: 590px) {
+	@media only screen and (max-width: 400px) {
 		.product-grid {
-			justify-content: center;
-		}
-		
-		.products {
-			max-width: 100%;
-		}
-
-		.filters {
-			position: fixed;
-			z-index: 99999;
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

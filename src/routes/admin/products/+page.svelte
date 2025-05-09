@@ -103,7 +103,7 @@
 							<td>{currencyFormatter.format(product.price)}</td>
 							<td>{product.height}"</td>
 							<td>{product.width}"</td>
-							<td>{product.medium}</td>
+							<td>{product.mediumId}</td>
 							<td>
 								{#if product.enabled}
 									<Check color={"green"} size={32} />
@@ -160,7 +160,7 @@
 
 					<div class="form-input">
 						<label for="medium">Medium</label>
-						<select id="medium" bind:value={selectedProduct.medium}>
+						<select id="medium" bind:value={selectedProduct.mediumId}>
 							<option value="Painting">Painting</option>
 							<option value="Print">Print</option>
 						</select>

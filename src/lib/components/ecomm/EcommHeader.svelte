@@ -3,7 +3,6 @@
 	import Header from "$lib/components/shared/Header.svelte";
 	import { onDestroy, onMount } from "svelte";
 	import Hamburger from "../Hamburger.svelte";
-	import { slide } from "svelte/transition";
 
     export let url: URL;
     export let name: string = "";
@@ -59,7 +58,7 @@
 				<Hamburger bind:open={open} />
 			</div>
 			<div class="header-center">
-				<a href="/" data-sveltekit-preload-data class="header-text" style:font-size={"x-large"} on:click={() => {if (open) open = !open}}>{name}</a>
+				<a href="/" data-sveltekit-preload-data class="header-text" style:font-size={"xx-large"} on:click={() => {if (open) open = !open}}>{name}</a>
 				<nav class={`mobile-menu ${open ? 'open' : ''}`}>
 					<a href="/" data-sveltekit-preload-data class:active={url.pathname === '/'} on:click={() => open = !open}>Home</a>
 					<a href="/products" data-sveltekit-preload-data class:active={url.pathname.startsWith('/products')} on:click={() => open = !open}>Browse</a>

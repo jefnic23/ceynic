@@ -14,12 +14,6 @@
 	const dispatch = createEventDispatcher();
 
 	function deriveClass(y: number = 0, scrolled: number = 0): string {
-		// if (y <= 0) {
-		// 	headerClass = 'pin';
-		// 	lastHeaderClass = 'pin';
-		// 	lastY = 0;
-		// 	return 'pin';
-		// }
 		if (y <= offset) return 'pin';
 		if (!scrolled || Math.abs(scrolled) < tolerance) return headerClass;
 		return scrolled < 0 ? 'unpin' : 'pin';

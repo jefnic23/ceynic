@@ -4,7 +4,7 @@ interface Product {
     price: number;
     height: number;
     width: number;
-    medium: "Painting" | "Print";
+    mediumId: number;
     thumbnail: string;
     enabled: boolean;
 }

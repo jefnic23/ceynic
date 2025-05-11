@@ -67,7 +67,7 @@
 				</nav>
 			</div>
 			<div class="header-right">
-				<a href="/cart" class:active={url.pathname === '/cart'} on:click={() => {if (open) open = !open}}><Cart size={32} /></a>
+				<!-- <a href="/cart" class:active={url.pathname === '/cart'} on:click={() => {if (open) open = !open}}><Cart size={32} /></a> -->
 			</div>
 		</div>
 	{:else}
@@ -83,7 +83,7 @@
 				</nav>
 			</div>
 			<div class="header-right">
-				<a href="/cart" class:active={url.pathname === '/cart'}><Cart size={32} /></a>
+				<!-- <a href="/cart" class:active={url.pathname === '/cart'}><Cart size={32} /></a> -->
 			</div>
 		</div>
 	{/if}

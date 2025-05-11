@@ -9,10 +9,20 @@ export const load = async ({ fetch }) => {
             console.log("Error retrieving products.");
         }
 
-        const responseData: ProductsOut[] = await response.json();
+        const responseData = await response.json();
 
-        // only show paintings on home page
-        return responseData.filter(product => product.mediumId === 1);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return responseData.map((item: any): ProductsOut => ({
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            height: item.height,
+            width: item.width, 
+            medium: item.mediumId === 1 ? "Painting" : "Print",
+            thumbnail: item.thumbnail,
+            imageUrl: item.imageUrl,
+            enabled: item.enabled
+        })).filter((product: ProductsOut) => product.medium === "Painting");
     }
 
     return {

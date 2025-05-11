@@ -103,7 +103,7 @@
 							<td>{currencyFormatter.format(product.price)}</td>
 							<td>{product.height}"</td>
 							<td>{product.width}"</td>
-							<td>{product.mediumId}</td>
+							<td>{product.medium}</td>
 							<td>
 								{#if product.enabled}
 									<Check color={"green"} size={32} />
@@ -160,7 +160,7 @@
 
 					<div class="form-input">
 						<label for="medium">Medium</label>
-						<select id="medium" bind:value={selectedProduct.mediumId}>
+						<select id="medium" bind:value={selectedProduct.medium}>
 							<option value="Painting">Painting</option>
 							<option value="Print">Print</option>
 						</select>
@@ -236,7 +236,7 @@
 	}
 
 	table {
-		width: 100%;
+		width: 100vw;
 		max-width: 1500px;
 		border-collapse: collapse;
 		text-align: left;
@@ -250,7 +250,7 @@
 	}
 
 	tr {
-		height: 55px;
+		height: fit-content;
 		vertical-align: middle;
 	}
 
@@ -356,20 +356,13 @@
 	}
 
 	.thumbnail img {
-		width: 32px;
-		height: 32px;
-		transition: transform 0.13s ease-in-out;
+		width: 48px;
+		height: 48px;
+		margin: 0.5rem 0;
 	}
 
 	:is(tbody > tr):hover {
 		outline: 2px solid #666;
 		outline-offset: -2px;
-	}
-
-	tr:hover .thumbnail img {
-		transform: scale(5) translateX(-34%);
-		z-index: 10;
-		position: relative;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	}
 </style>

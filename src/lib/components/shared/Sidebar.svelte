@@ -5,7 +5,9 @@
 </script>
 
 <div class="wrapper">
-	<Hamburger bind:open={open} />
+	<div class="hamburger">
+		<Hamburger bind:open={open} />
+	</div>
 
 	<aside class:open>
 		<slot />
@@ -15,23 +17,29 @@
 <style>
     .wrapper {
 		display: flex;
+		flex-direction: column;
 		align-items: flex-start;
 		position: relative;
 		z-index: 9999;
 		height: 100vh;
-		position: fixed;
+		background-color: #f9f9f9;
+		border-right: 1px solid #e0e0e0;
+	}
+
+	.hamburger {
+		padding: 1rem;
+		width: 72px;
+		display: flex;
+		justify-content: center;
 	}
 
 	aside {
 		height: 100%;
 		width: 72px;
 		overflow: hidden;
-		background-color: #f9f9f9;
-		border-right: 1px solid #e0e0e0;
 		transition: width 0.3s ease;
 		display: flex;
 		flex-direction: column;
-		padding-top: 3rem; /* Leave room for the hamburger */
 		align-items: stretch;
 	}
 

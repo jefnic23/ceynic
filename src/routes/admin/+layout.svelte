@@ -26,8 +26,8 @@
 
 <div class="container">
 	<Sidebar>
-		<nav>
-			<div>
+		<div class="sidebar">
+			<nav>
 				<a href="/admin">
 					<Home /> 
 					<span class="label">Home</span>
@@ -48,14 +48,14 @@
 					<Person />
 					<span class="label">Account</span>
 				</a>
-			</div>
+			</nav>
 			<form action="/admin/logout" method="POST" use:enhance>
 				<button type="submit">
 					<Logout /> 
 					<span class="label">Log Out</span>
 				</button>
 			</form>
-		</nav>
+		</div>
 	</Sidebar>
 
 	{#key data.url}
@@ -80,23 +80,24 @@
 		view-transition-name: main;
 	}
 
+	.sidebar {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100%;
+	}
+
 	nav {
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		align-items: flex-start;
-		height: 100%;
 		padding: 1rem;
+		gap: 1rem;
 	}
 
-	nav div {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	nav div a,
-	nav form button {
+	nav a,
+	form button {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -109,18 +110,25 @@
 		padding: 0.5rem;
 		transition: background 0.2s ease, color 0.2s ease;
 		border-radius: 4px;
-		width: 100%;
+		width: fit-content;
 		cursor: pointer;
 		line-height: normal;
+		justify-content: flex-start;
 	}
 
-	nav div a:hover,
-	nav form button:hover {
+	nav a:hover,
+	form button:hover {
 		background-color: #eaeaea;
 		color: #000;
 	}
 
-	nav form {
+	form {
 		margin: 0;
+		padding: 1rem;
+	}
+
+	.label {
+		transition: opacity 0.2s ease;
+		white-space: nowrap;
 	}
 </style>

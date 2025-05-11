@@ -77,7 +77,14 @@
 	on:click={() => fileInput.click()}
 	on:keydown={(e) => e.key === 'Enter' && fileInput.click()}
 >
-	<p>Drag & drop images here, or click to select</p>
+	<div class="instructions">
+		<div>
+			Drag & drop images here, or click to select
+		</div>
+		<div>
+			Click uploaded images to set thumbnail
+		</div>
+	</div>
 	<input
 		type="file"
 		accept="image/*"
@@ -122,6 +129,12 @@
 
 	.dropzone:hover {
 		background-color: #f0f0f0;
+	}
+
+	.instructions {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	.image-preview {

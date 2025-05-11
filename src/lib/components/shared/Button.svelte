@@ -44,6 +44,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		column-gap: 5px;
 		border: none;
 		cursor: pointer;
 		padding: 0.5rem 1.5rem;

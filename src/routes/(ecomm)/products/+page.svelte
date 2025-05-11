@@ -114,7 +114,7 @@
 	async function handleSort(event: CustomEvent) {
 		const url = new URL(window.location.href);
 		url.searchParams.set('sort', event.detail);
-		await goto(url, { replaceState: true, keepFocus: true });
+		if(!isMobile) await goto(url, { replaceState: true, keepFocus: true });
 	}
 
 	async function handleFilter() {
@@ -133,6 +133,7 @@
 		if (maxWidthChanged) url.searchParams.set(ProductFilter.MaxWidth, maxWidth.toString());
 		if (minHeightChanged) url.searchParams.set(ProductFilter.MinHeight, minHeight.toString());
 		if (maxHeightChanged) url.searchParams.set(ProductFilter.MaxHeight, maxHeight.toString());
+		if (sort !== "") url.searchParams.set('sort', sort)
 
 		if (url.searchParams.size === 0)  return;
 
@@ -140,7 +141,10 @@
 	}
 
 	async function handleClear() {
-		if (isMobile) toggleSidebar();
+		if (isMobile) {
+			toggleSidebar();
+			sort = "";
+		};
 		if ($page.url.searchParams.size === 0 && !filterApplied) return;
 		mediums = [];
 		await loadPriceRange();
@@ -173,7 +177,7 @@
 					Filter
 				</div>
 				<div class="column">
-					<button  class="close-button" on:click={toggleSidebar}>&times;</button>
+					<button class="close-button" on:click={toggleSidebar}>&times;</button>
 				</div>
 			{:else}
 				<div class="column">
@@ -331,7 +335,7 @@
 			<div class="row {isMobile ? "align-center" : ""}" style:justify-content={"space-between"}>
 				Results: {products.length}
 				{#if isMobile}
-					<button on:click={toggleSidebar}><Filter /> Filter & Sort</button>
+					<Button text={"Filter & Sort"} style={ButtonStyle.Neutral} on:click={toggleSidebar}><Filter /></Button>
 				{:else}
 					<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
 				{/if}
@@ -408,6 +412,10 @@
 	.close-button:hover {
 		transform: scale(1.2);
 		color: #000;
+	}
+
+	.align-center {
+		align-items: center;
 	}
 
 	@media only screen and (max-width: 974px) {

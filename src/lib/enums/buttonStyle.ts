@@ -2,5 +2,6 @@ export enum ButtonStyle {
     Submit = 'submit',
     Cancel = 'cancel',
     Info = 'info',
-    Warning = 'warning'
+    Warning = 'warning',
+    Neutral = 'neutral'
 }

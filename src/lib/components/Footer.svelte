@@ -1,7 +1,11 @@
 <script lang="ts">
     import Etsy from '$lib/icons/Etsy.svelte';
+	import Facebook from '$lib/icons/Facebook.svelte';
 	import Instagram from '$lib/icons/Instagram.svelte';
+	import LinkedIn from '$lib/icons/LinkedIn.svelte';
 	import Pinterest from '$lib/icons/Pinterest.svelte';
+	import TikTok from '$lib/icons/TikTok.svelte';
+	import Twitter from '$lib/icons/Twitter.svelte';
 	import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink';
 	import type { ComponentType } from 'svelte';
 
@@ -12,9 +16,13 @@
 
 	const iconMap: Record<string, ComponentType> = {
 		etsy: Etsy,
+		facebook: Facebook,
 		instagram: Instagram,
+		linkedin: LinkedIn,
 		pinterest: Pinterest,
-		// todo: add more (tiktok, facebook, twitter, linkedin, etc)
+		tiktok: TikTok,
+		twitter: Twitter
+		// todo: add more
 	}
 </script>
 

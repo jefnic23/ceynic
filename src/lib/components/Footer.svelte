@@ -2,23 +2,29 @@
     import Etsy from '$lib/icons/Etsy.svelte';
 	import Instagram from '$lib/icons/Instagram.svelte';
 	import Pinterest from '$lib/icons/Pinterest.svelte';
+	import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink';
+	import type { ComponentType } from 'svelte';
 
 	export let copyright: string = "";
+	export let socialMediaLinks: SocialMediaLink[] = [];
 
     let year: number = new Date().getFullYear();
+
+	const iconMap: Record<string, ComponentType> = {
+		etsy: Etsy,
+		instagram: Instagram,
+		pinterest: Pinterest,
+		// todo: add more (tiktok, facebook, twitter, linkedin, etc)
+	}
 </script>
 
 <div class="footer">
     <div class="icons">
-        <a href="https://www.etsy.com/shop/TraceyNicholasArt" target="_blank">
-            <Etsy size={32} />
-        </a>
-        <a href="https://www.instagram.com/traceynicholas_art/" target="_blank">
-            <Instagram size={32} />
-        </a>
-        <a href="https://www.pinterest.com/tnicholas48169/" target="_blank">
-            <Pinterest size={32} color={"#E60023"} />
-        </a>
+		{#each socialMediaLinks as { name, url }}
+			<a href={url} target="_blank">
+				<svelte:component this={iconMap[name.toLowerCase()]} size={32} />
+			</a>
+		{/each}
     </div>
     <div class="copyright">
 		<div>

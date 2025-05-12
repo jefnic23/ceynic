@@ -6,6 +6,7 @@
 	import { onNavigate } from '$app/navigation';
 	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
 	import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
+	import type { SocialMediaLink } from "$lib/interfaces/socialMediaLink";
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -28,6 +29,15 @@
 			name = value;
 		});
 	}
+
+	let socialMediaLinkPromise: Promise<SocialMediaLink[]> = data.socialMediaLinks;
+	let socialMediaLinks: SocialMediaLink[] = [];
+
+	$: if (socialMediaLinkPromise) {
+		socialMediaLinkPromise.then((value) => {
+			socialMediaLinks = value;
+		});
+	}
 </script>
 
 <GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
@@ -41,7 +51,7 @@
 		</main>
 	{/key}
 
-	<Footer copyright={name} />
+	<Footer copyright={name} socialMediaLinks={socialMediaLinks} />
 </div>
 
 <style>

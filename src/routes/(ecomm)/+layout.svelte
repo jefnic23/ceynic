@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { PUBLIC_MEASUREMENT_ID } from "$env/static/public";
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 	import Footer from '$lib/components/Footer.svelte';
 	import { onNavigate } from '$app/navigation';
 	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
+	import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -28,9 +30,7 @@
 	}
 </script>
 
-<svelte:head>
-	<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
-</svelte:head>
+<GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
 
 <div class="wrapper">
 	<EcommHeader url={$page.url} name={name} />

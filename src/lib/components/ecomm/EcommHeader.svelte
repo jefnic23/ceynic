@@ -51,6 +51,10 @@
 	});
 </script>
 
+<svelte:head>
+	<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+</svelte:head>
+
 <Header open={open}>
 	{#if isMobile}
 		<div class="header mobile" class:open bind:this={headerElement}>

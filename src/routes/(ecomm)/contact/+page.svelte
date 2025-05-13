@@ -5,9 +5,14 @@
 	import { applyAction, deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
+
+	let { form }: Props = $props();
 
 	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
 		window.grecaptcha.ready(async () => {
 			const token = await window.grecaptcha.execute(PUBLIC_RECAPTCHA_SITE_KEY, {
 				action: 'submit'
@@ -39,7 +44,7 @@
 
 <div class="wrapper">
 	<h3>Please contact me if you have any questions or comments</h3>
-	<form class="wrapper form" method="POST" on:submit|preventDefault={handleSubmit}>
+	<form class="wrapper form" method="POST" onsubmit={handleSubmit}>
 		{#if form?.success}
 			<div>Thank you for your message!</div>
 		{:else}

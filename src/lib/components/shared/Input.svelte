@@ -1,10 +1,21 @@
 <script lang="ts">
-	export let id: string = '';
-	export let label: string = '';
-	export let type: string = 'text';
-	export let min: number | null;
-	export let max: number | null;
-	export let value: string | number;
+	interface Props {
+		id?: string;
+		label?: string;
+		type?: string;
+		min: number | null;
+		max: number | null;
+		value: string | number;
+	}
+
+	let {
+		id = '',
+		label = '',
+		type = 'text',
+		min,
+		max,
+		value
+	}: Props = $props();
 </script>
 
 <div class="container">

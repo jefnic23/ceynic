@@ -13,12 +13,17 @@
 	import Add from '$lib/icons/Add.svelte';
 	import Check from '$lib/icons/Check.svelte';
 	import Cancel from '$lib/icons/Cancel.svelte';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let showModal: boolean = false;
-	let loadingModal: boolean = false;
-	let selectedProduct: ProductOut;
+	let { data }: Props = $props();
+
+	let showModal: boolean = $state(false);
+	let loadingModal: boolean = $state(false);
+	let selectedProduct: ProductOut = $state()!;
 
 	async function openEditModal(product: ProductsOut) {
 		showModal = true;
@@ -35,13 +40,13 @@
 		const responseData = await response.json();
 
 		selectedProduct = { ...responseData };
-		selectedProduct.images = selectedProduct.images.map(replaceImageUrl);
+		selectedProduct.images = selectedProduct?.images.map(replaceImageUrl);
 		loadingModal = false;
 	}
 
 	function replaceImageUrl(imageUrl: string) {
 		const filename = imageUrl.split('/').at(-1);
-		return `/api/proxy/${selectedProduct.title.replaceAll(' ', '_')}/${filename}`;
+		return `/api/proxy/${selectedProduct?.title.replaceAll(' ', '_')}/${filename}`;
 	}
 
 	const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -77,10 +82,10 @@
 				<Add />
 			</Button>
 		</div>
-		<table>
-			{#await data.products}
-				<div>loading products...</div>
-			{:then products}
+		{#await data.products}
+			<Skeleton />
+		{:then products}
+			<table>
 				<thead>
 					<tr>
 						<th></th>
@@ -122,10 +127,10 @@
 						</tr>
 					{/each}
 				</tbody>
-			{:catch error}
-				<div>Something went wrong: {error.message}</div>
-			{/await}
-		</table>
+			</table>
+		{:catch error}
+			<div>Something went wrong: {error.message}</div>
+		{/await}
 	</Card>
 </div>
 
@@ -141,7 +146,7 @@
 				</div>
 				<div class="form-input">
 					<label for="description">Description</label>
-					<textarea id="description" value={selectedProduct.description} />
+					<textarea id="description" value={selectedProduct.description}></textarea>
 				</div>
 
 				<div class="form-row">
@@ -193,8 +198,8 @@
 				</div>
 
 				<Dropzone
-					on:change={handleImagesChange}
-					on:thumbnailChange={handleThumbnailChange}
+					change={handleImagesChange}
+					thumbnailChange={handleThumbnailChange}
 					previews={selectedProduct.images}
 					thumbnail={selectedProduct.thumbnail}
 				/>

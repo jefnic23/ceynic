@@ -1,10 +1,15 @@
 <script lang="ts">
-	export let content = '';
-	export let position = 'top'; // 'top', 'bottom', 'left', or 'right'
+	interface Props {
+		content?: string;
+		position?: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { content = '', position = 'top', children }: Props = $props();
 </script>
 
 <div class="tooltip-container">
-	<slot></slot>
+	{@render children?.()}
 	<div class="tooltip" data-position={position}>
 		{content}
 	</div>

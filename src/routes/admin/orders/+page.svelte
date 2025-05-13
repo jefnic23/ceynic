@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: `<th>` is invalid inside `<thead>` -->
 <script lang="ts">
 	import AnimatedButton from "$lib/components/shared/AnimatedButton.svelte";
 	import { ButtonStyle } from "$lib/enums/buttonStyle";
@@ -13,10 +14,12 @@
 	{:then orders}
 		<table>
 			<thead>
-				<th>Order ID</th>
-				<th>Create Time</th>
-				<th>Status</th>
-				<th></th>
+				<tr>
+					<th>Order ID</th>
+					<th>Create Time</th>
+					<th>Status</th>
+					<th></th>
+				</tr>
 			</thead>
 			<tbody>
 				{#each orders as order}

@@ -9,8 +9,12 @@
 	import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink';
 	import type { ComponentType } from 'svelte';
 
-	export let copyright: string = "";
-	export let socialMediaLinks: SocialMediaLink[] = [];
+	interface Props {
+		copyright?: string;
+		socialMediaLinks?: SocialMediaLink[];
+	}
+
+	let { copyright = "", socialMediaLinks = [] }: Props = $props();
 
     let year: number = new Date().getFullYear();
 
@@ -29,8 +33,9 @@
 <div class="footer">
     <div class="icons">
 		{#each socialMediaLinks as { name, url }}
+			{@const SvelteComponent = iconMap[name.toLowerCase()]}
 			<a href={url} target="_blank">
-				<svelte:component this={iconMap[name.toLowerCase()]} size={32} />
+				<SvelteComponent size={32} />
 			</a>
 		{/each}
     </div>

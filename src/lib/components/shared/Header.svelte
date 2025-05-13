@@ -1,15 +1,28 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { createEventDispatcher } from 'svelte';
 
-	export let duration = '377ms';
-	export let offset = 0;
-	export let tolerance = 0;
-	export let open: boolean = false;
+	interface Props {
+		duration?: string;
+		offset?: number;
+		tolerance?: number;
+		open?: boolean;
+		children?: import('svelte').Snippet;
+	}
 
-	let headerClass = 'pin';
-	let lastHeaderClass = 'pin';
-	let y = 0;
-	let lastY = 0;
+	let {
+		duration = '377ms',
+		offset = 0,
+		tolerance = 0,
+		open = false,
+		children
+	}: Props = $props();
+
+	let headerClass = $state('pin');
+	let lastHeaderClass = $state('pin');
+	let y = $state(0);
+	let lastY = $state(0);
 
 	const dispatch = createEventDispatcher();
 
@@ -30,7 +43,7 @@
 		node.style.transitionDuration = duration;
 	}
 
-	$: {
+	run(() => {
 		if (!open) {
 			headerClass = updateClass(y);
 			if (headerClass !== lastHeaderClass) {
@@ -40,13 +53,13 @@
 		} else {
 			lastY = y;
 		}
-	}
+	});
 </script>
 
 <svelte:window bind:scrollY={y} />
 
 <div use:action class={headerClass}>
-	<slot />
+	{@render children?.()}
 </div>
 
 <style>

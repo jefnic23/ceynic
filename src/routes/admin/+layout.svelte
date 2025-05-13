@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from "svelte";
 	import { enhance } from "$app/forms";
     import Home from '$lib/icons/Home.svelte';
 	import Listing from '$lib/icons/Listing.svelte';
@@ -21,7 +22,12 @@
 		});
 	});
 	
-	export let data: LayoutData;
+	interface Props {
+		data: LayoutData;
+		children?: Snippet;
+	}
+
+	let { data, children }: Props = $props();
 </script>
 
 <div class="container">
@@ -60,7 +66,7 @@
 
 	{#key data.url}
 		<main>
-			<slot />
+			{@render children?.()}
 		</main>
 	{/key}
 </div>

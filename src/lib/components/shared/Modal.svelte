@@ -1,26 +1,45 @@
 <script lang="ts">
-	export let showModal: boolean;
-	export let showClose: boolean = true;
-	export let type: 'info' | 'success' | 'warning' | 'error' = 'info';
-	export let title: string;
+	import type { Snippet } from 'svelte';
 
-	let dialog: HTMLDialogElement;
+	interface Props {
+		showModal: boolean;
+		showClose?: boolean;
+		type?: 'info' | 'success' | 'warning' | 'error';
+		title: string;
+		children?: Snippet;
+	}
 
-	$: if (dialog && showModal) dialog.showModal();
+	let {
+		showModal = $bindable(),
+		showClose = true,
+		type = 'info',
+		title,
+		children
+	}: Props = $props();
+
+	let dialog: HTMLDialogElement | undefined = $state();
+
+	$effect(() => {
+		if (dialog && showModal) dialog.showModal();
+	});
+
+	function handleClick(event: Event) {
+		event.stopPropagation();
+	}
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={dialog} on:close={() => (showModal = false)} class={type}>
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div on:click|stopPropagation>
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+<dialog bind:this={dialog} onclose={() => (showModal = false)} class={type}>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div onclick={handleClick}>
 		<div class="header {showClose ? 'justify-between' : 'justify-center'}">
 			<h2>{title}</h2>
-			<!-- svelte-ignore a11y-autofocus -->
+			<!-- svelte-ignore a11y_autofocus -->
 			{#if showClose}
-				<button class="close-button" autofocus on:click={() => dialog.close()}>&times;</button>
+				<button class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
 			{/if}
 		</div>
-		<slot />
+		{@render children?.()}
 	</div>
 </dialog>
 

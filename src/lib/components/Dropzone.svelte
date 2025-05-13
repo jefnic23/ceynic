@@ -1,15 +1,32 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
 
-	export let previews: string[];
-	export let thumbnail: string | null;
+	interface Props {
+		change: CallableFunction,
+		thumbnailChange: CallableFunction,
+		previews: string[];
+		thumbnail: string | null;
+	}
 
-	const dispatch = createEventDispatcher();
-	let files: File[] = [];
+	let { 
+		change,
+		thumbnailChange,
+		previews, 
+		thumbnail = $bindable() 
+	}: Props = $props();
 
-	$: if (!thumbnail && files.length > 0) {
-		thumbnail = files[0].name;
+	let files: File[] = $state([]);
+
+	$effect(() => {
+		if (!thumbnail && files.length > 0) {
+			thumbnail = files[0].name;
+		}
+	});
+
+	function handleDragover(event: DragEvent) {
+		event.preventDefault();
+		const dragoverEvent = new CustomEvent('dragover', { bubbles: true });
+		event.currentTarget?.dispatchEvent(dragoverEvent);
 	}
 
 	// Triggered when images are dropped into the dropzone
@@ -20,7 +37,7 @@
 				file.type.startsWith('image/')
 			);
 			files = [...files, ...newFiles];
-			dispatch('change', { files });
+			change(files);
 		}
 	}
 
@@ -30,20 +47,20 @@
 		const selectedFiles = target.files ? Array.from(target.files) : [];
 		const newFiles = selectedFiles.filter((file) => file.type.startsWith('image/'));
 		files = [...files, ...newFiles];
-		dispatch('change', { files });
+		change(files);
 	}
 
 	// Removes a selected image from the list
 	function removeImage(index: number, event: MouseEvent) {
 		event.stopPropagation(); // Prevents triggering the dropzone click event
 		files = files.filter((_, i) => i !== index);
-		dispatch('change', { files });
+		change(files);
 	}
 
 	function selectThumbnail(filename: string, event: MouseEvent | KeyboardEvent) {
 		event.stopPropagation(); // Prevents triggering the dropzone click event
 		thumbnail = filename;
-		dispatch('thumbnailChange', { thumbnail });
+		thumbnailChange(thumbnail);
 	}
 
 	async function createFileFromImage(imageUrl: string) {
@@ -54,7 +71,7 @@
 		return file;
 	}
 
-	let fileInput: HTMLInputElement;
+	let fileInput: HTMLInputElement = $state()!;
 
 	onMount(async () => {
 		if (previews.length > 0) {
@@ -72,10 +89,10 @@
 	role="button"
 	aria-label="Image upload dropzone. Click or press Enter to upload images."
 	tabindex="0"
-	on:dragover|preventDefault
-	on:drop={handleDrop}
-	on:click={() => fileInput.click()}
-	on:keydown={(e) => e.key === 'Enter' && fileInput.click()}
+	ondragover={handleDragover}
+	ondrop={handleDrop}
+	onclick={() => fileInput.click()}
+	onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
 >
 	<div class="instructions">
 		<div>
@@ -90,7 +107,7 @@
 		accept="image/*"
 		multiple
 		bind:this={fileInput}
-		on:change={handleSelect}
+		onchange={handleSelect}
 		style="display: none;"
 	/>
 	<div class="image-preview">
@@ -101,14 +118,14 @@
 				aria-label="Click an image to make it the product thumbnail."
 				aria-pressed={thumbnail === file.name}
 				tabindex="0"
-				on:click={(e) => selectThumbnail(file.name, e)}
-				on:keydown={(e) => e.key === 'Enter' && selectThumbnail(file.name, e)}
+				onclick={(e) => selectThumbnail(file.name, e)}
+				onkeydown={(e) => e.key === 'Enter' && selectThumbnail(file.name, e)}
 			>
 				<img src={URL.createObjectURL(file)} alt="Preview" class="image" />
 				{#if thumbnail === file.name}
 					<span class="thumbnail-indicator">Thumbnail</span>
 				{/if}
-				<button class="remove-btn" aria-label="Remove image" on:click={(e) => removeImage(index, e)}
+				<button class="remove-btn" aria-label="Remove image" onclick={(e) => removeImage(index, e)}
 					>&times;</button
 				>
 			</div>

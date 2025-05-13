@@ -4,12 +4,16 @@
 	import { onDestroy, onMount } from "svelte";
 	import Hamburger from "../Hamburger.svelte";
 
-    export let url: URL;
-    export let name: string = "";
+	interface Props {
+		url: URL;
+		name?: string;
+	}
 
-	let open = false;
-	let isMobile = false;
-	let headerElement: HTMLElement;
+	let { url, name = "" }: Props = $props();
+
+	let open = $state(false);
+	let isMobile = $state(false);
+	let headerElement: HTMLElement | undefined = $state();
 
 	function updateBodyClass() {
         if (open) {
@@ -19,9 +23,11 @@
         }
     }
 
-	$: if (typeof window !== 'undefined') {
-        updateBodyClass();
-    }
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			updateBodyClass();
+		}
+	});
 
 	function checkIsMobile() {
         isMobile = window.innerWidth <= 768;
@@ -62,12 +68,12 @@
 				<Hamburger bind:open={open} />
 			</div>
 			<div class="header-center">
-				<a href="/" data-sveltekit-preload-data class="header-text" style:font-size={"xx-large"} on:click={() => {if (open) open = !open}}>{name}</a>
+				<a href="/" data-sveltekit-preload-data class="header-text" style:font-size={"xx-large"} onclick={() => {if (open) open = !open}}>{name}</a>
 				<nav class={`mobile-menu ${open ? 'open' : ''}`}>
-					<a href="/" data-sveltekit-preload-data class:active={url.pathname === '/'} on:click={() => open = !open}>Home</a>
-					<a href="/products" data-sveltekit-preload-data class:active={url.pathname.startsWith('/products')} on:click={() => open = !open}>Browse</a>
-					<a href="/about" data-sveltekit-preload-data class:active={url.pathname === '/about'} on:click={() => open = !open}>About</a>
-					<a href="/contact" class:active={url.pathname === '/contact'} on:click={() => open = !open}>Contact</a>
+					<a href="/" data-sveltekit-preload-data class:active={url.pathname === '/'} onclick={() => open = !open}>Home</a>
+					<a href="/products" data-sveltekit-preload-data class:active={url.pathname.startsWith('/products')} onclick={() => open = !open}>Browse</a>
+					<a href="/about" data-sveltekit-preload-data class:active={url.pathname === '/about'} onclick={() => open = !open}>About</a>
+					<a href="/contact" class:active={url.pathname === '/contact'} onclick={() => open = !open}>Contact</a>
 				</nav>
 			</div>
 			<div class="header-right">

@@ -1,7 +1,12 @@
 <script lang="ts">
 	import Hamburger from "$lib/components/Hamburger.svelte";
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
 
-    let open: boolean = false;
+	let { children }: Props = $props();
+
+    let open: boolean = $state(false);
 </script>
 
 <div class="wrapper">
@@ -10,7 +15,7 @@
 	</div>
 
 	<aside class:open>
-		<slot />
+		{@render children?.()}
 	</aside>
 </div>
 

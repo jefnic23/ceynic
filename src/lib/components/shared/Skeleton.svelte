@@ -1,6 +1,10 @@
 <script lang="ts">
-	export let className: string = '';
-	export let style: string = '';
+	interface Props {
+		className?: string;
+		style?: string;
+	}
+
+	let { className = '', style = '' }: Props = $props();
 </script>
 
 <div class={`skeleton-box ${className}`} style={style}></div>

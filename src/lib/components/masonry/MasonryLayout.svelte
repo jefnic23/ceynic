@@ -3,8 +3,12 @@
 	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
 	import type { ProductsOut } from '$lib/interfaces/product';
 
-	export let products: ProductsOut[] = [];
-	let loadedImages = new Set<number>();
+	interface Props {
+		products?: ProductsOut[];
+	}
+
+	let { products = [] }: Props = $props();
+	let loadedImages = $state(new Set<number>());
 
 	function handleImageLoad (id: number) {
 		loadedImages.add(id);

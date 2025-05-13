@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: `<th>` is invalid inside `<thead>` -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import AnimatedButton from '$lib/components/shared/AnimatedButton.svelte';
@@ -37,8 +38,10 @@
 		<Card>
 			<table>
 				<thead>
-					<th>Product Description</th>
-					<th>Amount</th>
+					<tr>
+						<th>Product Description</th>
+						<th>Amount</th>
+					</tr>
 				</thead>
 				<tbody>
 					{#each order.purchaseUnits as purchaseUnit}

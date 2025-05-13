@@ -3,15 +3,31 @@
 	import { ButtonSize } from '$lib/enums/buttonSize';
 	import { createEventDispatcher } from 'svelte';
 
-	export let text: string = "";
-	export let name: string = "";
-	export let value: string = "";
-	export let style: ButtonStyle = ButtonStyle.Submit;
-	export let size: ButtonSize = ButtonSize.Medium;
-	export let disabled: boolean = false;
-	export let loading: boolean = false;
-	export let fullWidth: boolean = false;
-	export let tooltip: string | null = null;
+	interface Props {
+		text?: string;
+		name?: string;
+		value?: string;
+		style?: ButtonStyle;
+		size?: ButtonSize;
+		disabled?: boolean;
+		loading?: boolean;
+		fullWidth?: boolean;
+		tooltip?: string | null;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		text = "",
+		name = "",
+		value = "",
+		style = ButtonStyle.Submit,
+		size = ButtonSize.Medium,
+		disabled = false,
+		loading = false,
+		fullWidth = false,
+		tooltip = null,
+		children
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -24,7 +40,7 @@
 
 <button
 	class="base-button {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
-	on:click={handleClick}
+	onclick={handleClick}
 	{disabled}
 	title={tooltip}
 	name={name}
@@ -35,7 +51,7 @@
 		<span class="spinner"></span>
 	{:else}
 		{text}
-		<slot />
+		{@render children?.()}
 	{/if}
 </button>
 

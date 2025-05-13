@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { slide } from 'svelte/transition';
 	import type { PageData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
@@ -16,18 +18,22 @@
 	import type { MediumCount } from '$lib/interfaces/mediumCount';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let isMobile = false;
-	let showFilters = false;
+	let { data }: Props = $props();
 
-	$: {
+	let isMobile = $state(false);
+	let showFilters = $state(false);
+
+	run(() => {
 		if (showFilters) {
 			document.body.classList.add('no-scroll');
 		} else {
 			document.body.classList.remove('no-scroll');
 		}
-	}
+	});
 
 	onMount(() => {
 		const checkMobile = () => {
@@ -47,7 +53,7 @@
 		showFilters = !showFilters;
 	}
 
-	let sort: string = '';
+	let sort: string = $state('');
 	const sortOptions = [
 		{ value: 'newest', label: 'Newest' },
 		{ value: 'oldest', label: 'Oldest' },
@@ -57,16 +63,16 @@
 		{ value: 'size_desc', label: 'Largest' }
 	];
 	
-	let mediumsChanged: boolean = false;
-	let minPriceChanged: boolean = false;
-	let maxPriceChanged: boolean = false;
-	let minWidthChanged: boolean = false;
-	let maxWidthChanged: boolean = false;
-	let minHeightChanged: boolean = false;
-	let maxHeightChanged: boolean = false;
-	$: filterApplied = mediumsChanged || minPriceChanged || maxPriceChanged || minWidthChanged || maxWidthChanged || minHeightChanged || maxHeightChanged;
+	let mediumsChanged: boolean = $state(false);
+	let minPriceChanged: boolean = $state(false);
+	let maxPriceChanged: boolean = $state(false);
+	let minWidthChanged: boolean = $state(false);
+	let maxWidthChanged: boolean = $state(false);
+	let minHeightChanged: boolean = $state(false);
+	let maxHeightChanged: boolean = $state(false);
+	let filterApplied = $derived(mediumsChanged || minPriceChanged || maxPriceChanged || minWidthChanged || maxWidthChanged || minHeightChanged || maxHeightChanged);
 
-	let mediums: string[] = $page.url.searchParams.getAll('medium') || [];
+	let mediums: string[] = $state(page.url.searchParams.getAll('medium') || []);
 
 	function handleMedium(medium: string) {
 		if (mediums.includes(medium)) {
@@ -83,8 +89,8 @@
 
 	let mediumCountsPromise = loadMediumCounts();
 
-	let minPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MinPrice) as string) || 0;
-	let maxPrice: number = parseInt($page.url.searchParams.get(ProductFilter.MaxPrice) as string) || 0;
+	let minPrice: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinPrice) as string) || 0);
+	let maxPrice: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxPrice) as string) || 0);
 
 	async function loadPriceRange(): Promise<PriceRange> {
 		const range = await data.priceRange;
@@ -95,10 +101,10 @@
 
 	let priceRangePromise = loadPriceRange();
 
-	let minWidth: number = parseInt($page.url.searchParams.get(ProductFilter.MinWidth) as string) || 0;
-	let maxWidth: number = parseInt($page.url.searchParams.get(ProductFilter.MaxWidth) as string) || 0;
-	let minHeight: number = parseInt($page.url.searchParams.get(ProductFilter.MinHeight) as string) || 0;
-	let maxHeight: number = parseInt($page.url.searchParams.get(ProductFilter.MaxHeight) as string) || 0;
+	let minWidth: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinWidth) as string) || 0);
+	let maxWidth: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxWidth) as string) || 0);
+	let minHeight: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinHeight) as string) || 0);
+	let maxHeight: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxHeight) as string) || 0);
 
 	async function loadSizeRanges(): Promise<SizeRanges> {
 		const range = await data.sizeRanges;
@@ -145,7 +151,7 @@
 			toggleSidebar();
 			sort = "";
 		};
-		if ($page.url.searchParams.size === 0 && !filterApplied) return;
+		if (page.url.searchParams.size === 0 && !filterApplied) return;
 		mediums = [];
 		await loadPriceRange();
 		await loadSizeRanges();
@@ -161,7 +167,7 @@
 </script>
 
 {#if isMobile && showFilters}
-    <div class="backdrop" on:click={toggleSidebar}></div>
+    <div class="backdrop" onclick={toggleSidebar}></div>
 {/if}
 
 <div class="container">
@@ -177,7 +183,7 @@
 					Filter
 				</div>
 				<div class="column">
-					<button class="close-button" on:click={toggleSidebar}>&times;</button>
+					<button class="close-button" onclick={toggleSidebar}>&times;</button>
 				</div>
 			{:else}
 				<div class="column">
@@ -207,7 +213,7 @@
 									name={mediumCount.name}
 									value={mediumCount.id}
 									checked={mediums.includes(mediumCount.name)}
-									on:click={() => handleMedium(mediumCount.name)}
+									onclick={() => handleMedium(mediumCount.name)}
 								/>
 								<label for={mediumCount.name}>{mediumCount.name} ({mediumCount.count})</label>
 							</div>

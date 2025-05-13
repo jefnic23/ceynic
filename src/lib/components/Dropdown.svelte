@@ -2,10 +2,14 @@
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	export let options: { value: string; label: string }[] = [];
-	export let selected: string = '';
+	interface Props {
+		options?: { value: string; label: string }[];
+		selected?: string;
+	}
 
-	let isDropdownOpen = false;
+	let { options = [], selected = $bindable('') }: Props = $props();
+
+	let isDropdownOpen = $state(false);
 
 	const dispatch = createEventDispatcher();
 
@@ -36,7 +40,7 @@
 <div class="dropdown-container">
 	<div
 		class="dropdown-header {isDropdownOpen ? 'open' : ''}"
-		on:click={() => (isDropdownOpen = !isDropdownOpen)}
+		onclick={() => (isDropdownOpen = !isDropdownOpen)}
 	>
 		Sort: {options.find((option) => option.value === selected)?.label || ''}
 		<span class="icon">▼</span>
@@ -44,7 +48,7 @@
 	{#if isDropdownOpen}
 		<div class="dropdown-list" transition:slide={{ duration: 233 }}>
 			{#each options as option}
-				<div class:selected={option.value === selected} on:click={() => selectOption(option.value)}>
+				<div class:selected={option.value === selected} onclick={() => selectOption(option.value)}>
 					<span>{option.label}</span>
 					{#if option.value === selected}
 						<span class="checkmark">✔</span>

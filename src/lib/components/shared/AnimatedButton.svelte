@@ -3,7 +3,13 @@
 	import { createEventDispatcher } from 'svelte';
 	import Button from './Button.svelte';
 
-	export let text: string;
+	interface Props {
+		text: string;
+		children?: import('svelte').Snippet;
+		[key: string]: any
+	}
+
+	let { text, children, ...rest }: Props = $props();
 
     const dispatch = createEventDispatcher();
 
@@ -12,10 +18,10 @@
 	}
 </script>
 
-<Button on:click={handleClick} {...$$restProps}>
+<Button on:click={handleClick} {...rest}>
 	<span class="button-content">
         <span class="text">{text}</span>
-        <span class="icon"><slot /></span>
+        <span class="icon">{@render children?.()}</span>
     </span>
 </Button>
 

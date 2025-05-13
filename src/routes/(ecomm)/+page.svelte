@@ -2,7 +2,11 @@
 	import MasonryLayout from '$lib/components/masonry/MasonryLayout.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <div class="wrapper">

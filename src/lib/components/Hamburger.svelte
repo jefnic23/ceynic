@@ -1,8 +1,12 @@
 <script lang="ts">
-    export let open: boolean = false;
+    interface Props {
+        open?: boolean;
+    }
+
+    let { open = $bindable(false) }: Props = $props();
 </script>
 
-<button class:open on:click={() => open = !open}>
+<button class:open onclick={() => open = !open}>
     <span></span>
     <span></span>
     <span></span>

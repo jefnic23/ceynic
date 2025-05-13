@@ -6,7 +6,11 @@
 	import type { ActionData } from './$types';
 	import Card from '$lib/components/shared/Card.svelte';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
+
+	let { form }: Props = $props();
 </script>
 
 <div class="wrapper">

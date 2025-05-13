@@ -1,15 +1,27 @@
 <script lang="ts">
-    export let value: number;
-    export let relatedValue: number;
-    export let isChanged: boolean;
-    export let isMinimum: boolean;
+	interface Props {
+		value: number;
+		relatedValue: number;
+		isChanged: boolean;
+		isMinimum: boolean;
+		id?: string;
+		label?: string;
+		min: number | null;
+		max: number | null;
+		className?: "price" | "size" | "";
+	}
 
-    export let id: string = "";
-	export let label: string = "";
-	export let min: number | null;
-	export let max: number | null;
-
-    export let className: "price" | "size" | "" = "";
+	let {
+		value = $bindable(),
+		relatedValue = $bindable(),
+		isChanged = $bindable(),
+		isMinimum,
+		id = "",
+		label = "",
+		min,
+		max,
+		className = ""
+	}: Props = $props();
 
     function handleInput(
         event: Event,
@@ -91,8 +103,8 @@
         max={max}
         step="1"
         bind:value={value}
-        on:blur={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
-        on:wheel={(e) => handleWheel(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+        onblur={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+        onwheel={(e) => handleWheel(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
     />
 </div>
 

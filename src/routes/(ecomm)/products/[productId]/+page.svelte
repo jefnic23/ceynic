@@ -9,7 +9,11 @@
 
 	// todo: Stripe/Amazon Pay needs to be added here as well
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
     const returnsTooltipContent: string = `
         You have 14 days from item delivery to ship this item back. Buyer is responsible for
@@ -17,8 +21,8 @@
         is responsible for any loss in value.
     `;
 
-	let showModal: boolean = false;
-	let orderId: string = "";
+	let showModal: boolean = $state(false);
+	let orderId: string = $state("");
 
 	function confirmOrder(e: CustomEvent) {
 		orderId = e.detail;

@@ -2,8 +2,12 @@
 	import type { ProductsOut } from "$lib/interfaces/product";
 	import { createEventDispatcher } from "svelte";
 
-    export let product: ProductsOut;
-    export let loaded: boolean = false;
+	interface Props {
+		product: ProductsOut;
+		loaded?: boolean;
+	}
+
+	let { product, loaded = false }: Props = $props();
 
     const dispatch = createEventDispatcher();
 
@@ -18,7 +22,7 @@
 >
 	{#if product.imageUrl}
 		<a href="/products/{product.id}" data-sveltekit-preload-data>
-			<img src={product.imageUrl} alt={product.title} on:load={onLoad} />
+			<img src={product.imageUrl} alt={product.title} onload={onLoad} />
 		</a>
 	{/if}
 </div>

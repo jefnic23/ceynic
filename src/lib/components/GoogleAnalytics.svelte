@@ -1,7 +1,11 @@
 <script lang="ts">
     import { browser } from "$app/environment";
 
-    export let measurementId: string;
+    interface Props {
+        measurementId: string;
+    }
+
+    let { measurementId }: Props = $props();
 
     if (browser) {
         window.dataLayer = window.dataLayer || [];

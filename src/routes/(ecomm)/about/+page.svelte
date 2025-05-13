@@ -3,7 +3,11 @@
 	import { marked } from "marked";
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	marked.use({
 		gfm: true,

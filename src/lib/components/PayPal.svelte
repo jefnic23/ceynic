@@ -3,7 +3,11 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { PUBLIC_PAYPAL_CLIENT_ID, PUBLIC_API_URL } from '$env/static/public';
 
-	export let productIds: number[];
+	interface Props {
+		productIds: number[];
+	}
+
+	let { productIds }: Props = $props();
 
 	const dispatch = createEventDispatcher<{
 		confirm_order: string

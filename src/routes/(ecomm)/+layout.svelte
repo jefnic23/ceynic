@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { PUBLIC_MEASUREMENT_ID } from "$env/static/public";
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
@@ -19,25 +21,34 @@
 		});
 	});
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 
 	let namePromise: Promise<string> = data.name;
-	let name: string = "";
+	let name: string = $state("");
 
-	$: if (namePromise) {
-		namePromise.then((value) => {
-			name = value;
-		});
-	}
+	run(() => {
+		if (namePromise) {
+			namePromise.then((value) => {
+				name = value;
+			});
+		}
+	});
 
 	let socialMediaLinkPromise: Promise<SocialMediaLink[]> = data.socialMediaLinks;
-	let socialMediaLinks: SocialMediaLink[] = [];
+	let socialMediaLinks: SocialMediaLink[] = $state([]);
 
-	$: if (socialMediaLinkPromise) {
-		socialMediaLinkPromise.then((value) => {
-			socialMediaLinks = value;
-		});
-	}
+	run(() => {
+		if (socialMediaLinkPromise) {
+			socialMediaLinkPromise.then((value) => {
+				socialMediaLinks = value;
+			});
+		}
+	});
 </script>
 
 <GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
@@ -47,7 +58,7 @@
 
 	{#key data.url}
 		<main>
-			<slot />
+			{@render children?.()}
 		</main>
 	{/key}
 

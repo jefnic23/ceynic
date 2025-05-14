@@ -16,7 +16,7 @@
 >
 	{#if product.imageUrl}
 		<a href="/products/{product.id}" data-sveltekit-preload-data>
-			<img src={product.imageUrl} alt={product.title} onload={load(product.id)} />
+			<img src={product.imageUrl} alt={product.title} onload={() => load(product.id)} />
 		</a>
 	{/if}
 </div>

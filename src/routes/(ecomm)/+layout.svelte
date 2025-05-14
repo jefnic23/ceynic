@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { PUBLIC_MEASUREMENT_ID } from "$env/static/public";
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import Footer from '$lib/components/Footer.svelte';
 	import { onNavigate } from '$app/navigation';
@@ -31,7 +29,7 @@
 	let namePromise: Promise<string> = data.name;
 	let name: string = $state("");
 
-	run(() => {
+	$effect(() => {
 		if (namePromise) {
 			namePromise.then((value) => {
 				name = value;
@@ -42,7 +40,7 @@
 	let socialMediaLinkPromise: Promise<SocialMediaLink[]> = data.socialMediaLinks;
 	let socialMediaLinks: SocialMediaLink[] = $state([]);
 
-	run(() => {
+	$effect(() => {
 		if (socialMediaLinkPromise) {
 			socialMediaLinkPromise.then((value) => {
 				socialMediaLinks = value;
@@ -54,7 +52,7 @@
 <GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
 
 <div class="wrapper">
-	<EcommHeader url={$page.url} name={name} />
+	<EcommHeader url={page.url} name={name} />
 
 	{#key data.url}
 		<main>

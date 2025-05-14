@@ -1,21 +1,20 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	interface Props {
 		options?: { value: string; label: string }[];
 		selected?: string;
+		change: CallableFunction;
 	}
 
-	let { options = [], selected = $bindable('') }: Props = $props();
+	let { options = [], selected = $bindable(''), change }: Props = $props();
 
 	let isDropdownOpen = $state(false);
 
-	const dispatch = createEventDispatcher();
-
 	function selectOption(optionValue: string) {
 		selected = optionValue; // Update local state
-		dispatch('change', optionValue); // Notify parent
+		change(optionValue); // Notify parent
 		isDropdownOpen = false; // Close dropdown
 	}
 

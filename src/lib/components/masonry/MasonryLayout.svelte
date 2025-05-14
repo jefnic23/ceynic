@@ -8,6 +8,7 @@
 	}
 
 	let { products = [] }: Props = $props();
+
 	let loadedImages = $state(new Set<number>());
 
 	function handleImageLoad (id: number) {
@@ -17,7 +18,7 @@
 
 	function randomAspectRatio() {
 		// Choose ratios between 3:4 (0.75) and 9:16 (0.5625)
-		const min = 0.56;
+		const min = 0.5625;
 		const max = 0.75;
 		const ratio = Math.random() * (max - min) + min;
 		return ratio.toFixed(2);
@@ -36,7 +37,7 @@
 			<MasonryItem
 				product={product}
 				loaded={loadedImages.has(product.id)}
-				on:load={() => handleImageLoad(product.id)}
+				load={handleImageLoad}
 			/>
 		{/each}
 	{/if}

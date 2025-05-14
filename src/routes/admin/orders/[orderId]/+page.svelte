@@ -9,7 +9,11 @@
 	import type { OrderOut } from '$lib/interfaces/order';
 	import type { PageServerData } from './$types';
 
-	export let data: PageServerData;
+	interface Props {
+		data: PageServerData;
+	}
+
+	let { data }: Props = $props();
 
 	function formatCurrency(amount: number, currency = 'USD'): string {
 		return new Intl.NumberFormat('en-US', {

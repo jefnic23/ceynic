@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { slide } from 'svelte/transition';
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
@@ -27,7 +25,7 @@
 	let isMobile = $state(false);
 	let showFilters = $state(false);
 
-	run(() => {
+	$effect(() => {
 		if (showFilters) {
 			document.body.classList.add('no-scroll');
 		} else {
@@ -194,7 +192,7 @@
 		{#if isMobile}
 			<div class="row" style:margin-top="1.33em">
 				<div class="column">
-					<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+					<Dropdown options={sortOptions} bind:selected={sort} change={handleSort} />
 				</div>
 			</div>
 		{/if}
@@ -343,7 +341,7 @@
 				{#if isMobile}
 					<Button text={"Filter & Sort"} style={ButtonStyle.Neutral} on:click={toggleSidebar}><Filter /></Button>
 				{:else}
-					<Dropdown options={sortOptions} bind:selected={sort} on:change={handleSort} />
+					<Dropdown options={sortOptions} bind:selected={sort} change={handleSort} />
 				{/if}
 			</div>
 			<div class="product-grid">

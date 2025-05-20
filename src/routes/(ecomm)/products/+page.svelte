@@ -27,9 +27,9 @@
 
 	$effect(() => {
 		if (showFilters) {
-			document.body.classList.add('no-scroll');
+			document?.body?.classList?.add('no-scroll');
 		} else {
-			document.body.classList.remove('no-scroll');
+			document?.body?.classList?.remove('no-scroll');
 		}
 	});
 
@@ -44,7 +44,7 @@
 	});
 
 	onDestroy(() => {
-		document.body.classList.remove('no-scroll');
+		document?.body?.classList?.remove('no-scroll');
 	});
 
 	function toggleSidebar() {

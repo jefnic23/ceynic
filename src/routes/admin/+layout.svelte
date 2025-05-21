@@ -12,10 +12,10 @@
 	import Box from "$lib/icons/Box.svelte";
 
 	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
+		if (!document?.startViewTransition) return;
 
 		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
+			document?.startViewTransition(async () => {
 				resolve();
 				await navigation.complete;
 			});

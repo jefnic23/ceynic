@@ -64,7 +64,7 @@
 	): void {
 		const input = event.target as HTMLInputElement;
 
-		if (document.activeElement === input) {
+		if (document?.activeElement === input) {
 			event.preventDefault(); // Prevent page scrolling behavior
 
 			const step = Number(input.step) || 1;

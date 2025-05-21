@@ -20,7 +20,7 @@
 
 	// Function to handle clicks outside the dropdown
 	function handleClickOutside(event: MouseEvent) {
-		const dropdown = document.querySelector('.dropdown-container');
+		const dropdown = document?.querySelector('.dropdown-container');
 		if (dropdown && !dropdown.contains(event.target as Node)) {
 			isDropdownOpen = false; // Close dropdown
 		}
@@ -28,11 +28,11 @@
 
 	// Attach and detach the document click listener
 	onMount(() => {
-		document.addEventListener('click', handleClickOutside);
+		document?.addEventListener('click', handleClickOutside);
 	});
 
 	onDestroy(() => {
-		document.removeEventListener('click', handleClickOutside);
+		document?.removeEventListener('click', handleClickOutside);
 	});
 </script>
 

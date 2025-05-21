@@ -17,9 +17,9 @@
 
 	function updateBodyClass() {
         if (open) {
-            document.body.classList.add('menu-open');
+            document?.body.classList.add('menu-open');
         } else {
-            document.body.classList.remove('menu-open');
+            document?.body.classList.remove('menu-open');
         }
     }
 
@@ -43,7 +43,7 @@
 	onMount(() => {
 		if (typeof window !== 'undefined') {
 			window.addEventListener('resize', checkIsMobile);
-			document.addEventListener('click', handleOutsideClick);
+			document?.addEventListener('click', handleOutsideClick);
 			checkIsMobile();
 		}
     });
@@ -51,8 +51,8 @@
 	onDestroy(() => {
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('resize', checkIsMobile);
-			document.removeEventListener('click', handleOutsideClick);
-			document.body.classList.remove('menu-open');
+			document?.removeEventListener('click', handleOutsideClick);
+			document?.body?.classList?.remove('menu-open');
 		}
 	});
 </script>

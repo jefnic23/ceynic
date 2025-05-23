@@ -15,6 +15,7 @@
 	import Filter from '$lib/icons/Filter.svelte';
 	import type { MediumCount } from '$lib/interfaces/mediumCount';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
+	import type { ProductMetadata } from '$lib/interfaces/product_metadata';
 
 	interface Props {
 		data: PageData;
@@ -81,39 +82,27 @@
 		mediumsChanged = true;
 	}
 
-	async function loadMediumCounts(): Promise<MediumCount[]> {
-		return await data.mediumCounts;
-	}
-
-	let mediumCountsPromise = loadMediumCounts();
-
 	let minPrice: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinPrice) as string) || 0);
 	let maxPrice: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxPrice) as string) || 0);
-
-	async function loadPriceRange(): Promise<PriceRange> {
-		const range = await data.priceRange;
-		minPrice = Math.floor(range?.minimum) || 0;
-		maxPrice = Math.floor(range?.maximum) || 0;
-		return range;
-	}
-
-	let priceRangePromise = loadPriceRange();
-
 	let minWidth: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinWidth) as string) || 0);
 	let maxWidth: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxWidth) as string) || 0);
 	let minHeight: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MinHeight) as string) || 0);
 	let maxHeight: number = $state(parseInt(page.url.searchParams.get(ProductFilter.MaxHeight) as string) || 0);
 
-	async function loadSizeRanges(): Promise<SizeRanges> {
-		const range = await data.sizeRanges;
-		minWidth = Math.floor(range?.widthMinimum) || 0;
-		maxWidth = Math.floor(range?.widthMaximum) || 0;
-		minHeight = Math.floor(range?.heightMinimum) || 0;
-		maxHeight = Math.floor(range?.heightMaximum) || 0;
-		return range;
+	async function loadMetadata(): Promise<ProductMetadata> {
+		const metadata = await data.metadata;
+
+		minPrice = Math.floor(metadata?.priceRange?.minimum || 0);
+		maxPrice = Math.floor(metadata?.priceRange?.maximum || 0);
+		minWidth = Math.floor(metadata?.sizeRanges?.widthMinimum || 0);
+		maxWidth = Math.floor(metadata?.sizeRanges?.widthMaximum || 0);
+		minHeight = Math.floor(metadata?.sizeRanges?.heightMinimum || 0);
+		maxHeight = Math.floor(metadata?.sizeRanges?.heightMaximum || 0);
+
+		return metadata as ProductMetadata;
 	}
 
-	let sizeRangesPromise = loadSizeRanges();
+	let loadMetadataPromise = loadMetadata();
 
 	async function handleSort(event: CustomEvent) {
 		const url = new URL(window.location.href);
@@ -151,8 +140,7 @@
 		};
 		if (page.url.searchParams.size === 0 && !filterApplied) return;
 		mediums = [];
-		await loadPriceRange();
-		await loadSizeRanges();
+		await loadMetadata();
 		mediumsChanged = false;
 		minPriceChanged = false;
 		maxPriceChanged = false;
@@ -196,14 +184,20 @@
 				</div>
 			</div>
 		{/if}
-		<div class="row">
-			<div class="column">
-				{#await mediumCountsPromise}
+		{#await loadMetadataPromise}
+			<div class="row">
+				<div class="column">
 					<Skeleton />
-				{:then mediumCounts}
+					<Skeleton />
+					<Skeleton />
+				</div>
+			</div>
+		{:then metadata} 
+			<div class="row">
+				<div class="column">
 					<h4>Medium</h4>
 					<div class="column">
-						{#each mediumCounts as mediumCount}
+						{#each metadata?.mediumCounts || [] as mediumCount}
 							<div class="row justify-left">
 								<input
 									type="checkbox"
@@ -217,14 +211,10 @@
 							</div>
 						{/each}
 					</div>
-				{/await}
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="column">
-				{#await priceRangePromise}
-					<Skeleton />
-				{:then priceRange}
+			<div class="row">
+				<div class="column">
 					<div class="row">
 						<h4>Price</h4>
 					</div>
@@ -236,8 +226,8 @@
 							isMinimum={true}
 							id={"minPrice"}
 							label={"Min"}
-							min={priceRange?.minimum}
-							max={priceRange?.maximum}
+							min={Math.floor(metadata?.priceRange?.minimum || 0)}
+							max={Math.floor(metadata?.priceRange?.maximum || 0)}
 							className={"price"}
 						/>
 						<ScrollableInput
@@ -247,19 +237,15 @@
 							isMinimum={false}
 							id={"maxPrice"}
 							label={"Max"}
-							min={priceRange?.minimum}
-							max={priceRange?.maximum}
+							min={Math.floor(metadata?.priceRange?.minimum || 0)}
+							max={Math.floor(metadata?.priceRange?.maximum || 0)}
 							className={"price"}
 						/>
 					</div>
-				{/await}
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="column">
-				{#await sizeRangesPromise}
-					<Skeleton />
-				{:then sizeRanges}
+			<div class="row">
+				<div class="column">
 					<div class="row">
 						<div class="column">
 							<div class="row">
@@ -273,8 +259,8 @@
 									isMinimum={true}
 									id={"minWidth"}
 									label={"Min"}
-									min={sizeRanges?.widthMinimum}
-									max={sizeRanges?.widthMaximum}
+									min={Math.floor(metadata?.sizeRanges?.widthMinimum || 0)}
+									max={Math.floor(metadata?.sizeRanges?.widthMaximum || 0)}
 									className={"size"}
 								/>
 								<ScrollableInput
@@ -284,8 +270,8 @@
 									isMinimum={false}
 									id={"maxWidth"}
 									label={"Max"}
-									min={sizeRanges?.widthMinimum}
-									max={sizeRanges?.widthMaximum}
+									min={Math.floor(metadata?.sizeRanges?.widthMinimum || 0)}
+									max={Math.floor(metadata?.sizeRanges?.widthMaximum || 0)}
 									className={"size"}
 								/>
 							</div>
@@ -304,8 +290,8 @@
 									isMinimum={true}
 									id={"minHeight"}
 									label={"Min"}
-									min={sizeRanges?.heightMinimum}
-									max={sizeRanges?.heightMaximum}
+									min={Math.floor(metadata?.sizeRanges?.heightMinimum || 0)}
+									max={Math.floor(metadata?.sizeRanges?.heightMaximum || 0)}
 									className={"size"}
 								/>
 								<ScrollableInput
@@ -315,16 +301,16 @@
 									isMinimum={false}
 									id={"maxHeight"}
 									label={"Max"}
-									min={sizeRanges?.heightMinimum}
-									max={sizeRanges?.heightMaximum}
+									min={Math.floor(metadata?.sizeRanges?.heightMinimum || 0)}
+									max={Math.floor(metadata?.sizeRanges?.heightMaximum || 0)}
 									className={"size"}
 								/>
 							</div>
 						</div>
 					</div>
-				{/await}
+				</div>
 			</div>
-		</div>
+		{/await}
 		<div class="filter-buttons">
 			<Button text={"Filter"} on:click={handleFilter} />
 			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />

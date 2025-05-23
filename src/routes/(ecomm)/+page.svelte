@@ -12,8 +12,8 @@
 <div class="wrapper">
 	{#await data.products}
 		<MasonryLayout />
-	{:then products} 
-		<MasonryLayout products={products} />
+	{:then products}
+		<MasonryLayout {products} />
 	{:catch error}
 		<p style="color: red">{error.message}</p>
 	{/await}

@@ -7,7 +7,7 @@
 	import TikTok from '$lib/icons/TikTok.svelte';
 	import Twitter from '$lib/icons/Twitter.svelte';
 	import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	interface Props {
 		copyright?: string;
@@ -18,7 +18,7 @@
 
     let year: number = new Date().getFullYear();
 
-	const iconMap: Record<string, ComponentType> = {
+	const iconMap: Record<string, Component> = {
 		etsy: Etsy,
 		facebook: Facebook,
 		instagram: Instagram,

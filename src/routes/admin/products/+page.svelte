@@ -3,7 +3,8 @@
 	import Card from '$lib/components/shared/Card.svelte';
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
-	import type { ProductOut, ProductsOut } from '$lib/interfaces/product';
+	import type { ProductOut } from '$lib/interfaces/ProductOut';
+	import type { ProductsOut } from '$lib/interfaces/ProductsOut';
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
@@ -40,13 +41,13 @@
 		const responseData = await response.json();
 
 		selectedProduct = { ...responseData };
-		selectedProduct.images = selectedProduct?.images.map(replaceImageUrl);
+		selectedProduct.images = selectedProduct?.images?.map(replaceImageUrl);
 		loadingModal = false;
 	}
 
 	function replaceImageUrl(imageUrl: string) {
 		const filename = imageUrl.split('/').at(-1);
-		return `/api/proxy/${selectedProduct?.title.replaceAll(' ', '_')}/${filename}`;
+		return `/api/proxy/${selectedProduct?.title?.replaceAll(' ', '_')}/${filename}`;
 	}
 
 	const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -105,7 +106,7 @@
 								<img src="{product.imageUrl}" alt="{product.thumbnail}" />
 							</td>
 							<td>{product.title}</td>
-							<td>{currencyFormatter.format(product.price)}</td>
+							<td>{currencyFormatter.format((product.price as number))}</td>
 							<td>{product.height}"</td>
 							<td>{product.width}"</td>
 							<td>{product.medium}</td>

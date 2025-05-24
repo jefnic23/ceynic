@@ -1,6 +1,6 @@
 <script lang="ts">
     import Card from "$lib/components/shared/Card.svelte";
-	import type { ProductsOut } from "$lib/interfaces/product";
+	import type { ProductsOut } from "$lib/interfaces/ProductsOut";
 
     interface Props {
         product: ProductsOut;

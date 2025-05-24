@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ProductsOut } from "$lib/interfaces/product";
+	import type { ProductsOut } from "$lib/interfaces/ProductsOut";
 
 	interface Props {
 		product: ProductsOut;

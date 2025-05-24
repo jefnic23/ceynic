@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { loadScript } from '@paypal/paypal-js';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { PUBLIC_PAYPAL_CLIENT_ID, PUBLIC_API_URL } from '$env/static/public';
 
 	interface Props {
 		productIds: number[];
+		confirmOrder: CallableFunction;
 	}
 
-	let { productIds }: Props = $props();
-
-	const dispatch = createEventDispatcher<{
-		confirm_order: string
-	}>();
+	let { productIds, confirmOrder }: Props = $props();
 
 	onMount(async () => {
 		let paypal;
@@ -75,7 +72,7 @@
 
 						console.log(json);
 
-						dispatch("confirm_order", data.orderID);
+						confirmOrder(data.orderID);
 					}
 					// onApprove: function(data, actions) {
 					// 	const CAPTURE_ORDER_URL = '{{ url_for("main.capture_order", order_id="order_id") }}'.replace('order_id', data.orderID);

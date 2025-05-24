@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -8,14 +7,11 @@
 	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ProductFilter } from '$lib/enums/productFilter';
-	import type { SizeRanges } from '$lib/interfaces/sizeRanges';
-	import type { PriceRange } from '$lib/interfaces/priceRange';
 	import ProductCard from '$lib/components/ProductCard.svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import Filter from '$lib/icons/Filter.svelte';
-	import type { MediumCount } from '$lib/interfaces/mediumCount';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
-	import type { ProductMetadata } from '$lib/interfaces/product_metadata';
+	import type { ProductMetadata } from '$lib/interfaces/ProductMetadata';
 
 	interface Props {
 		data: PageData;
@@ -92,8 +88,8 @@
 	async function loadMetadata(): Promise<ProductMetadata> {
 		const metadata = await data.metadata;
 
-		minPrice = Math.floor(metadata?.priceRange?.minimum || 0);
-		maxPrice = Math.floor(metadata?.priceRange?.maximum || 0);
+		minPrice = Math.floor(metadata?.priceRange?.minimum as number || 0);
+		maxPrice = Math.floor(metadata?.priceRange?.maximum as number || 0);
 		minWidth = Math.floor(metadata?.sizeRanges?.widthMinimum || 0);
 		maxWidth = Math.floor(metadata?.sizeRanges?.widthMaximum || 0);
 		minHeight = Math.floor(metadata?.sizeRanges?.heightMinimum || 0);
@@ -161,7 +157,6 @@
 		class="column filters" 
 		class:is-mobile={isMobile} 
 		class:open={showFilters}
-		transition:slide="{{ duration: 377 }}"
 	>
 		<div class="row">
 			{#if isMobile && showFilters}
@@ -226,8 +221,8 @@
 							isMinimum={true}
 							id={"minPrice"}
 							label={"Min"}
-							min={Math.floor(metadata?.priceRange?.minimum || 0)}
-							max={Math.floor(metadata?.priceRange?.maximum || 0)}
+							min={Math.floor(metadata?.priceRange?.minimum as number || 0)}
+							max={Math.floor(metadata?.priceRange?.maximum as number || 0)}
 							className={"price"}
 						/>
 						<ScrollableInput
@@ -237,8 +232,8 @@
 							isMinimum={false}
 							id={"maxPrice"}
 							label={"Max"}
-							min={Math.floor(metadata?.priceRange?.minimum || 0)}
-							max={Math.floor(metadata?.priceRange?.maximum || 0)}
+							min={Math.floor(metadata?.priceRange?.minimum as number || 0)}
+							max={Math.floor(metadata?.priceRange?.maximum as number || 0)}
 							className={"price"}
 						/>
 					</div>

@@ -1,12 +1,9 @@
-<!-- @migration-task Error while migrating Svelte code: `<th>` is invalid inside `<thead>` -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import AnimatedButton from '$lib/components/shared/AnimatedButton.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import Edit from '$lib/icons/Edit.svelte';
-	import type { OrderOut } from '$lib/interfaces/order';
+	import type { OrderDetails } from '$lib/interfaces/OrderDetails';
 	import type { PageServerData } from './$types';
 
 	interface Props {
@@ -22,10 +19,10 @@
 		}).format(amount);
 	}
 
-	function getTotalAmount(order: OrderOut): string {
+	function getTotalAmount(order: OrderDetails): string {
 		return formatCurrency(
-			order.purchaseUnits.reduce((sum, purchaseUnit) => {
-				return sum + purchaseUnit.amount.value;
+			order.purchaseUnits?.reduce((sum, purchaseUnit) => {
+				return sum + (purchaseUnit?.amount?.value as number);
 			}, 0)
 		);
 	}

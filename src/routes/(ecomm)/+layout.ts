@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public'
-import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink.js';
+import type { SocialMediaLinkOut } from '$lib/interfaces/SocialMediaLinkOut';
 
 export const load = async ({ url, fetch }) => {
     const fetchName = async (): Promise<string> => {
@@ -15,7 +15,7 @@ export const load = async ({ url, fetch }) => {
         return responseData;
     }
 
-    const fetchSocialMediaLinks = async (): Promise<SocialMediaLink[]> => {
+    const fetchSocialMediaLinks = async (): Promise<SocialMediaLinkOut[]> => {
         const response = await fetch(`${PUBLIC_API_URL}/socialMediaLinks`);
 
         if (!response.ok) {
@@ -23,7 +23,7 @@ export const load = async ({ url, fetch }) => {
             return [];
         }
 
-        const responseData: SocialMediaLink[] = await response.json();
+        const responseData: SocialMediaLinkOut[] = await response.json();
 
         return responseData;
     }

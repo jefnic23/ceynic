@@ -1,7 +1,7 @@
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { Location } from '$lib/interfaces/Location'
 import type { PaymentProcessor } from '$lib/enums/paymentProcessor.js';
-import type { Location } from '$lib/interfaces/location.js';
-import type { ProductOut } from '$lib/interfaces/product';
+import type { ProductOut } from '$lib/interfaces/ProductOut';
 
 export const load = async ({ fetch, params }) => {
     const fetchProduct = async (productId: string): Promise<ProductOut> => {

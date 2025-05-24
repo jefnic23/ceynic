@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
-	import type { ProductsOut } from '$lib/interfaces/product';
+	import type { ProductsOut } from '$lib/interfaces/ProductsOut';
 
 	interface Props {
 		products?: ProductsOut[];

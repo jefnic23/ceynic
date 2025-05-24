@@ -1,6 +1,6 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { ProductsOut } from '$lib/interfaces/product.ts';
-import type { ProductMetadata } from '$lib/interfaces/product_metadata.ts';
+import type { ProductMetadata } from '$lib/interfaces/ProductMetadata';
+import type { ProductsOut } from '$lib/interfaces/ProductsOut';
 
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async () => {

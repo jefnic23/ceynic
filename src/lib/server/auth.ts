@@ -1,6 +1,7 @@
-import type { Token } from '$lib/interfaces/token';
+import type { Token } from '$lib/interfaces/Token';
 import { type Cookies } from '@sveltejs/kit';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { jwtDecode } from "jwt-decode";
 
 export function setCookie(name: string, token: string, maxAge: number, cookies: Cookies) {
     cookies.set(name, token, {
@@ -58,4 +59,11 @@ export async function handleRefresh(cookies: Cookies ) {
 export function handleLogout(cookies: Cookies) {
     setCookie('access', '', 0, cookies);
     setCookie('refresh', '', 0, cookies);
+}
+
+export function isExpired(token: string): boolean {
+    const decodedToken = jwtDecode(token);
+
+    return (decodedToken.exp as number) >
+        Math.floor(Date.now() / 1000)
 }

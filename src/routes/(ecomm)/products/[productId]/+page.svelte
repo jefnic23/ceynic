@@ -71,7 +71,7 @@
 					<div>loading</div>
 				{:then paymentProcessor} 
 					{#if paymentProcessor === PaymentProcessor.PAYPAL}
-						<PayPal productIds={[product.id]} on:confirm_order={confirmOrder} />
+						<PayPal productIds={[product.id]} confirmOrder={confirmOrder} />
 					{/if}
 				{/await}
 				<div>

@@ -6,12 +6,12 @@
 	import Pinterest from '$lib/icons/Pinterest.svelte';
 	import TikTok from '$lib/icons/TikTok.svelte';
 	import Twitter from '$lib/icons/Twitter.svelte';
-	import type { SocialMediaLink } from '$lib/interfaces/socialMediaLink';
+	import type { SocialMediaLinkOut } from '$lib/interfaces/SocialMediaLinkOut';
 	import type { Component } from 'svelte';
 
 	interface Props {
 		copyright?: string;
-		socialMediaLinks?: SocialMediaLink[];
+		socialMediaLinks?: SocialMediaLinkOut[];
 	}
 
 	let { copyright = "", socialMediaLinks = [] }: Props = $props();

@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from "$env/static/public";
-import type { OrdersOut } from "$lib/interfaces/order.js";
+import type { OrdersOut } from "$lib/interfaces/OrdersOut";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch, cookies }) => {

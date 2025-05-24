@@ -1,10 +1,10 @@
 import { PUBLIC_API_URL } from "$env/static/public";
-import type { OrderOut } from "$lib/interfaces/order";
+import type { OrderDetails } from "$lib/interfaces/OrderDetails";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
-    const fetchOrder = async (orderId: string): Promise<OrderOut> => {
+    const fetchOrder = async (orderId: string): Promise<OrderDetails> => {
         const response = await fetch(`${PUBLIC_API_URL}/orders/${orderId}`, {
             method: "GET",
             headers: {
@@ -17,9 +17,9 @@ export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
             error(500, "Error retrieving order.");
         }
 
-        const responseData: OrderOut = await response.json();
+        const responseData: OrderDetails = await response.json();
 
-        console.log(responseData.purchaseUnits[0].payments.authorizations);
+        console.log(responseData?.purchaseUnits[0]?.payments?.authorizations);
 
         return responseData;
     }

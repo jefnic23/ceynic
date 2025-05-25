@@ -156,7 +156,7 @@
 	>
 		<div class="row">
 			<div class="column">
-				<h4 style:margin-top="0">Filter & Sort</h4>
+				<h4 style:margin-top={isMobile ? "auto" : "0"}>Filter & Sort</h4>
 			</div>
 			{#if isMobile && showFilters}
 				<div class="column">
@@ -308,7 +308,7 @@
 			</div>
 		{:then products}
 			{#if isMobile}
-				<div class="row {isMobile ? "align-center" : ""}" style:justify-content={"space-between"}>
+				<div class="row" style:justify-content={"flex-start"}>
 					<Button text={"Filter & Sort"} style={ButtonStyle.Neutral} on:click={toggleSidebar}><Filter /></Button>
 				</div>
 			{/if}
@@ -391,14 +391,12 @@
 		color: #000;
 	}
 
-	.align-center {
-		align-items: center;
-	}
-
 	@media only screen and (max-width: 974px) {
 		.filters {
 			position: fixed;
 			z-index: 99999;
+			height: 100%;
+			top: 0;
 		}
 
 		.container {

@@ -17,9 +17,9 @@
 
 	function updateBodyClass() {
         if (open) {
-            document?.body.classList.add('menu-open');
+            document?.body?.classList?.add('menu-open');
         } else {
-            document?.body.classList.remove('menu-open');
+            document?.body?.classList?.remove('menu-open');
         }
     }
 
@@ -58,6 +58,7 @@
 </script>
 
 <svelte:head>
+	<!-- todo: allow custom font/header image -->
 	<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
 </svelte:head>
 
@@ -195,7 +196,7 @@
 		flex-direction: column;
 		overflow: hidden;
 		max-height: 0;
-		transition: max-height 377ms ease-in-out 210ms;
+		transition: max-height 377ms ease-in-out 144ms;
 		background-color: #f8f8f8;
 		border-bottom: 1px solid #e7e7e7;
 		position: absolute;

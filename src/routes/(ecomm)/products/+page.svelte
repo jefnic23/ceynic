@@ -100,9 +100,9 @@
 
 	let loadMetadataPromise = loadMetadata();
 
-	async function handleSort(event: CustomEvent) {
+	async function handleSort(_: CustomEvent) {
 		const url = new URL(window.location.href);
-		url.searchParams.set('sort', event.detail);
+		url.searchParams.set('sort', sort);
 		if(!isMobile) await goto(url, { replaceState: true, keepFocus: true });
 	}
 
@@ -148,37 +148,27 @@
 	}
 </script>
 
-{#if isMobile && showFilters}
-    <div class="backdrop" onclick={toggleSidebar}></div>
-{/if}
-
 <div class="container">
 	<aside 
-		class="column filters" 
+		class="filters" 
 		class:is-mobile={isMobile} 
 		class:open={showFilters}
 	>
 		<div class="row">
+			<div class="column">
+				<h4 style:margin-top="0">Filter & Sort</h4>
+			</div>
 			{#if isMobile && showFilters}
-				<div class="column">
-					Filter
-				</div>
 				<div class="column">
 					<button class="close-button" onclick={toggleSidebar}>&times;</button>
 				</div>
-			{:else}
-				<div class="column">
-					Filter
-				</div>
 			{/if}
 		</div>
-		{#if isMobile}
-			<div class="row" style:margin-top="1.33em">
-				<div class="column">
-					<Dropdown options={sortOptions} bind:selected={sort} change={handleSort} />
-				</div>
+		<div class="row">
+			<div class="column">
+				<Dropdown options={sortOptions} bind:selected={sort} change={handleSort} />
 			</div>
-		{/if}
+		</div>
 		{#await loadMetadataPromise}
 			<div class="row">
 				<div class="column">
@@ -317,14 +307,11 @@
 				<Skeleton />
 			</div>
 		{:then products}
-			<div class="row {isMobile ? "align-center" : ""}" style:justify-content={"space-between"}>
-				Results: {products.length}
-				{#if isMobile}
+			{#if isMobile}
+				<div class="row {isMobile ? "align-center" : ""}" style:justify-content={"space-between"}>
 					<Button text={"Filter & Sort"} style={ButtonStyle.Neutral} on:click={toggleSidebar}><Filter /></Button>
-				{:else}
-					<Dropdown options={sortOptions} bind:selected={sort} change={handleSort} />
-				{/if}
-			</div>
+				</div>
+			{/if}
 			<div class="product-grid">
 				{#each products as product}
 					{#if product.imageUrl}
@@ -360,8 +347,13 @@
 	}
 
 	.filters {
+		position: sticky;
+		top: 158px;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: fit-content;
 		transition: transform 0.3s ease-in-out;
-		z-index: 1000;
 	}
 
 	.row {
@@ -385,7 +377,7 @@
 	.close-button {
 		background: none;
 		border: none;
-		font-size: 1.5em;
+		font-size: xxx-large;
 		cursor: pointer;
 		color: #333;
 		margin-left: auto;
@@ -417,8 +409,7 @@
 			position: fixed;
 			top: 0;
 			left: 0;
-			width: 80%;
-			max-width: 300px;
+			width: 100%;
 			height: 100%;
 			background: white;
 			z-index: 20;
@@ -432,18 +423,6 @@
 			transform: translateX(0);
 			z-index: 99999;
 			overflow-y: scroll;
-		}
-
-		.backdrop {
-			position: fixed;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: rgba(0,0,0,0.4);
-			filter: blur(4px);
-			pointer-events: auto;
-			z-index: 9999;
 		}
 	}
 

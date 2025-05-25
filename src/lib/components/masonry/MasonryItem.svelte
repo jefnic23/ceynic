@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ProductsOut } from "$lib/interfaces/ProductsOut";
 	import { page } from "$app/state";
+	import { onMount } from "svelte";
 
 	interface Props {
 		product: ProductsOut;
@@ -9,6 +10,12 @@
 	}
 
 	let { product, loaded = false, load }: Props = $props();
+
+	let isMobile = $state(false);
+
+	onMount(() => {
+		isMobile = window.innerWidth <= 768;
+	});
 </script>
 
 <div
@@ -21,10 +28,12 @@
 				src={product.imageUrl} 
 				alt={product.title} 
 				onload={() => load(product.id)}
-				data-pin-do="buttonPin"
-				data-pin-media={product.imageUrl}
-				data-pin-url={page.url}
-				data-pin-description={product.title}
+				loading="lazy"
+				data-pin-do={!isMobile ? "buttonPin" : undefined}
+				data-pin-media={!isMobile ? product.imageUrl : undefined}
+				data-pin-url={!isMobile ? page.url : undefined}
+				data-pin-description={!isMobile ? product.title : undefined}
+				data-pin-no-hover={isMobile ? "true" : undefined}
 			/>
 		</a>
 	{/if}

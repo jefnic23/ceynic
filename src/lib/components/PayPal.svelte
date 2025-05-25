@@ -17,7 +17,6 @@
 			paypal = await loadScript({
 				clientId: PUBLIC_PAYPAL_CLIENT_ID,
 				currency: 'USD',
-				disableFunding: 'venmo',
 				dataPageType: 'checkout',
 				intent: 'authorize'
 				// debug: true

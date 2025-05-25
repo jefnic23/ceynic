@@ -201,7 +201,7 @@
 				<Dropzone
 					change={handleImagesChange}
 					thumbnailChange={handleThumbnailChange}
-					previews={selectedProduct.images}
+					previews={selectedProduct.images || []}
 					thumbnail={selectedProduct.thumbnail}
 				/>
 

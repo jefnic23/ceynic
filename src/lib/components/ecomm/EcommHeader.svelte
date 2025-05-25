@@ -128,7 +128,7 @@
 		text-transform: uppercase;
 		margin: 0 0.5rem;
 		color: rgba(0, 0, 0, 0.55);
-		font-size: 13px;
+		font-size: 16px;
 		width: fit-content;
 		transition:
 			color 0.15s ease-in-out,

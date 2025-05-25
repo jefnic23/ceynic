@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { ProductsOut } from "$lib/interfaces/ProductsOut";
+	import { page } from "$app/state";
 
 	interface Props {
 		product: ProductsOut;
 		loaded?: boolean;
-		load: CallableFunction
+		load: CallableFunction;
 	}
 
 	let { product, loaded = false, load }: Props = $props();
@@ -16,13 +17,22 @@
 >
 	{#if product.imageUrl}
 		<a href="/products/{product.id}" data-sveltekit-preload-data>
-			<img src={product.imageUrl} alt={product.title} onload={() => load(product.id)} />
+			<img 
+				src={product.imageUrl} 
+				alt={product.title} 
+				onload={() => load(product.id)}
+				data-pin-do="buttonPin"
+				data-pin-media={product.imageUrl}
+				data-pin-url={page.url}
+				data-pin-description={product.title}
+			/>
 		</a>
 	{/if}
 </div>
 
 <style>
 	.masonry-item {
+		position: relative;
 		margin-bottom: 34px;
 		display: inline-block;
 		vertical-align: top;

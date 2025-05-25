@@ -12,7 +12,7 @@
 <Card>
     <div class="product">
         <a href="/products/{product.id}" data-sveltekit-preload-data>
-            <img class="image" src={product.imageUrl} alt={product.title} />
+            <img class="image" src={product.imageUrl} alt={product.title} data-pin-nopin="true" />
             <div class="title">{product.title}</div>
             <div class="price">${product.price}</div>
         </a>

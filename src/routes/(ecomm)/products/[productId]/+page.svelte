@@ -6,6 +6,7 @@
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
+	import { page } from '$app/state';
 
 	// todo: Stripe/Amazon Pay needs to be added here as well
 
@@ -56,7 +57,14 @@
 		</div>
 		<div class="product">
 			<div class="image">
-				<img src={product.images[0]} alt={product.title} />
+				<img 
+					src={product.images[0]} 
+					alt={product.title}
+					data-pin-do="buttonPin"
+					data-pin-media={product.images[0]}
+					data-pin-url={page.url}
+					data-pin-description={product.title}
+				/>
 			</div>
 			<div class="details">
 				<div>

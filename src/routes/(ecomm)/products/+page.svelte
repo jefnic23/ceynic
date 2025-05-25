@@ -348,7 +348,7 @@
 
 	.filters {
 		position: sticky;
-		top: 158px;
+		top: 182px;
 		display: flex;
 		flex-direction: column;
 		width: 100%;

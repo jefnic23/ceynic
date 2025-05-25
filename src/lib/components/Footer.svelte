@@ -32,6 +32,7 @@
 
 <div class="footer">
     <div class="icons">
+		<!-- todo: move social links to sidebar in mobile -->
 		{#each socialMediaLinks as { name, url }}
 			{@const SvelteComponent = iconMap[name.toLowerCase()]}
 			<a href={url} target="_blank">

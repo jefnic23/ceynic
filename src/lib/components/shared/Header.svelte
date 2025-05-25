@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
-	import { createEventDispatcher } from 'svelte';
-
 	interface Props {
 		duration?: string;
 		offset?: number;
@@ -24,8 +20,6 @@
 	let y = $state(0);
 	let lastY = $state(0);
 
-	const dispatch = createEventDispatcher();
-
 	function deriveClass(y: number = 0, scrolled: number = 0): string {
 		if (y <= offset) return 'pin';
 		if (!scrolled || Math.abs(scrolled) < tolerance) return headerClass;
@@ -43,12 +37,9 @@
 		node.style.transitionDuration = duration;
 	}
 
-	run(() => {
+	$effect(() => {
 		if (!open) {
 			headerClass = updateClass(y);
-			if (headerClass !== lastHeaderClass) {
-				dispatch(headerClass);
-			}
 			lastHeaderClass = headerClass;
 		} else {
 			lastY = y;

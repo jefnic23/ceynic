@@ -59,7 +59,7 @@
 		width: 100%;
 		top: 0;
 		transition: transform 377ms ease-in-out;
-		z-index: 99;
+		z-index: 9999999;
 		will-change: transform;
 		view-transition-name: header;
 	}

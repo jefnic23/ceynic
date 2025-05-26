@@ -159,8 +159,20 @@
 	}
 
 	.images {
+		display: flex;
+		flex-direction: row;
 		flex: 5;
 		padding: 1rem;
+	}
+
+	.images ul {
+		list-style: none;
+		padding: 0;
+	}
+
+	.images ul > li {
+		width: 60px;
+		height: 60px;
 	}
 
 	.details {

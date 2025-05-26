@@ -196,7 +196,7 @@
 		flex-direction: column;
 		overflow: hidden;
 		max-height: 0;
-		transition: max-height 377ms ease-in-out 144ms;
+		transition: max-height 377ms ease-in-out 199ms;
 		background-color: #f8f8f8;
 		border-bottom: 1px solid #e7e7e7;
 		position: absolute;

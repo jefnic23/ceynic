@@ -17,8 +17,14 @@ export interface ProductOut {
   mediumId: number;
   storefrontId: number;
   id: number;
-  images?: string[];
+  images?: ProductImageOut[];
   medium?: MediumOut | null;
+}
+export interface ProductImageOut {
+  publicId: string;
+  position: number;
+  productId: number;
+  id: number;
 }
 export interface MediumOut {
   name: string;

@@ -1,6 +1,6 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { ProductMetadata } from '$lib/interfaces/ProductMetadata';
-import type { ProductsOut } from '$lib/interfaces/ProductsOut';
+import type { ProductOut } from '$lib/interfaces/ProductOut';
 
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async () => {
@@ -11,7 +11,7 @@ export const load = async ({ fetch, url }) => {
             return [];
         }
 
-        const responseData: ProductsOut[] = await response.json();
+        const responseData: ProductOut[] = await response.json();
 
         return responseData;
     }

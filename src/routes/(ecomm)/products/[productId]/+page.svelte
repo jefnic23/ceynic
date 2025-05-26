@@ -7,6 +7,8 @@
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import { page } from '$app/state';
+	import { CldImage } from 'svelte-cloudinary';
+	import { type ProductImageOut } from '$lib/interfaces/ProductOut';
 
 	// todo: Stripe/Amazon Pay needs to be added here as well
 
@@ -56,15 +58,33 @@
 			{product.title}
 		</div>
 		<div class="product">
-			<div class="image">
-				<img 
-					src={product.images[0]} 
-					alt={product.title}
-					data-pin-do="buttonPin"
-					data-pin-media={product.images[0]}
-					data-pin-url={page.url}
-					data-pin-description={product.title}
-				/>
+			<div class="images">
+				{#if (product.images as ProductImageOut[]).length > 1}
+					<ul>
+						{#each (product.images as ProductImageOut[]) as productImage}
+							<li>
+								<CldImage 
+									src={productImage.publicId} 
+									alt={productImage.publicId}
+									width={60}
+									height={60}
+									data-pin-nopin="true"
+								/>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				<div class="image">
+					<CldImage 
+						src={(product.images as ProductImageOut[])[0]?.publicId} 
+						alt={product.title}
+						width={0}
+						height={0}
+						data-pin-do="buttonPin"
+						data-pin-url={page.url}
+						data-pin-description={product.title}
+					/>
+				</div>
 			</div>
 			<div class="details">
 				<div>
@@ -138,13 +158,9 @@
 		flex-direction: row;
 	}
 
-	.image {
+	.images {
 		flex: 5;
 		padding: 1rem;
-	}
-
-	.image img {
-		width: 100%;
 	}
 
 	.details {

@@ -314,7 +314,7 @@
 			{/if}
 			<div class="product-grid">
 				{#each products as product}
-					{#if product.imageUrl}
+					{#if (product.images?.length as number) > 0}
 						<ProductCard product={product} />
 					{/if}
 				{/each}
@@ -419,7 +419,7 @@
 
 		aside.open {
 			transform: translateX(0);
-			z-index: 99999;
+			z-index: 9999999;
 			overflow-y: scroll;
 		}
 	}

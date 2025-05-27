@@ -4,16 +4,16 @@
 	interface Props {
 		showModal: boolean;
 		showClose?: boolean;
-		type?: 'info' | 'success' | 'warning' | 'error';
-		title: string;
+		type?: 'info' | 'success' | 'warning' | 'error' | 'none';
+		title?: string;
 		children?: Snippet;
 	}
 
 	let {
 		showModal = $bindable(),
 		showClose = true,
-		type = 'info',
-		title,
+		type = 'none',
+		title = '',
 		children
 	}: Props = $props();
 
@@ -26,11 +26,11 @@
 	function handleClick(event: Event) {
 		event.stopPropagation();
 	}
+
+	// todo: clicking outside modal if showClose is true should also close modal
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <dialog bind:this={dialog} onclose={() => (showModal = false)} class={type}>
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div onclick={handleClick}>
 		<div class="header {showClose ? 'justify-between' : 'justify-center'}">
 			<h2>{title}</h2>
@@ -58,7 +58,9 @@
 
 	dialog > div {
 		padding: 1em 1em 1em 1.34em;
-		transition: max-height 0.3s ease, height 0.3s ease;
+		transition:
+			max-height 0.3s ease,
+			height 0.3s ease;
 	}
 
 	dialog[open] {

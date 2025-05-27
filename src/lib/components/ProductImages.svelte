@@ -95,7 +95,7 @@
 </div>
 
 {#if showModal && modalImage}
-	<Modal bind:showModal={showModal}>
+    <Modal bind:showModal={showModal}>
         <div class="modal-image">
             <button class="arrow left" onclick={goToPrevious} aria-label="Previous image"><ArrowLeft /></button>
 
@@ -109,7 +109,7 @@
 
             <button class="arrow right" onclick={goToNext} aria-label="Next image"><ArrowRight /></button>
         </div>
-	</Modal>
+    </Modal>
 {/if}
 
 <style>

@@ -7,8 +7,6 @@
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import { page } from '$app/state';
-	import { CldImage } from 'svelte-cloudinary';
-	import { type ProductImageOut } from '$lib/interfaces/ProductOut';
 	import { onMount } from 'svelte';
 	import { loadScript, type PayPalNamespace } from '@paypal/paypal-js';
 	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';

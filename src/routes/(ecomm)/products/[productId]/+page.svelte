@@ -9,6 +9,11 @@
 	import { page } from '$app/state';
 	import { CldImage } from 'svelte-cloudinary';
 	import { type ProductImageOut } from '$lib/interfaces/ProductOut';
+	import { onMount } from 'svelte';
+	import { loadScript, type PayPalNamespace } from '@paypal/paypal-js';
+	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
+	import ProductImages from '$lib/components/ProductImages.svelte';
+
 
 	// todo: Stripe/Amazon Pay needs to be added here as well
 
@@ -31,6 +36,23 @@
 		orderId = e.detail;
 		showModal = !showModal;
 	}
+
+	let paypal: PayPalNamespace | null = $state(null);
+
+	onMount(async () => {
+		try {
+			paypal = await loadScript({
+				clientId: PUBLIC_PAYPAL_CLIENT_ID,
+				currency: 'USD',
+				dataPageType: 'checkout',
+				intent: 'authorize',
+				// debug: true
+				// todo: add merchantId
+			});
+		} catch (error) {
+			// todo: log error and show something in the UI
+		}
+	});
 
 	// todo: add callback to payment processor 
 	// todo: show modal payment confirmation
@@ -58,34 +80,7 @@
 			{product.title}
 		</div>
 		<div class="product">
-			<div class="images">
-				{#if (product.images as ProductImageOut[]).length > 1}
-					<ul>
-						{#each (product.images as ProductImageOut[]) as productImage}
-							<li>
-								<CldImage 
-									src={productImage.publicId} 
-									alt={productImage.publicId}
-									width={60}
-									height={60}
-									data-pin-nopin="true"
-								/>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-				<div class="image">
-					<CldImage 
-						src={(product.images as ProductImageOut[])[0]?.publicId} 
-						alt={product.title}
-						width={0}
-						height={0}
-						data-pin-do="buttonPin"
-						data-pin-url={page.url}
-						data-pin-description={product.title}
-					/>
-				</div>
-			</div>
+			<ProductImages product={product} url={page.url} />
 			<div class="details">
 				<div>
 					<div class="title">{product.title}</div>
@@ -99,18 +94,16 @@
 					<div>loading</div>
 				{:then paymentProcessor} 
 					{#if paymentProcessor === PaymentProcessor.PAYPAL}
-						<PayPal productIds={[product.id]} confirmOrder={confirmOrder} />
+						<PayPal paypal={paypal} productIds={[product.id]} confirmOrder={confirmOrder} />
 					{/if}
 				{/await}
-				<div>
-					{#await data.location}
-						<div>Ships from: <div class="loader"></div></div>
-					{:then location}
-						<div>
-							Ships from: <b>{location.city ? `${location.city}, ${location.state}` : `${location.state}`}</b>
-						</div>
-					{/await}
-				</div>
+				{#await data.location}
+					<div>Ships from: <div class="loader"></div></div>
+				{:then location}
+					<div>
+						Ships from: <b>{location.city ? `${location.city}, ${location.state}` : `${location.state}`}</b>
+					</div>
+				{/await}
 				<Tooltip content={returnsTooltipContent.trim()} position={'bottom'}>
 					<div>Returns & exchanges accepted within 14 days</div>
 				</Tooltip>
@@ -156,23 +149,7 @@
 	.product {
 		display: flex;
 		flex-direction: row;
-	}
-
-	.images {
-		display: flex;
-		flex-direction: row;
-		flex: 5;
-		padding: 1rem;
-	}
-
-	.images ul {
-		list-style: none;
-		padding: 0;
-	}
-
-	.images ul > li {
-		width: 60px;
-		height: 60px;
+		width: 100%;
 	}
 
 	.details {
@@ -181,6 +158,7 @@
 		display: flex;
 		flex-direction: column;
 		row-gap: 1rem;
+		align-items: center;
 	}
 
 	.title {
@@ -191,7 +169,6 @@
 
 	.description {
 		text-align: justify;
-		text-align-last: center;
 		hyphens: auto;
 	}
 
@@ -216,7 +193,7 @@
 
     @keyframes l1 {to{clip-path: inset(0 -34% 0 0)}}
 
-	@media only screen and (max-width: 900px) {
+	@media only screen and (max-width: 1144px) {
 		.wrapper {
 			align-items: center;
 		}

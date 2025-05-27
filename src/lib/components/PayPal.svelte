@@ -1,30 +1,17 @@
 <script lang="ts">
-	import { loadScript } from '@paypal/paypal-js';
+	import { type PayPalNamespace } from '@paypal/paypal-js';
 	import { onMount } from 'svelte';
-	import { PUBLIC_PAYPAL_CLIENT_ID, PUBLIC_API_URL } from '$env/static/public';
+	import { PUBLIC_API_URL } from '$env/static/public';
 
 	interface Props {
+		paypal: PayPalNamespace | null;
 		productIds: number[];
 		confirmOrder: CallableFunction;
 	}
 
-	let { productIds, confirmOrder }: Props = $props();
+	let { paypal, productIds, confirmOrder }: Props = $props();
 
 	onMount(async () => {
-		let paypal;
-
-		try {
-			paypal = await loadScript({
-				clientId: PUBLIC_PAYPAL_CLIENT_ID,
-				currency: 'USD',
-				dataPageType: 'checkout',
-				intent: 'authorize'
-				// debug: true
-			});
-		} catch (error) {
-			// todo: log error and show something in the UI
-		}
-
 		if (!paypal || !paypal.Buttons) {
 			// todo: add logic for skeleton buttons
 			return;

@@ -1,7 +1,11 @@
 <!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
-	export let size: number = 24;
-	export let color: string = 'currentColor';
+    interface Props {
+        size: number;
+        color: string;
+    }
+
+    let { size = 24, color = "currentColor", ...rest}: Props = $props();
 </script>
 
 <svg 
@@ -9,7 +13,7 @@
     width={size} 
     height={size} 
     viewBox="0 0 16 16" 
-    {...$$props}
+    {...rest}
 >
     <path 
         fill={color}

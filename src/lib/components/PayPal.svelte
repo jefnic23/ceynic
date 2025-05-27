@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { type PayPalNamespace } from '@paypal/paypal-js';
-	import { onMount } from 'svelte';
 	import { PUBLIC_API_URL } from '$env/static/public';
 
 	interface Props {
@@ -11,15 +10,15 @@
 
 	let { paypal, productIds, confirmOrder }: Props = $props();
 
-	onMount(async () => {
-		if (!paypal || !paypal.Buttons) {
-			// todo: add logic for skeleton buttons
-			return;
-		}
+	$effect(() => {
+		if (paypal) renderButtons();
+	})
+
+	async function renderButtons () {
+		if (!paypal?.Buttons) return;
 
 		try {
-			await paypal
-				.Buttons({
+			await paypal?.Buttons({
 					onShippingChange: function (_, actions) {
 						return actions.resolve();
 					},
@@ -94,7 +93,7 @@
 		} catch (error) {
 			// log error and show something in the UI
 		}
-	});
+	};
 </script>
 
 <div id="paypal-container-element"></div>

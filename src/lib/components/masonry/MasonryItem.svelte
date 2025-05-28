@@ -28,8 +28,9 @@
 			<CldImage 
 				src={(product.images as ProductImageOut[])[0]?.publicId} 
 				alt={product.title} 
-				width={630}
-				height={0}
+				width={(product.images as ProductImageOut[])[0]?.width}
+				height={(product.images as ProductImageOut[])[0]?.height}
+				loading={"lazy"}
 				onload={() => load(product.id)}
 				data-pin-do={!isMobile ? "buttonPin" : undefined}
 				data-pin-url={!isMobile ? page.url : undefined}

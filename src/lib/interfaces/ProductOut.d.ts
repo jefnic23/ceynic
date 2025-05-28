@@ -23,6 +23,8 @@ export interface ProductOut {
 export interface ProductImageOut {
   publicId: string;
   position: number;
+  width: number;
+  height: number;
   productId: number;
   id: number;
 }

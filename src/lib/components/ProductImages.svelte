@@ -2,7 +2,7 @@
 	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
 	import { CldImage } from "svelte-cloudinary";
 	import { quintOut } from "svelte/easing";
-	import { crossfade } from "svelte/transition";
+	import { crossfade, fly, slide } from "svelte/transition";
 	import Modal from "$lib/components/shared/Modal.svelte";
 	import { onMount } from "svelte";
 	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
@@ -50,6 +50,32 @@
 		}
 	}
 
+    let touchStartX: number | null = $state(null);
+    let touchEndX: number | null = $state(null);
+
+    function handleTouchStart(event: TouchEvent) {
+        touchStartX = event.changedTouches[0].clientX;
+    }
+
+    function handleTouchEnd(event: TouchEvent) {
+        touchEndX = event.changedTouches[0].clientX;
+
+        if (touchStartX === null || touchEndX === null) return;
+
+        const deltaX = touchEndX - touchStartX;
+
+        if (Math.abs(deltaX) < 50) return;
+
+        if (deltaX > 0) {
+            goToPrevious();
+        } else {
+            goToNext();
+        }
+
+        touchStartX = null;
+        touchEndX = null;
+    }
+
 	onMount(() => {
 		window.addEventListener('keydown', handleKeydown);
 		return () => window.removeEventListener('keydown', handleKeydown);
@@ -78,13 +104,15 @@
     {/if}
     <div class="image" onclick={() => (modalIndex = selectedIndex, showModal = true)}>
         {#key selectedImage?.publicId}
-            <div in:receive={{ key: selectedImage?.publicId }} out:send={{ key: selectedImage?.publicId }}>
+            <div 
+                in:receive={{ key: selectedImage?.publicId }}
+                out:send={{ key: selectedImage?.publicId }}
+            >
                 <CldImage 
                     src={selectedImage?.publicId || ""} 
                     alt={product.title}
-                    width={600}
-                    height={600}
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    width={(product.images as ProductImageOut[])[0]?.width}
+                    height={(product.images as ProductImageOut[])[0]?.height}
                     data-pin-do="buttonPin"
                     data-pin-url={url}
                     data-pin-description={product.title}
@@ -96,14 +124,14 @@
 
 {#if showModal && modalImage}
     <Modal bind:showModal={showModal}>
-        <div class="modal-image">
+        <div class="modal-image" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
             <button class="arrow left" onclick={goToPrevious} aria-label="Previous image"><ArrowLeft /></button>
 
             <CldImage
                 src={modalImage?.publicId || ""} 
                 alt={product.title}
-                width={960}
-                height={960}
+                width={(product.images as ProductImageOut[])[0]?.width}
+                height={(product.images as ProductImageOut[])[0]?.height}
                 data-pin-nopin="true"
             />
 
@@ -140,17 +168,13 @@
 		border-radius: 8px;
 	}
 
-    .image {
-        position: relative;
-        width: 600px;
-        height: 600px;
+    .image  {
+        display: grid;
         cursor: sw-resize;
     }
 
     .image > div {
-        position: absolute;
-        width: 100%;
-        height: 100%;
+        grid-area: 1 / 1;
     }
 
     .modal-image {

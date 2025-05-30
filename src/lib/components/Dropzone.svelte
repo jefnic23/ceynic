@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ProductImageOut } from '$lib/interfaces/ProductOut';
+	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -96,11 +97,12 @@
 	onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
 >
 	<div class="instructions">
+		<Icon icon="material-symbols:upload-rounded" />
 		<div>
 			Drag & drop images here, or click to select
 		</div>
 		<div>
-			Click uploaded images to set thumbnail
+			Click an uploaded image to set thumbnail
 		</div>
 	</div>
 	<input

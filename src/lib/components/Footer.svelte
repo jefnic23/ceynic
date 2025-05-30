@@ -1,13 +1,6 @@
 <script lang="ts">
-    import Etsy from '$lib/icons/Etsy.svelte';
-	import Facebook from '$lib/icons/Facebook.svelte';
-	import Instagram from '$lib/icons/Instagram.svelte';
-	import LinkedIn from '$lib/icons/LinkedIn.svelte';
-	import Pinterest from '$lib/icons/Pinterest.svelte';
-	import TikTok from '$lib/icons/TikTok.svelte';
-	import Twitter from '$lib/icons/Twitter.svelte';
 	import type { SocialMediaLinkOut } from '$lib/interfaces/SocialMediaLinkOut';
-	import type { Component } from 'svelte';
+	import Icon, { type IconProps } from '@iconify/svelte';
 
 	interface Props {
 		copyright?: string;
@@ -18,14 +11,14 @@
 
     let year: number = new Date().getFullYear();
 
-	const iconMap: Record<string, Component> = {
-		etsy: Etsy,
-		facebook: Facebook,
-		instagram: Instagram,
-		linkedin: LinkedIn,
-		pinterest: Pinterest,
-		tiktok: TikTok,
-		twitter: Twitter
+	const iconMap: Record<string, IconProps> = {
+		etsy: { icon: "mdi:etsy", color: "#eb6d20" },
+		facebook: { icon: "mdi:facebook", color: "#1877F2" },
+		instagram: { icon: "mdi:instagram", color: "#000000" },
+		linkedin: { icon: "mdi:linkedin", color: "#0077B5" },
+		pinterest: { icon: "mdi:pinterest", color: "#E60023" },
+		tiktok: { icon: "ic:baseline-tiktok", color: "#000000" },
+		twitter: { icon: "bi:twitter-x", color: "#000000" }
 		// todo: add more
 	}
 </script>
@@ -34,9 +27,14 @@
     <div class="icons">
 		<!-- todo: move social links to sidebar in mobile -->
 		{#each socialMediaLinks as { name, url }}
-			{@const SvelteComponent = iconMap[name.toLowerCase()]}
+			{@const iconProps = iconMap[name.toLowerCase()]}
 			<a href={url} target="_blank">
-				<SvelteComponent size={32} />
+				<Icon 
+					icon={iconProps.icon} 
+					color={iconProps.color || ""} 
+					width={32} 
+					height={32}
+				/>
 			</a>
 		{/each}
     </div>

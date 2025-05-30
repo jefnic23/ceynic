@@ -2,8 +2,9 @@
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import type { ActionResult } from '@sveltejs/kit';
 	import type { ActionData } from './$types';
-	import { applyAction, deserialize } from '$app/forms';
+	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import Button from '$lib/components/shared/Button.svelte';
 
 	interface Props {
 		form: ActionData;
@@ -87,7 +88,7 @@
 				<a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a> and
 				<a href="https://policies.google.com/terms" target="_blank">Terms of Service</a> apply.
 			</div>
-			<button>Send</button>
+			<Button>Send</Button>
 		{/if}
 	</form>
 </div>
@@ -122,7 +123,6 @@
 		font-size: 11px;
 	}
 
-	button,
 	input,
 	textarea {
 		font-family: inherit;

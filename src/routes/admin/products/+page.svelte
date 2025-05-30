@@ -4,7 +4,6 @@
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
-	import type { ProductsOut } from '$lib/interfaces/ProductsOut';
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
@@ -15,6 +14,7 @@
 	import Check from '$lib/icons/Check.svelte';
 	import Cancel from '$lib/icons/Cancel.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
+	import { currencyFormatter } from '$lib/utils/formatters';
 
 	interface Props {
 		data: PageData;
@@ -26,7 +26,7 @@
 	let loadingModal: boolean = $state(false);
 	let selectedProduct: ProductOut = $state()!;
 
-	async function openEditModal(product: ProductsOut) {
+	async function openEditModal(product: ProductOut[]) {
 		showModal = true;
 		loadingModal = true;
 		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
@@ -49,13 +49,7 @@
 		const filename = imageUrl.split('/').at(-1);
 		return `/api/proxy/${selectedProduct?.title?.replaceAll(' ', '_')}/${filename}`;
 	}
-
-	const currencyFormatter = new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		minimumFractionDigits: 2
-	});
-
+	
 	let images: File[] = [];
 
 	function handleImagesChange(event: CustomEvent<{ files: File[] }>) {

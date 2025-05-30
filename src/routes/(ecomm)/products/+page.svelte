@@ -8,10 +8,10 @@
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ProductFilter } from '$lib/enums/productFilter';
 	import ProductCard from '$lib/components/ProductCard.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import Filter from '$lib/icons/Filter.svelte';
+	import { onMount } from 'svelte';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
 	import type { ProductMetadata } from '$lib/interfaces/ProductMetadata';
+	import Icon from '@iconify/svelte';
 
 	interface Props {
 		data: PageData;
@@ -37,11 +37,10 @@
 
 		checkMobile();
 		window.addEventListener("resize", checkMobile);
-		return () => window.removeEventListener("resize", checkMobile);
-	});
-
-	onDestroy(() => {
-		document?.body?.classList?.remove('no-scroll');
+		return () => {
+			window.removeEventListener("resize", checkMobile);
+			document?.body?.classList?.remove('no-scroll');
+		}
 	});
 
 	function toggleSidebar() {
@@ -297,8 +296,8 @@
 			</div>
 		{/await}
 		<div class="filter-buttons">
-			<Button text={"Filter"} on:click={handleFilter} />
-			<Button text={"Clear"} style={ButtonStyle.Cancel} on:click={handleClear} />
+			<Button onclick={handleFilter}>Filter</Button>
+			<Button onclick={handleClear} style={ButtonStyle.Cancel}>Clear</Button>
 		</div>
 	</aside>
 	<div class="column products">
@@ -309,7 +308,10 @@
 		{:then products}
 			{#if isMobile}
 				<div class="row" style:justify-content={"flex-start"}>
-					<Button text={"Filter & Sort"} style={ButtonStyle.Neutral} on:click={toggleSidebar}><Filter /></Button>
+					<Button onclick={toggleSidebar} style={ButtonStyle.Neutral}>
+						<div>Filter & Sort</div>
+						<Icon icon="material-symbols:filter-list-rounded" width={32} height={32} />
+					</Button>
 				</div>
 			{/if}
 			<div class="product-grid">

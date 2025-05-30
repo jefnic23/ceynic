@@ -1,56 +1,41 @@
 <script lang="ts">
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import { ButtonSize } from '$lib/enums/buttonSize';
-	import { createEventDispatcher } from 'svelte';
+	import type {  Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 
-	interface Props {
-		text?: string;
-		name?: string;
-		value?: string;
+	interface Props extends HTMLButtonAttributes {
 		style?: ButtonStyle;
 		size?: ButtonSize;
 		disabled?: boolean;
 		loading?: boolean;
 		fullWidth?: boolean;
 		tooltip?: string | null;
-		children?: import('svelte').Snippet;
+		children?: Snippet;
 	}
 
 	let {
-		text = "",
-		name = "",
-		value = "",
 		style = ButtonStyle.Submit,
 		size = ButtonSize.Medium,
 		disabled = false,
 		loading = false,
 		fullWidth = false,
 		tooltip = null,
-		children
+		children,
+		...rest
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
-
-	function handleClick(event: Event) {
-		if (!disabled && !loading) {
-			dispatch('click', event);
-		}
-	}
 </script>
 
 <button
 	class="base-button {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
-	onclick={handleClick}
-	{disabled}
 	title={tooltip}
-	name={name}
-	value={value}
+	{disabled}
+	{...rest}
 >
 	{#if loading}
 		<!-- todo: use <Skeleton /> instead -->
 		<span class="spinner"></span>
 	{:else}
-		{text}
 		{@render children?.()}
 	{/if}
 </button>
@@ -68,7 +53,6 @@
 		border-radius: 0.25rem;
 		overflow: hidden;
 		position: relative;
-		height: 100%;
 		transition:
 			background-color 0.3s ease,
 			transform 0.2s ease,
@@ -140,7 +124,7 @@
 	}
 
 	/* Hover Effects */
-	button:hover {
+	button:hover:not(:disabled) {
 		transform: scale(1.03); /* Slight scale-up effect */
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
 	}

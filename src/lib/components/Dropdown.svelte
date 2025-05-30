@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	interface Props {
@@ -29,10 +29,10 @@
 	// Attach and detach the document click listener
 	onMount(() => {
 		document?.addEventListener('click', handleClickOutside);
-	});
 
-	onDestroy(() => {
-		document?.removeEventListener('click', handleClickOutside);
+		return () => {
+			document?.removeEventListener('click', handleClickOutside);
+		}
 	});
 </script>
 

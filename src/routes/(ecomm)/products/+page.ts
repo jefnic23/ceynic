@@ -4,7 +4,9 @@ import type { ProductOut } from '$lib/interfaces/ProductOut';
 
 export const load = async ({ fetch, url }) => {
     const fetchProducts = async () => {
-        const response = await fetch(`${PUBLIC_API_URL}/products?${url.searchParams}`);
+        const searchParams = url.searchParams ? `?${url.searchParams}` : '';
+
+        const response = await fetch(`${PUBLIC_API_URL}/products${searchParams}`);
 
         if (!response.ok) {
             console.log("Error retrieving products.");

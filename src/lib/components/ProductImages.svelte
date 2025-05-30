@@ -2,11 +2,10 @@
 	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
 	import { CldImage } from "svelte-cloudinary";
 	import { quintOut } from "svelte/easing";
-	import { crossfade, fly, slide } from "svelte/transition";
+	import { crossfade } from "svelte/transition";
 	import Modal from "$lib/components/shared/Modal.svelte";
 	import { onMount } from "svelte";
-	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
-	import ArrowRight from "$lib/icons/ArrowRight.svelte";
+	import Icon from "@iconify/svelte";
 
     interface Props {
 		product: ProductOut;
@@ -125,7 +124,9 @@
 {#if showModal && modalImage}
     <Modal bind:showModal={showModal}>
         <div class="modal-image" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
-            <button class="arrow left" onclick={goToPrevious} aria-label="Previous image"><ArrowLeft /></button>
+            <button class="arrow left" onclick={goToPrevious} aria-label="Previous image">
+                <Icon icon="material-symbols:arrow-back-ios-rounded" width={32} height={32} />
+            </button>
 
             <CldImage
                 src={modalImage?.publicId || ""} 
@@ -135,7 +136,9 @@
                 data-pin-nopin="true"
             />
 
-            <button class="arrow right" onclick={goToNext} aria-label="Next image"><ArrowRight /></button>
+            <button class="arrow right" onclick={goToNext} aria-label="Next image">
+                <Icon icon="material-symbols:arrow-forward-ios-rounded" width={32} height={32} />
+            </button>
         </div>
     </Modal>
 {/if}
@@ -188,8 +191,8 @@
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		background: rgba(0, 0, 0, 0.5);
-		color: white;
+		background: none;
+		color: black;
 		border: none;
 		font-size: 2rem;
 		padding: 0.5rem 1rem;
@@ -199,9 +202,9 @@
 		z-index: 10;
 	}
 
-	.arrow:hover {
+	/* .arrow:hover {
 		background: rgba(0, 0, 0, 0.7);
-	}
+	} */
 
 	.arrow.left {
 		left: 1rem;

@@ -21,7 +21,10 @@
 
 	let { data }: Props = $props();
 
-    let subtotal: number = $derived(cart.current.products.reduce((accumulator, product) => accumulator + parseInt(product.price as string), 0.0));
+    let subtotal: () => number = $derived(() => {
+        const prices = cart.current.products.map(p => parseFloat(p.price as string));
+		return prices.reduce((a, b) => a + b, 0.0)
+    });
     let showModal: boolean = $state(false);
 	let orderId: string = $state("");
 
@@ -99,7 +102,7 @@
                                     Subtotal ({cart.current.products.length}): 
                                 </div>
                                 <div>
-                                    {currencyFormatter.format(subtotal)}
+                                    {currencyFormatter.format(subtotal())}
                                 </div>
                             </div>
                             {#await data.paymentProcessor}
@@ -112,7 +115,7 @@
                         </div>
                     </Card> 
                 </div>
-                <div class="row">
+                <div class="row" style:justify-content="flex-end">
                     <Button 
                         onclick={() => cart.current.products = []}
                         style={ButtonStyle.Neutral}
@@ -144,12 +147,14 @@
     .column {
         display: flex;
         flex-direction: column;
+        width: 100%;
     }
 
     .row {
         display: flex;
         flex-direction: row;
         justify-content: center;
+        width: 100%;
     }
 
     .gap {

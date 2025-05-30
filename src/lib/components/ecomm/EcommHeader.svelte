@@ -61,15 +61,29 @@
 		}
 	});
 
-	let previousCount: number = $derived(cart.current.products.length || 0);
-	let animate: boolean = $state(false);
+	let previousCount: number = $state(cart.current.products.length || 0);
+	let displayCount: number = $state(cart.current.products.length || 0);
+	let animateBounce: boolean = $state(false);
+	let animateShrink: boolean = $state(false);
+	let showBadge: boolean = $state(false);
 
 	$effect(() => {
-		if (previousCount !== 0) {
-			animate = false;
-			requestAnimationFrame(() => {
-				animate = true;
-			});
+		if (cart.current.products.length > 0) {
+			displayCount = cart.current.products.length;
+			if (!showBadge) showBadge = true;
+			if (cart.current.products.length !== previousCount) {
+				animateBounce = false;
+				requestAnimationFrame(() => {
+					animateBounce = true;
+				});
+			}
+		} else if (previousCount > 0 && cart.current.products.length === 0) {
+			// Trigger shrink, then hide
+			animateShrink = true;
+			setTimeout(() => {
+				showBadge = false;
+				animateShrink = false;
+			}, 200); // match shrink duration
 		}
 		previousCount = cart.current.products.length || 0;
 	});
@@ -99,9 +113,10 @@
 			onclick={toggleMobileHeader}
 		>
 			<Icon icon="material-symbols:shopping-cart-rounded" width={32} height={32} />
-			{#if cart.current.products.length > 0}
-				<span class="cart-badge {animate ? 'bounce' : ''}">{cart.current.products.length}</span>
-				
+			{#if showBadge}
+				<span class="cart-badge {animateBounce ? 'bounce' : ''} {animateShrink ? 'shrink' : ''}">
+					{displayCount}
+				</span>
 			{/if}
 		</a>
 	</div>
@@ -268,5 +283,14 @@
 		50%  { transform: translate(-34%, 34%) scale(0.95); }
 		75%  { transform: translate(-34%, 34%) scale(1.05); }
 		100% { transform: translate(-34%, 34%) scale(1); }
+	}
+
+	.shrink {
+		animation: shrink 0.2s ease forwards;
+	}
+
+	@keyframes shrink {
+		from { transform: translate(-34%, 34%) scale(1); opacity: 1; }
+		to   { transform: translate(-34%, 34%) scale(0); opacity: 0; }
 	}
 </style>

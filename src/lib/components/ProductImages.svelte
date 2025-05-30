@@ -6,6 +6,7 @@
 	import Modal from "$lib/components/shared/Modal.svelte";
 	import { onMount } from "svelte";
 	import Icon from "@iconify/svelte";
+	import { page } from "$app/state";
 
     interface Props {
 		product: ProductOut;
@@ -75,7 +76,17 @@
         touchEndX = null;
     }
 
+    function handleThumbnail(index: number) {
+        selectedIndex = index;
+    }
+
 	onMount(() => {
+        const hash = page.url.hash;
+        const index = hash ? parseInt(hash.substring(1)) : 0;
+        if (!isNaN(index) && index >= 0 && index < (product.images as ProductImageOut[]).length) {
+			selectedIndex = index;
+		}
+
 		window.addEventListener('keydown', handleKeydown);
 		return () => window.removeEventListener('keydown', handleKeydown);
 	});
@@ -85,23 +96,33 @@
     {#if (product.images as ProductImageOut[]).length > 1}
         <ul>
             {#each (product.images as ProductImageOut[]) as image, i}
-                <li 
-                    onclick={() => (selectedIndex = i)}
-                    class:selected={i === selectedIndex}
-                >
-                    <CldImage 
-                        src={image.publicId} 
-                        alt={image.publicId}
-                        width={60}
-                        height={60}
-                        radius={8}
-                        data-pin-nopin="true"
-                    />
+                <li class:selected={i === selectedIndex}>
+                    <a href="#{i}" onclick={() => handleThumbnail(i)}>
+                        <CldImage 
+                            src={image.publicId} 
+                            alt={image.publicId}
+                            width={60}
+                            height={60}
+                            radius={8}
+                            data-pin-nopin="true"
+                        />
+                    </a>
                 </li>
             {/each}
         </ul>
     {/if}
-    <div class="image" onclick={() => (modalIndex = selectedIndex, showModal = true)}>
+    <div 
+        class="image" 
+        onclick={() => (modalIndex = selectedIndex, showModal = true)} 
+        onkeydown={(e) => { 
+            if (e.key !== "Enter" && e.key !== " ") return; 
+            e.preventDefault();
+            (e.target as HTMLElement).click();
+        }} 
+        role="button" 
+        tabindex="0" 
+        aria-pressed="false"
+    >
         {#key selectedImage?.publicId}
             <div 
                 in:receive={{ key: selectedImage?.publicId }}

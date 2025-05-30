@@ -7,14 +7,10 @@
 	import type { PageData } from './$types';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import Edit from '$lib/icons/Edit.svelte';
-	import Trash from '$lib/icons/Trash.svelte';
-	import AnimatedButton from '$lib/components/shared/AnimatedButton.svelte';
-	import Add from '$lib/icons/Add.svelte';
-	import Check from '$lib/icons/Check.svelte';
-	import Cancel from '$lib/icons/Cancel.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { currencyFormatter } from '$lib/utils/formatters';
+	import { CldImage } from 'svelte-cloudinary';
+	import Icon from '@iconify/svelte';
 
 	interface Props {
 		data: PageData;
@@ -26,7 +22,7 @@
 	let loadingModal: boolean = $state(false);
 	let selectedProduct: ProductOut = $state()!;
 
-	async function openEditModal(product: ProductOut[]) {
+	async function openEditModal(product: ProductOut) {
 		showModal = true;
 		loadingModal = true;
 		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
@@ -38,10 +34,9 @@
 			return;
 		}
 
-		const responseData = await response.json();
+		const responseData: ProductOut = await response.json();
 
-		selectedProduct = { ...responseData };
-		selectedProduct.images = selectedProduct?.images?.map(replaceImageUrl);
+		selectedProduct = responseData;
 		loadingModal = false;
 	}
 
@@ -73,8 +68,9 @@
 	<Card>
 		<div class="header">
 			<h1>Products</h1>
-			<Button text="Add New Product" style={ButtonStyle.Info}>
-				<Add />
+			<Button style={ButtonStyle.Info}>
+				<div>Add New Product</div>
+				<Icon icon="material-symbols:add-rounded" />
 			</Button>
 		</div>
 		{#await data.products}
@@ -96,8 +92,13 @@
 				<tbody>
 					{#each products as product}
 						<tr>
-							<td class="thumbnail">
-								<img src="{product.imageUrl}" alt="{product.thumbnail}" />
+							<td>
+								<CldImage
+									src={product.images?.[0]?.publicId || ""}
+									alt={product.title}
+									width={48}
+									height={48}
+								/>
 							</td>
 							<td>{product.title}</td>
 							<td>{currencyFormatter.format((product.price as number))}</td>
@@ -106,18 +107,20 @@
 							<td>{product.medium}</td>
 							<td>
 								{#if product.enabled}
-									<Check color={"green"} size={32} />
+									<Icon icon="material-symbols:check-rounded" width={32} height={32} />
 								{:else}
-									<Cancel color={"red"} size={32} />
+									<Icon icon="material-symbols:close-rounded" width={32} height={32} />
 								{/if}
 							</td>
 							<td>
-								<AnimatedButton text="Edit" style={ButtonStyle.Info} on:click={async () => await openEditModal(product)}>
-									<Edit size={16} />
-								</AnimatedButton>
-								<AnimatedButton text="Delete" style={ButtonStyle.Cancel}>
-									<Trash size={16} />
-								</AnimatedButton>
+								<Button style={ButtonStyle.Info} onclick={async () => await openEditModal(product)}>
+									<div>Edit</div>
+									<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
+								</Button>
+								<Button style={ButtonStyle.Cancel}>
+									<div>Delete</div>
+									<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
+								</Button>
 							</td>
 						</tr>
 					{/each}
@@ -200,8 +203,12 @@
 				/>
 
 				<div class="form-buttons">
-					<Button text="Submit" on:click={handleSubmit} />
-					<Button text="Cancel" style={ButtonStyle.Cancel} on:click={() => showModal = false} />
+					<Button onclick={handleSubmit}>
+						Submit
+					</Button>
+					<Button style={ButtonStyle.Cancel} onclick={() => showModal = false}>
+						Cancel
+					</Button>
 				</div>
 
 				<!-- <div class="image-container">

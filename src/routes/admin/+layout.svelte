@@ -1,15 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { enhance } from "$app/forms";
-    import Home from '$lib/icons/Home.svelte';
-	import Listing from '$lib/icons/Listing.svelte';
-	import Logout from "$lib/icons/Logout.svelte";
-	import Settings from "$lib/icons/Settings.svelte";
-	import Person from "$lib/icons/Person.svelte";
 	import type { LayoutData } from './$types';
 	import Sidebar from '$lib/components/shared/Sidebar.svelte';
 	import { onNavigate } from '$app/navigation';
-	import Box from "$lib/icons/Box.svelte";
+	import Icon from "@iconify/svelte";
 
 	onNavigate((navigation) => {
 		if (!document?.startViewTransition) return;
@@ -35,29 +30,29 @@
 		<div class="sidebar">
 			<nav>
 				<a href="/admin">
-					<Home /> 
+					<Icon icon="material-symbols:home-rounded" />
 					<span class="label">Home</span>
 				</a>
 				<a href="/admin/products" data-sveltekit-preload-data>
-					<Listing /> 
+					<Icon icon="material-symbols:list-alt" />
 					<span class="label">Products</span>
 				</a>
 				<a href="/admin/orders" data-sveltekit-preload-data>
-					<Box />
+					<Icon icon="material-symbols:box" />
 					<span class="label">Orders</span>
 				</a>
 				<a href="/admin/settings">
-					<Settings />
+					<Icon icon="material-symbols:settings-rounded" />
 					<span class="label">Settings</span>
 				</a>
 				<a href="/admin/account">
-					<Person />
+					<Icon icon="material-symbols:person" />
 					<span class="label">Account</span>
 				</a>
 			</nav>
 			<form action="/admin/logout" method="POST" use:enhance>
 				<button type="submit">
-					<Logout /> 
+					<Icon icon="material-symbols:logout-rounded" />
 					<span class="label">Log Out</span>
 				</button>
 			</form>

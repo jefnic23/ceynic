@@ -3,7 +3,7 @@
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import type { OrderDetails } from '$lib/interfaces/OrderDetails';
+	import type { Address, OrderDetails } from '$lib/interfaces/OrderDetails';
 	import type { PageServerData } from './$types';
 
 	interface Props {
@@ -28,6 +28,18 @@
 	}
 </script>
 
+{#snippet address(order: OrderDetails)}
+	{@const address: Address | undefined = order.purchaseUnits?.[0]?.shipping?.address}
+	<div>
+		{address?.addressLine1}
+		{address?.addressLine2}, 
+		{address?.adminArea2}, 
+		{address?.adminArea1}, 
+		{address?.postalCode}
+	</div>
+	<div>{address?.countryCode}</div>
+{/snippet}
+
 <div class="wrapper">
 	{#await data.order}
 		<div>loading products...</div>
@@ -48,7 +60,7 @@
 					{#each order.purchaseUnits as purchaseUnit}
 						<tr>
 							<td>{purchaseUnit.description}</td>
-							<td>${purchaseUnit.amount.value}</td>
+							<td>${purchaseUnit.amount?.value}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -60,14 +72,7 @@
 				<h2>Customer Details</h2>
 				<div>{order.payer.name.givenName} {order.payer.name.surname}</div>
 				<div>{order.payer.emailAddress}</div>
-				<div>
-					{order.purchaseUnits[0].shipping.address.addressLine1}
-					{order.purchaseUnits[0].shipping.address.addressLine2}, 
-                    {order.purchaseUnits[0].shipping.address.adminArea2}, 
-                    {order.purchaseUnits[0].shipping.address.adminArea1}, 
-                    {order.purchaseUnits[0].shipping.address.postalCode}
-				</div>
-				<div>{order.purchaseUnits[0].shipping.address.countryCode}</div>
+				{@render address(order)}
 			</div>
 		</Card>
 		<Card>
@@ -77,10 +82,10 @@
 			</div>
 		</Card>
         <form action="/admin/orders/{order.id}" method="POST" use:enhance>
-			{#if order.purchaseUnits[0].payments.authorizations[0].status === "CREATED"}
+			{#if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED"}
 				<Button name={"action"} value={"capture"}>Complete Order</Button>
 				<Button name={"action"} value={"void"} style={ButtonStyle.Cancel}>Void</Button>
-			{:else if order.purchaseUnits[0].payments.authorizations[0].status === "CAPTURED"}
+			{:else if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CAPTURED"}
 				<Button name={"action"} value={"refund"} style={ButtonStyle.Info}>Refund</Button>
 			{/if}
         </form>

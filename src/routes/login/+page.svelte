@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Person from '$lib/icons/Person.svelte';
-	import Lock from '$lib/icons/Lock.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import Card from '$lib/components/shared/Card.svelte';
+	import Icon from '@iconify/svelte';
 
 	interface Props {
 		form: ActionData;
@@ -19,11 +18,11 @@
 			<h2>Log in</h2>
 			<form method="POST" use:enhance>
 				<div class="input-container">
-					<Person />
+					<Icon icon="material-symbols:person" />
 					<input id="email" name="username" value="" placeholder="Email" type="email" required />
 				</div>
 				<div class="input-container">
-					<Lock />
+					<Icon icon="material-symbols:lock" />
 					<input
 						id="password"
 						name="password"
@@ -40,7 +39,7 @@
 				{#if form?.credentials}
 					<p class="error">You have entered the wrong credentials.</p>
 				{/if}
-				<Button text="Submit" />
+				<Button>Submit</Button>
 			</form>
 		</div>
 	</Card>

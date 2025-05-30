@@ -1,10 +1,11 @@
 <script lang="ts">
+	import type { ProductImageOut } from '$lib/interfaces/ProductOut';
 	import { onMount } from 'svelte';
 
 	interface Props {
 		change: CallableFunction,
 		thumbnailChange: CallableFunction,
-		previews: string[];
+		previews: ProductImageOut[];
 		thumbnail: string | null;
 	}
 
@@ -63,9 +64,9 @@
 		thumbnailChange(thumbnail);
 	}
 
-	async function createFileFromImage(imageUrl: string) {
-		const filename = imageUrl.split('/').at(-1);
-		const response = await fetch(imageUrl);
+	async function createFileFromImage(productImage: ProductImageOut) {
+		const filename = productImage.publicId;
+		const response = await fetch(productImage.publicId);
 		const blob = await response.blob();
 		const file = new File([blob], filename as string, { type: blob.type });
 		return file;

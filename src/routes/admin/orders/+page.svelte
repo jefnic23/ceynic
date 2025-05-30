@@ -1,8 +1,8 @@
 <!-- @migration-task Error while migrating Svelte code: `<th>` is invalid inside `<thead>` -->
 <script lang="ts">
-	import AnimatedButton from "$lib/components/shared/AnimatedButton.svelte";
+	import Button from "$lib/components/shared/Button.svelte";
 	import { ButtonStyle } from "$lib/enums/buttonStyle";
-	import Edit from "$lib/icons/Edit.svelte";
+	import Icon from "@iconify/svelte";
 	import type { PageServerData } from "./$types";
 
 	interface Props {
@@ -33,9 +33,10 @@
 						<td>{order.status}</td>
 						<td>
 							<a href="/admin/orders/{order.id}" data-sveltekit-preload-data>
-								<AnimatedButton text={"Details"} style={ButtonStyle.Info}>
-									<Edit size={16} />
-								</AnimatedButton>
+								<Button style={ButtonStyle.Info}>
+									<div>Details</div>
+									<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
+								</Button>
 							</a>
 						</td>
 					</tr>

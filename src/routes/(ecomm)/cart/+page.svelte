@@ -77,10 +77,10 @@
                                                 <h3 style:margin="0">{product.title}</h3>
                                             </a>
                                         </div>
-                                        <div>{product.description}</div>
-                                        <div style:font-style="italic">{currencyFormatter.format(product.price as number)}</div>
+                                        <div class="description">{product.description}</div>
+                                        <div>{currencyFormatter.format(product.price as number)}</div>
                                     </div>
-                                    <div class="end" style:margin-top="2rem">
+                                    <div class="remove">
                                         <Button onclick={() => handleRemove(product)} style={ButtonStyle.Neutral}>Remove</Button>
                                     </div>
                                 </div>
@@ -191,6 +191,23 @@
     .product {
         display: flex;
         flex-direction: row;
+    }
+
+    .description {
+        width: 100%;
+        max-width: 600px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-style: italic;
+        padding-right: 3px;
+        color: rgb(112, 112, 112);
+    }
+
+    .remove {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: end;
     }
 
     .summary {

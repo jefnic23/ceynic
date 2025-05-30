@@ -1,19 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import PayPal from '$lib/components/PayPal.svelte';
 	import Tooltip from '$lib/components/shared/Tooltip.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
-	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
-	import Modal from '$lib/components/shared/Modal.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
-	import { loadScript, type PayPalNamespace } from '@paypal/paypal-js';
-	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
 	import ProductImages from '$lib/components/ProductImages.svelte';
-
-
-	// todo: Stripe/Amazon Pay needs to be added here as well
+	import Button from '$lib/components/shared/Button.svelte';
+	import type { ProductOut } from '$lib/interfaces/ProductOut';
+	import { ButtonStyle } from '$lib/enums/buttonStyle';
+	import { cart } from '$lib/state/cart.svelte';
+	import Icon from '@iconify/svelte';
+	import { currencyFormatter } from '$lib/utils/formatters';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -27,40 +24,22 @@
         is responsible for any loss in value.
     `;
 
-	let showModal: boolean = $state(false);
-	let orderId: string = $state("");
-
-	function confirmOrder(e: CustomEvent) {
-		orderId = e.detail;
-		showModal = !showModal;
+	function handleAddToCart(product: ProductOut) {
+		cart.current.products.push(product);
+		// todo: add toast message with redirect to cart
+		// console.log($state.snapshot(cart));
 	}
 
-	let paypal: PayPalNamespace | null = $state(null);
-
-	onMount(async () => {
-		try {
-			paypal = await loadScript({
-				clientId: PUBLIC_PAYPAL_CLIENT_ID,
-				currency: 'USD',
-				dataPageType: 'checkout',
-				intent: 'authorize',
-				// debug: true
-				// todo: add merchantId
-			});
-		} catch (error) {
-			// todo: log error and show something in the UI
-		}
-	});
-
-	// todo: add callback to payment processor 
-	// todo: show modal payment confirmation
+	function handleViewInCart() {
+		goto('/cart');
+	}
 </script>
 
 <div class="wrapper">
 	{#await data.product}
 		<div class="breadcrumb">
 			<a href="/products">Browse</a>
-			<ArrowRight size={16} />
+			<Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />
 			...
 		</div>
 		<div class="product">
@@ -74,7 +53,7 @@
 	{:then product}
 		<div class="breadcrumb">
 			<a href="/products">Browse</a>
-			<ArrowRight size={16} />
+			<Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />
 			{product.title}
 		</div>
 		<div class="product">
@@ -85,16 +64,18 @@
 					<div class="description">{product.description}</div>
 				</div>
 				<div>
-					<div class="price">${product.price}</div>
+					<div class="price">{currencyFormatter.format(product.price as number)}</div>
 					<div class="shipping">+ <i>free shipping</i></div>
 				</div>
-				{#await data.paymentProcessor}
-					<div>loading</div>
-				{:then paymentProcessor} 
-					{#if paymentProcessor === PaymentProcessor.PAYPAL}
-						<PayPal paypal={paypal} productIds={[product.id]} confirmOrder={confirmOrder} />
-					{/if}
-				{/await}
+				{#if cart.current.products.find(p => p.id === product.id) === undefined}
+					<Button onclick={() => handleAddToCart(product)} style={ButtonStyle.Info}>
+						Add to Cart
+					</Button>
+				{:else}
+					<Button onclick={handleViewInCart} style={ButtonStyle.Neutral}>
+						View in Cart
+					</Button>
+				{/if}
 				{#await data.location}
 					<div>Ships from: <div class="loader"></div></div>
 				{:then location}
@@ -110,14 +91,7 @@
 	{/await}
 </div>
 
-{#if showModal}
-	<Modal bind:showModal title={"Order Confirmed!"} type={"success"}>
-		<div>
-			<div>Your order has been confirmed.</div>
-			<div>Order ID: {orderId}</div>
-		</div>
-	</Modal>
-{/if}
+
 
 <style>
 	.wrapper {

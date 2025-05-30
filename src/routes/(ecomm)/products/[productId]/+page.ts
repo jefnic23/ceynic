@@ -1,6 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { Location } from '$lib/interfaces/Location'
-import type { PaymentProcessor } from '$lib/enums/paymentProcessor.js';
 import type { ProductOut } from '$lib/interfaces/ProductOut';
 
 export const load = async ({ fetch, params }) => {
@@ -28,21 +27,8 @@ export const load = async ({ fetch, params }) => {
         return responseData;
     }
 
-    const fetchPaymentProcessor = async (): Promise<PaymentProcessor> => {
-        const response = await fetch(`${PUBLIC_API_URL}/settings/paymentProcessor`);
-
-        if (!response.ok) {
-            console.log("Error retrieving payment processor.");
-        }
-
-        const responseData: PaymentProcessor = await response.json();
-
-        return responseData;
-    }
-
     return {
         product: fetchProduct(params.productId),
-        location: fetchShippingLocation(),
-        paymentProcessor: fetchPaymentProcessor()
+        location: fetchShippingLocation()
     }
 }

@@ -52,8 +52,8 @@
 		box-sizing: border-box;
 	}
 
-	.container input:focus + label,
-	.container input:not(:placeholder-shown) + label {
+	.container :global(input:focus + label),
+	.container :global(input:not(:placeholder-shown) + label) {
 		top: -10px;
 		font-size: 0.7em;
 		color: #007bff;

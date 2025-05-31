@@ -355,7 +355,7 @@
 		margin: 0;
 	}
 
-	.thumbnail {
+	/* .thumbnail {
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -366,7 +366,7 @@
 		width: 48px;
 		height: 48px;
 		margin: 0.5rem 0;
-	}
+	} */
 
 	:is(tbody > tr):hover {
 		outline: 2px solid #666;

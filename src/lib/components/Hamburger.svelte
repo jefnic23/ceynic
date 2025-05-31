@@ -6,7 +6,7 @@
     let { open = $bindable(false) }: Props = $props();
 </script>
 
-<button class:open onclick={() => open = !open}>
+<button class:open onclick={() => open = !open} aria-label="Main menu">
     <span></span>
     <span></span>
     <span></span>

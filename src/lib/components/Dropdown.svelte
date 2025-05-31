@@ -40,6 +40,14 @@
 	<div
 		class="dropdown-header {isDropdownOpen ? 'open' : ''}"
 		onclick={() => (isDropdownOpen = !isDropdownOpen)}
+		onkeydown={(e) => { 
+            if (e.key !== "Enter" && e.key !== " ") return; 
+            e.preventDefault();
+            (e.target as HTMLElement).click();
+        }} 
+		role="button" 
+        tabindex="0" 
+        aria-pressed="false"
 	>
 		Sort: {options.find((option) => option.value === selected)?.label || ''}
 		<span class="icon">▼</span>
@@ -47,7 +55,18 @@
 	{#if isDropdownOpen}
 		<div class="dropdown-list" transition:slide={{ duration: 233 }}>
 			{#each options as option}
-				<div class:selected={option.value === selected} onclick={() => selectOption(option.value)}>
+				<div 
+					class:selected={option.value === selected} 
+					onclick={() => selectOption(option.value)}
+					onkeydown={(e) => { 
+						if (e.key !== "Enter" && e.key !== " ") return; 
+						e.preventDefault();
+						(e.target as HTMLElement).click();
+					}} 
+					role="button" 
+					tabindex="0" 
+					aria-pressed="false"
+				>
 					<span>{option.label}</span>
 					{#if option.value === selected}
 						<span class="checkmark">✔</span>

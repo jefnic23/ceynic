@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { tick } from "svelte";
+
 	interface Props {
 		value: number;
 		relatedValue: number;
@@ -22,6 +24,17 @@
 		max,
 		className = ""
 	}: Props = $props();
+
+	let minAtLimit = $state(false);
+	let maxAtLimit = $state(false);
+
+	async function flashLimit(setLimit: (v: boolean) => void) {
+		setLimit(false);
+		await tick();
+		setLimit(true);
+		await tick();
+		setTimeout(() => setLimit(false), 377);
+	}
 
     function handleInput(
         event: Event,
@@ -48,11 +61,10 @@
             newValue = Math.max(newValue, relatedValue);
         }
 
-        // Update the bound value
-        setValue(newValue);
+		setValue(newValue);
 
-        // Mark the value as updated
-        setFlag(true);
+		// Mark the value as updated
+		setFlag(true);
     }
 
     function handleWheel(
@@ -60,7 +72,8 @@
 		setValue: (newValue: number) => void,
 		setFlag: (newFlag: boolean) => void,
 		relatedValue?: number,
-		isMin?: boolean
+		isMin?: boolean,
+		flashLimitReached?: () => void
 	): void {
 		const input = event.target as HTMLInputElement;
 
@@ -85,11 +98,15 @@
                 newValue = Math.max(newValue, relatedValue);
             }
 
-			// Update the bound value
-			setValue(newValue);
+			if (newValue === value && flashLimitReached) {
+				flashLimitReached(); // trigger the animation
+			} else {
+				// Update the bound value
+				setValue(newValue);
 
-			// Mark the value as updated
-			setFlag(true);
+				// Mark the value as updated
+				setFlag(true);
+			}
 		}
 	}
 </script>
@@ -103,8 +120,22 @@
         max={max}
         step="1"
         bind:value={value}
-        onblur={(e) => handleInput(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
-        onwheel={(e) => handleWheel(e, (newValue) => value = newValue, (newFlag) => isChanged = newFlag, relatedValue, isMinimum)}
+		class:at-limit={isMinimum ? minAtLimit : maxAtLimit}
+        onblur={(e) => handleInput(
+			e, 
+			(newValue) => value = newValue, 
+			(newFlag) => isChanged = newFlag, 
+			relatedValue, 
+			isMinimum
+		)}
+        onwheel={(e) => handleWheel(
+			e, 
+			(newValue) => value = newValue, 
+			(newFlag) => isChanged = newFlag, 
+			relatedValue, 
+			isMinimum,
+			() => flashLimit((v) => (isMinimum ? minAtLimit = v : maxAtLimit = v))
+		)}
     />
 </div>
 
@@ -165,5 +196,24 @@
 		font-size: 1em;
 		font-weight: bold;
 		color: #333; /* Adjust color as needed */
+	}
+
+	@keyframes pulseLimit {
+		0% {
+			box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6);
+			border-color: red;
+		}
+		50% {
+			box-shadow: 0 0 0 6px rgba(255, 0, 0, 0);
+			border-color: red;
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+			border-color: inherit;
+		}
+	}
+
+	input.at-limit {
+		animation: pulseLimit 0.377s ease-out;
 	}
 </style>

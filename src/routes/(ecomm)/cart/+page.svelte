@@ -28,9 +28,10 @@
     let showModal: boolean = $state(false);
 	let orderId: string = $state("");
 
-	function confirmOrder(e: CustomEvent) {
-		orderId = e.detail;
-		showModal = !showModal;
+	function confirmOrder(orderID: string) {
+		orderId = orderID;
+		showModal = !showModal; // todo: order confirmation page instead?
+        cart.current.products = [];
 	}
 
     // todo: Stripe/Amazon Pay needs to be added here as well

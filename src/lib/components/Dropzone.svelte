@@ -5,49 +5,117 @@
 
 	interface Props {
 		change: CallableFunction,
-		thumbnailChange: CallableFunction,
 		previews: ProductImageOut[];
-		thumbnail: string | null;
 	}
 
 	let { 
 		change,
-		thumbnailChange,
-		previews, 
-		thumbnail = $bindable() 
+		previews
 	}: Props = $props();
 
 	let files: File[] = $state([]);
+	let fileHashes: Set<string> = $state(new Set());
+	let draggedIndex: number | null = $state(null);
+	let hoverIndex: number | null = $state(null);
 
-	$effect(() => {
-		if (!thumbnail && files.length > 0) {
-			thumbnail = files[0].name;
-		}
-	});
+	async function hashFile(file: File): Promise<string> {
+		const arrayBuffer = await file.arrayBuffer();
+		const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+		const hashArray = Array.from(new Uint8Array(hashBuffer));
+		return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+	}
+
+	function handleDragStart(index: number) {
+		draggedIndex = index;
+		hoverIndex = index;
+	}
+
+	function handleDragEnter(targetIndex: number) {
+		if (draggedIndex === null || targetIndex === hoverIndex) return;
+
+		const reordered = [...files];
+		const [moved] = reordered.splice(draggedIndex, 1);
+		reordered.splice(targetIndex, 0, moved);
+
+		files = reordered;
+		draggedIndex = targetIndex; // update drag position
+		hoverIndex = targetIndex;
+	}
+
+	function handleDragEnd() {
+		draggedIndex = null;
+		hoverIndex = null;
+		change(files);
+	}
 
 	function handleDragover(event: DragEvent) {
 		event.preventDefault();
-		const dragoverEvent = new CustomEvent('dragover', { bubbles: true });
-		event.currentTarget?.dispatchEvent(dragoverEvent);
+		// const dragoverEvent = new CustomEvent('dragover', { bubbles: true });
+		// event.currentTarget?.dispatchEvent(dragoverEvent);
 	}
 
 	// Triggered when images are dropped into the dropzone
-	function handleDrop(event: DragEvent) {
+	async function handleDrop(event: DragEvent) {
 		event.preventDefault();
-		if (event.dataTransfer) {
-			const newFiles = Array.from(event.dataTransfer.files).filter((file) =>
-				file.type.startsWith('image/')
-			);
-			files = [...files, ...newFiles];
+
+		if (!event.dataTransfer) return;
+
+		const droppedFiles = Array.from(event.dataTransfer.files).filter((file) =>
+			file.type.startsWith('image/')
+		);
+
+		const uniqueNewFiles: File[] = [];
+
+		for (const file of droppedFiles) {
+			const hash = await hashFile(file);
+			if (!fileHashes.has(hash)) {
+				fileHashes.add(hash);
+				uniqueNewFiles.push(file);
+			}
+		}
+
+		if (uniqueNewFiles.length > 0) {
+			files = [...files, ...uniqueNewFiles];
 			change(files);
 		}
 	}
 
+	function handleKeyDown(event: KeyboardEvent, index: number) {
+		if (event.key === 'ArrowLeft' && index > 0) {
+			event.preventDefault();
+			const reordered = [...files];
+			const [moved] = reordered.splice(index, 1);
+			reordered.splice(index - 1, 0, moved);
+			files = reordered;
+			change(files);
+			setTimeout(() => focusImage(index - 1), 0);
+		} else if (event.key === 'ArrowRight' && index < files.length - 1) {
+			event.preventDefault();
+			const reordered = [...files];
+			const [moved] = reordered.splice(index, 1);
+			reordered.splice(index + 1, 0, moved);
+			files = reordered;
+			change(files);
+			setTimeout(() => focusImage(index + 1), 0);
+		}
+	}
+
+	function focusImage(index: number) {
+		const elements = document.querySelectorAll('.image-wrapper');
+		(elements[index] as HTMLElement)?.focus();
+	}
+
 	// Triggered when images are selected through file input
-	function handleSelect(event: Event) {
+	async function handleSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const selectedFiles = target.files ? Array.from(target.files) : [];
 		const newFiles = selectedFiles.filter((file) => file.type.startsWith('image/'));
+		for (const file of newFiles) {
+			const hash = await hashFile(file);
+			if (!fileHashes.has(hash)) {
+				fileHashes.add(hash);
+			}
+		}
 		files = [...files, ...newFiles];
 		change(files);
 	}
@@ -59,15 +127,9 @@
 		change(files);
 	}
 
-	function selectThumbnail(filename: string, event: MouseEvent | KeyboardEvent) {
-		event.stopPropagation(); // Prevents triggering the dropzone click event
-		thumbnail = filename;
-		thumbnailChange(thumbnail);
-	}
-
 	async function createFileFromImage(productImage: ProductImageOut) {
 		const filename = productImage.publicId;
-		const response = await fetch(productImage.publicId);
+		const response = await fetch(`../api/proxy/${productImage.publicId}`);
 		const blob = await response.blob();
 		const file = new File([blob], filename as string, { type: blob.type });
 		return file;
@@ -77,11 +139,14 @@
 
 	onMount(async () => {
 		if (previews.length > 0) {
-			Promise.all(previews.map(createFileFromImage))
-				.then((resolvedFiles) => {
-					files = resolvedFiles;
-				})
-				.catch((error) => console.error('Error loading files:', error));
+			const resolvedFiles = await Promise.all(previews.map(createFileFromImage));
+			files = resolvedFiles;
+			for (const file of resolvedFiles) {
+				const hash = await hashFile(file);
+				if (!fileHashes.has(hash)) {
+					fileHashes.add(hash);
+				}
+			}
 		}
 	});
 </script>
@@ -102,7 +167,7 @@
 			Drag & drop images here, or click to select
 		</div>
 		<div>
-			Click an uploaded image to set thumbnail
+			Move images to reorder
 		</div>
 	</div>
 	<input
@@ -116,21 +181,31 @@
 	<div class="image-preview">
 		{#each files as file, index}
 			<div
-				class="image-wrapper {thumbnail === file.name ? 'thumbnail' : ''}"
+				class="image-wrapper 
+					{index === 0 ? 'thumbnail' : ''} 
+					{index === draggedIndex ? 'dragged' : ''} 
+					{index === hoverIndex ? 'hovered' : ''}"
 				role="button"
-				aria-label="Click an image to make it the product thumbnail."
-				aria-pressed={thumbnail === file.name}
+				aria-label="Use arrow keys to reorder."
+				aria-pressed={index === 0}
 				tabindex="0"
-				onclick={(e) => selectThumbnail(file.name, e)}
-				onkeydown={(e) => e.key === 'Enter' && selectThumbnail(file.name, e)}
+				draggable="true"
+				ondragstart={() => handleDragStart(index)}
+				ondragenter={() => handleDragEnter(index)}
+				ondragend={handleDragEnd}
+				onkeydown={(e) => handleKeyDown(e, index)}
 			>
-				<img src={URL.createObjectURL(file)} alt="Preview" class="image" />
-				{#if thumbnail === file.name}
+				<img class="image" src={URL.createObjectURL(file)} alt={file.name} />
+				{#if index === 0}
 					<span class="thumbnail-indicator">Thumbnail</span>
 				{/if}
-				<button class="remove-btn" aria-label="Remove image" onclick={(e) => removeImage(index, e)}
-					>&times;</button
+				<button
+					class="remove-btn" 
+					aria-label="Remove image" 
+					onclick={(e) => removeImage(index, e)}
 				>
+					&times;
+				</button>
 			</div>
 		{/each}
 	</div>
@@ -161,16 +236,41 @@
 		display: flex;
 		flex-wrap: wrap;
 		margin-top: 10px;
+		justify-content: center;
 	}
 
 	.image-wrapper {
 		position: relative;
+		width: 150px;
+		height: 150px;
 		margin: 5px;
+		cursor: grab;
+		border: 2px solid transparent;
+		border-radius: 8px;
+		overflow: hidden;
+		transition: transform 150ms ease, border-color 150ms ease;
+	}
+
+	.image-wrapper.dragged {
+		opacity: 0.6;
+		transform: scale(0.95);
+		cursor: grabbing;
+	}
+
+	.image-wrapper.hovered {
+		border-color: var(--accent, #0070f3);
+		box-shadow: 0 0 0 2px var(--accent, #0070f3);
+	}
+
+	.image-wrapper img.image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.image {
-		width: 144px;
-		height: 144px;
+		width: 150px;
+		height: 150px;
 		object-fit: cover;
 	}
 

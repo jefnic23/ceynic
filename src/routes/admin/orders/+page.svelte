@@ -28,7 +28,7 @@
 			<tbody>
 				{#each orders as order}
 					<tr>
-						<td>{order.id}</td>
+						<td>{order.orderId}</td>
 						<td>{new Date(order.createTime).toLocaleString()}</td>
 						<td>{order.status}</td>
 						<td>

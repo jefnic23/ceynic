@@ -19,8 +19,6 @@ export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
 
         const responseData: OrderDetails = await response.json();
 
-        console.log(responseData?.purchaseUnits[0]?.payments?.authorizations);
-
         return responseData;
     }
 

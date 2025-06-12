@@ -44,6 +44,7 @@ export interface PurchaseUnit {
   shipping?: Shipping | null;
   payments?: Payments | null;
   amount?: Amount | null;
+  items?: Item[] | null;
 }
 export interface Payee {
   emailAddress: string;
@@ -59,16 +60,16 @@ export interface Payments {
 export interface Authorization {
   id: string;
   status: string;
-  amount: Amount;
+  amount: UnitAmount;
   sellerProtection: SellerProtection;
-  expirationTime: string;
-  createTime: string;
-  updateTime: string;
+  expirationTime?: string | null;
+  createTime?: string | null;
+  updateTime?: string | null;
   links: Link[];
 }
-export interface Amount {
+export interface UnitAmount {
   currencyCode?: string;
-  value: number | string;
+  value: string;
 }
 export interface SellerProtection {
   status: string;
@@ -82,13 +83,13 @@ export interface Link {
 export interface Capture {
   id: string;
   status: string;
-  amount: Amount;
+  unitamount: UnitAmount;
   sellerProtection: SellerProtection;
   finalCapture: boolean;
   disbursementMode?: string | null;
   sellerReceivableBreakdown: SellerReceivableBreakdown;
-  createTime: string;
-  updateTime: string;
+  createTime?: string | null;
+  updateTime?: string | null;
   links: Link[];
 }
 export interface SellerReceivableBreakdown {
@@ -107,6 +108,35 @@ export interface PaypalFee {
 export interface NetAmount {
   currencyCode: string;
   value: number | string;
+}
+export interface Amount {
+  currencyCode?: string;
+  value: string;
+  breakdown: Breakdown;
+}
+export interface Breakdown {
+  itemTotal: UnitAmount;
+  shipping?: UnitAmount | null;
+}
+export interface Item {
+  name: string;
+  quantity: string;
+  unitAmount: UnitAmount;
+  tax?: Tax | null;
+  discount?: DiscountPercent | DiscountAmount | null;
+  description?: string | null;
+  unitOfMeasure?: string | null;
+}
+export interface Tax {
+  name: string;
+  percent: string;
+  taxNote?: string | null;
+}
+export interface DiscountPercent {
+  percent: string;
+}
+export interface DiscountAmount {
+  amount: UnitAmount;
 }
 export interface Payer {
   name: Name;

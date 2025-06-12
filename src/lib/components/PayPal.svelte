@@ -45,7 +45,7 @@
 							headers: {
 								'Content-Type': 'application/json'
 							},
-							body: JSON.stringify({ product_ids: productIds })
+							body: JSON.stringify({ product_ids: productIds }) // todo: pass in object with quantity
 						});
 
 						if (!response.ok) {
@@ -54,8 +54,6 @@
 						}
 
 						const json = await response.json();
-
-						console.log(json);
 
 						confirmOrder(data.orderID);
 					}

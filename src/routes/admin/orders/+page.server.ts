@@ -1,9 +1,9 @@
 import { PUBLIC_API_URL } from "$env/static/public";
-import type { OrdersOut } from "$lib/interfaces/OrdersOut";
+import type { OrderOut } from "$lib/interfaces/OrderOut";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch, cookies }) => {
-    const fetchOrders = async (): Promise<OrdersOut[]> => {
+    const fetchOrders = async (): Promise<OrderOut[]> => {
         const response = await fetch(`${PUBLIC_API_URL}/orders`, {
             method: "GET",
             headers: {
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
             return [];
         }
 
-        const responseData: OrdersOut[] = await response.json();
+        const responseData: OrderOut[] = await response.json();
 
         return responseData;
     }

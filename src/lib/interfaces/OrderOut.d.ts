@@ -5,11 +5,12 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface OrdersOut {
-  createTime: string;
-  authorizationId: string;
-  captureId: string;
+export interface OrderOut {
+  orderId: string;
+  authorizationId: string | null;
+  captureId: string | null;
   status: string;
+  createTime: string;
   storefrontId: number;
-  id: string;
+  id: number;
 }

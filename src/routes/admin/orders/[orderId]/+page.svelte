@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import type { Address, OrderDetails } from '$lib/interfaces/OrderDetails';
+	import type { Address, Item, OrderDetails } from '$lib/interfaces/OrderDetails';
 	import type { PageServerData } from './$types';
 
 	interface Props {
@@ -22,8 +23,8 @@
 	function getTotalAmount(order: OrderDetails): string {
 		return formatCurrency(
 			order.purchaseUnits?.reduce((sum, purchaseUnit) => {
-				return sum + (purchaseUnit?.amount?.value as number);
-			}, 0)
+				return sum + (parseFloat(purchaseUnit?.amount?.value as string));
+			}, 0.0)
 		);
 	}
 </script>
@@ -46,7 +47,7 @@
 	{:then order}
         <div>
             <h2>Order #{order.id}</h2>
-            <div>Status: {order.status}</div>
+            <div>Status: {order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED" ? "Pending" : "Captured"}</div>
         </div>
 		<Card>
 			<table>
@@ -58,10 +59,12 @@
 				</thead>
 				<tbody>
 					{#each order.purchaseUnits as purchaseUnit}
-						<tr>
-							<td>{purchaseUnit.description}</td>
-							<td>${purchaseUnit.amount?.value}</td>
-						</tr>
+						{#each (purchaseUnit?.items as Item[]) as item}
+							<tr>
+								<td>{item.description}</td>
+								<td>${item.unitAmount?.value}</td>
+							</tr>
+						{/each}
 					{/each}
 				</tbody>
 			</table>
@@ -81,7 +84,7 @@
 				<div>Order placed: {new Date(order.createTime).toLocaleString()}</div>
 			</div>
 		</Card>
-        <form action="/admin/orders/{order.id}" method="POST" use:enhance>
+        <form method="POST" use:enhance>
 			{#if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED"}
 				<Button name={"action"} value={"capture"}>Complete Order</Button>
 				<Button name={"action"} value={"void"} style={ButtonStyle.Cancel}>Void</Button>

@@ -11,6 +11,7 @@
 	import { currencyFormatter } from '$lib/utils/formatters';
 	import { CldImage } from 'svelte-cloudinary';
 	import Icon from '@iconify/svelte';
+	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
 
 	interface Props {
 		data: PageData;
@@ -47,8 +48,8 @@
 	
 	let images: File[] = [];
 
-	function handleImagesChange(event: CustomEvent<{ files: File[] }>) {
-		images = event.detail.files;
+	function handleImagesChange(files: File[]) {
+		images = files;
 	}
 
 	function handleThumbnailChange(event: CustomEvent<{ thumbnail: string }>) {
@@ -86,30 +87,32 @@
 						<th>Width</th>
 						<th>Medium</th>
 						<th>Enabled</th>
-						<th></th>
+						<th>Options</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each products as product}
 						<tr>
 							<td>
-								<CldImage
-									src={product.images?.[0]?.publicId || ""}
-									alt={product.title}
-									width={48}
-									height={48}
-								/>
+								<div class="thumbnail">
+									<CldImage
+										src={product.images?.[0]?.publicId || ""}
+										alt={product.title}
+										width={48}
+										height={48}
+									/>
+								</div>
 							</td>
 							<td>{product.title}</td>
 							<td>{currencyFormatter.format((product.price as number))}</td>
 							<td>{product.height}"</td>
 							<td>{product.width}"</td>
-							<td>{product.medium}</td>
+							<td>{product.medium?.name}</td>
 							<td>
 								{#if product.enabled}
-									<Icon icon="material-symbols:check-rounded" width={32} height={32} />
+									<Icon icon="material-symbols:check-rounded" width={32} height={32} color={"green"} />
 								{:else}
-									<Icon icon="material-symbols:close-rounded" width={32} height={32} />
+									<Icon icon="material-symbols:close-rounded" width={32} height={32} color={"red"} />
 								{/if}
 							</td>
 							<td>
@@ -151,21 +154,29 @@
 					<div class="form-input">
 						<label for="price">Price</label>
 						<div class="price">
-							<input
+							<ScrollableInput 
+								bind:value={selectedProduct.price as number} 
+								id={"number"} 
+								min={0.01} 
+								step={0.01} 
+								className={"price"} 
+							/>
+							<!-- <input
 								id="price"
 								type="number"
 								min="0.01"
 								step="0.01"
 								value={selectedProduct.price}
-							/>
+							/> -->
 						</div>
 					</div>
 
 					<div class="form-input">
 						<label for="medium">Medium</label>
-						<select id="medium" bind:value={selectedProduct.medium}>
+						<select id="medium" value={selectedProduct.medium?.name}>
 							<option value="Painting">Painting</option>
 							<option value="Print">Print</option>
+							<!-- todo: pass in available mediums -->
 						</select>
 					</div>
 				</div>
@@ -174,14 +185,16 @@
 					<div class="form-input">
 						<label for="height">Height</label>
 						<div class="inches">
-							<input id="height" type="number" min="1" step="1" value={selectedProduct.height} />
+							<ScrollableInput bind:value={selectedProduct.height} id={"height"} min={1} className={"size"} />
+							<!-- <input id="height" type="number" min="1" step="1" value={selectedProduct.height} /> -->
 						</div>
 					</div>
 
 					<div class="form-input">
 						<label for="width">Width</label>
 						<div class="inches">
-							<input id="width" type="number" min="1" step="1" value={selectedProduct.width} />
+							<ScrollableInput bind:value={selectedProduct.width} id={"width"} min={1} className={"size"} />
+							<!-- <input id="width" type="number" min="1" step="1" value={selectedProduct.width} /> -->
 						</div>
 					</div>
 				</div>
@@ -197,10 +210,12 @@
 
 				<Dropzone
 					change={handleImagesChange}
-					thumbnailChange={handleThumbnailChange}
 					previews={selectedProduct.images || []}
-					thumbnail={selectedProduct.thumbnail}
 				/>
+
+				<!-- <CldUploadWidget uploadPreset="preset1" let:open let:isLoading>
+					<button onclick={() => open()} disabled={isLoading}>Open widget</button>
+				</CldUploadWidget> -->
 
 				<div class="form-buttons">
 					<Button onclick={handleSubmit}>
@@ -210,19 +225,6 @@
 						Cancel
 					</Button>
 				</div>
-
-				<!-- <div class="image-container">
-					{#each selectedProduct.images as image}
-						<div class="image-wrapper">
-							<img src={image} alt={image} />
-							{#if image.endsWith(selectedProduct.thumbnail)}
-								<div class="thumbnail-overlay">
-									<Thumbnail width="3em" height="3em" />
-								</div>
-							{/if}
-						</div>
-					{/each}
-				</div> -->
 			</div>
 		{/if}
 	</Modal>
@@ -274,6 +276,11 @@
 		width: 100%;
 	}
 
+	.thumbnail {
+		display: flex;
+		padding: 0.5rem;
+	}
+
 	.edit {
 		display: flex;
 		flex-direction: column;
@@ -301,47 +308,6 @@
 		align-items: center;
 		justify-content: flex-end;
 		column-gap: 1rem;
-	}
-
-	.price {
-		position: relative;
-		display: inline-block;
-	}
-
-	.price input {
-		padding-left: 1.5em; /* Add space for the dollar sign */
-	}
-
-	.price::before {
-		content: '$';
-		position: absolute;
-		left: 0.5em; /* Adjust positioning as needed */
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 1em;
-		font-weight: bold;
-		color: #333; /* Adjust color as needed */
-	}
-
-	.inches {
-		position: relative;
-		display: inline-block;
-	}
-
-	.inches input {
-		padding-right: 2em;
-	}
-
-	.inches::after {
-		content: 'in.';
-		position: absolute;
-		right: 0.34em; /* Adjust positioning as needed */
-		top: 50%;
-		transform: translateY(-50%);
-		line-height: normal;
-		font-size: 1em;
-		font-weight: bold;
-		color: #333; /* Adjust color as needed */
 	}
 
 	.checkbox {

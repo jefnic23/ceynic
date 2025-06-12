@@ -33,14 +33,14 @@
 
 	.hamburger {
 		padding: 1rem;
-		width: 72px;
+		width: 80px;
 		display: flex;
 		justify-content: center;
 	}
 
 	aside {
 		height: 100%;
-		width: 72px;
+		width: 80px;
 		overflow: hidden;
 		transition: width 0.3s ease;
 		display: flex;

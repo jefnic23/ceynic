@@ -3,13 +3,14 @@
 
 	interface Props {
 		value: number;
-		relatedValue: number;
-		isChanged: boolean;
-		isMinimum: boolean;
+		relatedValue?: number;
+		isChanged?: boolean;
+		isMinimum?: boolean;
 		id?: string;
 		label?: string;
-		min: number | null;
-		max: number | null;
+		min?: number;
+		max?: number;
+		step?: number;
 		className?: "price" | "size" | "";
 	}
 
@@ -17,12 +18,13 @@
 		value = $bindable(),
 		relatedValue = $bindable(),
 		isChanged = $bindable(),
-		isMinimum,
+		isMinimum = false,
 		id = "",
 		label = "",
-		min,
-		max,
-		className = ""
+		min = 0,
+		max = Infinity,
+		className = "",
+		step = 1
 	}: Props = $props();
 
 	let minAtLimit = $state(false);
@@ -102,7 +104,11 @@
 				flashLimitReached(); // trigger the animation
 			} else {
 				// Update the bound value
-				setValue(newValue);
+				if (Number.isInteger(newValue)) {
+					setValue(newValue);
+				} else {
+					setValue(parseFloat(newValue.toFixed(2)))
+				}
 
 				// Mark the value as updated
 				setFlag(true);
@@ -118,7 +124,7 @@
         type="number"
         min={min}
         max={max}
-        step="1"
+        step={step}
         bind:value={value}
 		class:at-limit={isMinimum ? minAtLimit : maxAtLimit}
         onblur={(e) => handleInput(

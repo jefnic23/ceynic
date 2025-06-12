@@ -37,6 +37,7 @@
     // todo: Stripe/Amazon Pay needs to be added here as well
     let paypal: PayPalNamespace | null = $state(null);
 
+    // todo: add this to layout so it loads earlier
 	onMount(async () => {
 		try {
 			paypal = await loadScript({

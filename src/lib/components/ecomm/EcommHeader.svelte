@@ -108,6 +108,7 @@
 		<!-- todo: don't show cart if no payment processor is found -->
 		<a 
 			href="/cart" 
+			data-sveltekit-preload-data
 			class:active={url.pathname === '/cart'} 
 			style:position="relative"
 			onclick={toggleMobileHeader}

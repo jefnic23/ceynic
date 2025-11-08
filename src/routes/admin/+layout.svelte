@@ -29,29 +29,29 @@
 	<Sidebar>
 		<div class="sidebar">
 			<nav>
-				<a href="/admin">
+				<a href="/admin" title="Home">
 					<Icon icon="material-symbols:home-rounded" width={32} height={32} />
 					<span class="label">Home</span>
 				</a>
-				<a href="/admin/products" data-sveltekit-preload-data>
+				<a href="/admin/products" title="Products" data-sveltekit-preload-data>
 					<Icon icon="material-symbols:list-alt" width={32} height={32}  />
 					<span class="label">Products</span>
 				</a>
-				<a href="/admin/orders" data-sveltekit-preload-data>
+				<a href="/admin/orders" title="Orders" data-sveltekit-preload-data>
 					<Icon icon="material-symbols:box" width={32} height={32}  />
 					<span class="label">Orders</span>
 				</a>
-				<a href="/admin/settings">
+				<a href="/admin/settings" title="Settings">
 					<Icon icon="material-symbols:settings-rounded" width={32} height={32}  />
 					<span class="label">Settings</span>
 				</a>
-				<a href="/admin/account">
+				<a href="/admin/account" title="Account">
 					<Icon icon="material-symbols:person" width={32} height={32}  />
 					<span class="label">Account</span>
 				</a>
 			</nav>
 			<form action="/admin/logout" method="POST" use:enhance>
-				<button type="submit">
+				<button type="submit" title="Log Out">
 					<Icon icon="material-symbols:logout-rounded" width={32} height={32}  />
 					<span class="label">Log Out</span>
 				</button>

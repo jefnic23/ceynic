@@ -11,6 +11,7 @@
 		loading?: boolean;
 		fullWidth?: boolean;
 		tooltip?: string | null;
+		buttonType?: "submit" | "reset" | "button";
 		children?: Snippet;
 	}
 
@@ -21,13 +22,14 @@
 		loading = false,
 		fullWidth = false,
 		tooltip = null,
+		buttonType = "button",
 		children,
 		...rest
 	}: Props = $props();
 </script>
 
 <button
-	class="base-button {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
+	class="base-button type={buttonType} {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
 	title={tooltip}
 	{disabled}
 	{...rest}

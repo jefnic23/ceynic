@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import Dropdown from '$lib/components/Dropdown.svelte';
+	import Dropdown from '$lib/components/Sort.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';

@@ -46,7 +46,7 @@
 			<h2>{title}</h2>
 			<!-- svelte-ignore a11y_autofocus -->
 			{#if showClose}
-				<button class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
+				<button title="Close" class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
 			{/if}
 		</div>
 		{@render children?.()}

@@ -121,6 +121,7 @@
     <label for={id}>{label}</label>
     <input
         id={id}
+		name={id}
         type="number"
         min={min}
         max={max}
@@ -195,13 +196,13 @@
 	.size::after {
 		content: 'in.';
 		position: absolute;
-		right: 2rem; /* Adjust positioning as needed */
+		right: 2rem;
 		top: 50%;
 		transform: translateY(-50%);
 		line-height: normal;
 		font-size: 1em;
 		font-weight: bold;
-		color: #333; /* Adjust color as needed */
+		color: #333;
 	}
 
 	@keyframes pulseLimit {

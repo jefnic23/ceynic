@@ -45,3 +45,5 @@
 		</table>
 	{/await}
 </div>
+
+<!-- add modal for order editing and remove slug -->

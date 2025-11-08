@@ -12,6 +12,8 @@
 	import { CldImage } from 'svelte-cloudinary';
 	import Icon from '@iconify/svelte';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
+	import Dropdown from '$lib/components/shared/Dropdown.svelte';
+	import { enhance } from '$app/forms';
 
 	interface Props {
 		data: PageData;
@@ -22,6 +24,7 @@
 	let showModal: boolean = $state(false);
 	let loadingModal: boolean = $state(false);
 	let selectedProduct: ProductOut = $state()!;
+	let files: File[] = $state([]);
 
 	async function openEditModal(product: ProductOut) {
 		showModal = true;
@@ -39,29 +42,6 @@
 
 		selectedProduct = responseData;
 		loadingModal = false;
-	}
-
-	function replaceImageUrl(imageUrl: string) {
-		const filename = imageUrl.split('/').at(-1);
-		return `/api/proxy/${selectedProduct?.title?.replaceAll(' ', '_')}/${filename}`;
-	}
-	
-	let images: File[] = [];
-
-	function handleImagesChange(files: File[]) {
-		images = files;
-	}
-
-	function handleThumbnailChange(event: CustomEvent<{ thumbnail: string }>) {
-		selectedProduct.thumbnail = event.detail.thumbnail;
-	}
-
-	function handleSubmit(event: Event) {
-		event.preventDefault();
-		console.log(selectedProduct);
-		// const formData = new FormData(event.target as HTMLFormElement);
-		// images.forEach((image) => formData.append('images', image));
-		// Send `formData` to your API endpoint
 	}
 </script>
 
@@ -87,7 +67,7 @@
 						<th>Width</th>
 						<th>Medium</th>
 						<th>Enabled</th>
-						<th>Options</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -140,62 +120,79 @@
 		{#if loadingModal}
 			<div>loading product...</div>
 		{:else}
-			<div class="edit">
+			<form 
+				method="POST" 
+				enctype="multipart/form-data" 
+				class="edit" 
+				use:enhance={({ formData }) => {
+					// Remove the empty <input type="file"> contents
+					formData.delete('medium');
+					formData.delete('images');
+
+					// Attach every NEW image in the right order
+					files.forEach((item, _) => {
+						if (item instanceof File) {
+							formData.append('images', item, item.name);
+						}
+					});
+
+					return async ({ update }) => {
+						await update();
+						showModal = !showModal;
+					}
+				}}
+			>
+				<input type="hidden" id="id" name="id" value={selectedProduct.id} />
 				<div class="form-input">
 					<label for="title">Title</label>
-					<input id="title" type="text" value={selectedProduct.title} />
+					<input id="title" name="title" type="text" bind:value={selectedProduct.title} />
 				</div>
 				<div class="form-input">
 					<label for="description">Description</label>
-					<textarea id="description" value={selectedProduct.description}></textarea>
+					<textarea id="description" name="description" bind:value={selectedProduct.description}></textarea>
 				</div>
 
 				<div class="form-row">
 					<div class="form-input">
-						<label for="price">Price</label>
-						<div class="price">
-							<ScrollableInput 
-								bind:value={selectedProduct.price as number} 
-								id={"number"} 
-								min={0.01} 
-								step={0.01} 
-								className={"price"} 
-							/>
-							<!-- <input
-								id="price"
-								type="number"
-								min="0.01"
-								step="0.01"
-								value={selectedProduct.price}
-							/> -->
-						</div>
+						<ScrollableInput 
+							bind:value={selectedProduct.price as number} 
+							id={"price"} 
+							label={"Price"}
+							min={0.01} 
+							step={0.01} 
+							className={"price"} 
+						/>
 					</div>
 
 					<div class="form-input">
-						<label for="medium">Medium</label>
-						<select id="medium" value={selectedProduct.medium?.name}>
+						<input type="hidden" id="medium_id" name="medium_id" value={selectedProduct.medium?.id} />
+						<Dropdown id={"medium"} label={"Medium"} value={selectedProduct.medium?.name || ""}>
+							<!-- todo: pass in available mediums -->
 							<option value="Painting">Painting</option>
 							<option value="Print">Print</option>
-							<!-- todo: pass in available mediums -->
-						</select>
+						</Dropdown>
 					</div>
 				</div>
 
 				<div class="form-row">
 					<div class="form-input">
-						<label for="height">Height</label>
-						<div class="inches">
-							<ScrollableInput bind:value={selectedProduct.height} id={"height"} min={1} className={"size"} />
-							<!-- <input id="height" type="number" min="1" step="1" value={selectedProduct.height} /> -->
-						</div>
+						<ScrollableInput 
+							bind:value={selectedProduct.height} 
+							id={"height"} 
+							label={"Height"}
+							min={1} 
+							className={"size"} 
+						/>
 					</div>
 
 					<div class="form-input">
-						<label for="width">Width</label>
-						<div class="inches">
-							<ScrollableInput bind:value={selectedProduct.width} id={"width"} min={1} className={"size"} />
-							<!-- <input id="width" type="number" min="1" step="1" value={selectedProduct.width} /> -->
-						</div>
+						<ScrollableInput 
+							bind:value={selectedProduct.width} 
+							id={"width"} 
+							label={"Width"} 
+							min={1} 
+							className={"size"} 
+						/>
 					</div>
 				</div>
 
@@ -203,29 +200,28 @@
 					<div class="form-input">
 						<label for="enabled">Enabled</label>
 						<div class="checkbox">
-							<input id="enabled" type="checkbox" value={selectedProduct.enabled} bind:checked={selectedProduct.enabled} />
+							<input 
+								id="enabled" 
+								name="enabled"
+								type="checkbox" 
+								value={selectedProduct.enabled} 
+								bind:checked={selectedProduct.enabled} 
+							/>
 						</div>
 					</div>
 				</div>
 
-				<Dropzone
-					change={handleImagesChange}
-					previews={selectedProduct.images || []}
-				/>
-
-				<!-- <CldUploadWidget uploadPreset="preset1" let:open let:isLoading>
-					<button onclick={() => open()} disabled={isLoading}>Open widget</button>
-				</CldUploadWidget> -->
+				<Dropzone previews={selectedProduct.images || []} bind:files={files} />
 
 				<div class="form-buttons">
-					<Button onclick={handleSubmit}>
+					<Button buttonType={"submit"}>
 						Submit
 					</Button>
 					<Button style={ButtonStyle.Cancel} onclick={() => showModal = false}>
 						Cancel
 					</Button>
 				</div>
-			</div>
+			</form>
 		{/if}
 	</Modal>
 {/if}
@@ -245,12 +241,14 @@
 	}
 
 	table {
-		width: 100vw;
+		width: calc(100vw - 180px);
 		max-width: 1500px;
 		border-collapse: collapse;
 		text-align: left;
 		font-size: 18px;
 		margin: auto;
+		overflow: auto;
+		white-space: nowrap;
 	}
 
 	th {
@@ -320,19 +318,6 @@
 		width: 21px;
 		margin: 0;
 	}
-
-	/* .thumbnail {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: inherit;
-	}
-
-	.thumbnail img {
-		width: 48px;
-		height: 48px;
-		margin: 0.5rem 0;
-	} */
 
 	:is(tbody > tr):hover {
 		outline: 2px solid #666;

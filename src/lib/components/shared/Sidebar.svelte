@@ -24,7 +24,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		position: relative;
+		top: 0;
+		position: sticky;
 		z-index: 9999;
 		height: 100vh;
 		background-color: #f9f9f9;

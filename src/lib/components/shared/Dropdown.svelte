@@ -1,30 +1,26 @@
 <script lang="ts">
+	import type { Snippet } from "svelte";
+
 	interface Props {
-		id?: string;
-		label?: string;
-		type?: string;
-		min: number | null;
-		max: number | null;
-		value: string | number;
+		id: string;
+		label: string;
+		value: string;
+        children?: Snippet;
 	}
 
 	let {
-		id = '',
-		label = '',
-		type = 'text',
-		min,
-		max,
-		value
+		id,
+		label,
+		value,
+        children
 	}: Props = $props();
 </script>
 
 <div class="container">
 	<label for={id}>{label}</label>
-	{#if type === 'number'}
-		<input {id} name={id} type="number" {min} {max} {value} placeholder=" " />
-	{:else}
-		<input {id} name={id} type="text" {value} placeholder=" " />
-	{/if}
+	<select {id} name={id} {value} style:padding="13px">
+        {@render children?.()}
+    </select>
 </div>
 
 <style>
@@ -45,15 +41,15 @@
 		transition: all 0.2s ease;
 	}
 
-	.container input {
+	.container select {
 		width: 100%;
 		padding: 10px;
 		font-size: 1em;
 		box-sizing: border-box;
 	}
 
-	.container :global(input:focus + label),
-	.container :global(input:not(:placeholder-shown) + label) {
+	.container :global(select:focus + label),
+	.container :global(select:not(:placeholder-shown) + label) {
 		top: -10px;
 		font-size: 0.7em;
 		color: #007bff;

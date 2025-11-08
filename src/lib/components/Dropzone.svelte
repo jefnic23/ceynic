@@ -4,19 +4,22 @@
 	import { onMount } from 'svelte';
 
 	interface Props {
-		change: CallableFunction,
 		previews: ProductImageOut[];
+		files: File[];
 	}
 
 	let { 
-		change,
-		previews
+		previews,
+		files = $bindable()
 	}: Props = $props();
 
-	let files: File[] = $state([]);
+	let initialFileHashes: Set<string> = $state(new Set());
 	let fileHashes: Set<string> = $state(new Set());
+	let filesChanged: boolean = $derived(!areEqual(initialFileHashes, fileHashes));
 	let draggedIndex: number | null = $state(null);
 	let hoverIndex: number | null = $state(null);
+
+	const thumbnailTitle = "This image will be used as the product thumbnail";
 
 	async function hashFile(file: File): Promise<string> {
 		const arrayBuffer = await file.arrayBuffer();
@@ -45,13 +48,10 @@
 	function handleDragEnd() {
 		draggedIndex = null;
 		hoverIndex = null;
-		change(files);
 	}
 
 	function handleDragover(event: DragEvent) {
 		event.preventDefault();
-		// const dragoverEvent = new CustomEvent('dragover', { bubbles: true });
-		// event.currentTarget?.dispatchEvent(dragoverEvent);
 	}
 
 	// Triggered when images are dropped into the dropzone
@@ -69,14 +69,13 @@
 		for (const file of droppedFiles) {
 			const hash = await hashFile(file);
 			if (!fileHashes.has(hash)) {
-				fileHashes.add(hash);
+				fileHashes = new Set(fileHashes).add(hash);
 				uniqueNewFiles.push(file);
 			}
 		}
 
 		if (uniqueNewFiles.length > 0) {
 			files = [...files, ...uniqueNewFiles];
-			change(files);
 		}
 	}
 
@@ -87,7 +86,6 @@
 			const [moved] = reordered.splice(index, 1);
 			reordered.splice(index - 1, 0, moved);
 			files = reordered;
-			change(files);
 			setTimeout(() => focusImage(index - 1), 0);
 		} else if (event.key === 'ArrowRight' && index < files.length - 1) {
 			event.preventDefault();
@@ -95,7 +93,6 @@
 			const [moved] = reordered.splice(index, 1);
 			reordered.splice(index + 1, 0, moved);
 			files = reordered;
-			change(files);
 			setTimeout(() => focusImage(index + 1), 0);
 		}
 	}
@@ -113,18 +110,16 @@
 		for (const file of newFiles) {
 			const hash = await hashFile(file);
 			if (!fileHashes.has(hash)) {
-				fileHashes.add(hash);
+				fileHashes = new Set(fileHashes).add(hash);
 			}
 		}
 		files = [...files, ...newFiles];
-		change(files);
 	}
 
 	// Removes a selected image from the list
 	function removeImage(index: number, event: MouseEvent) {
 		event.stopPropagation(); // Prevents triggering the dropzone click event
 		files = files.filter((_, i) => i !== index);
-		change(files);
 	}
 
 	async function createFileFromImage(productImage: ProductImageOut) {
@@ -133,6 +128,23 @@
 		const blob = await response.blob();
 		const file = new File([blob], filename as string, { type: blob.type });
 		return file;
+	}
+
+	function areEqual<T>(setA: Set<T>, setB: Set<T>): boolean {
+		const arrA = Array.from(setA);
+        const arrB = Array.from(setB);
+
+        if (arrA.length !== arrB.length) {
+            return false;
+        }
+
+        for (let i = 0; i < arrA.length; i++) {
+            if (arrA[i] !== arrB[i]) {
+                return false;
+            }
+        }
+
+        return true;
 	}
 
 	let fileInput: HTMLInputElement = $state()!;
@@ -144,7 +156,8 @@
 			for (const file of resolvedFiles) {
 				const hash = await hashFile(file);
 				if (!fileHashes.has(hash)) {
-					fileHashes.add(hash);
+					fileHashes = new Set(fileHashes).add(hash);
+					initialFileHashes = new Set(initialFileHashes).add(hash);
 				}
 			}
 		}
@@ -170,7 +183,10 @@
 			Move images to reorder
 		</div>
 	</div>
+	<input type="hidden" id="filesChanged" name="filesChanged" bind:value={filesChanged} />
 	<input
+		id="images"
+		name="images"
 		type="file"
 		accept="image/*"
 		multiple
@@ -195,13 +211,14 @@
 				ondragend={handleDragEnd}
 				onkeydown={(e) => handleKeyDown(e, index)}
 			>
-				<img class="image" src={URL.createObjectURL(file)} alt={file.name} />
+				<img class="image" title={index === 0 ? thumbnailTitle : file.name} src={URL.createObjectURL(file)} alt={file.name} />
 				{#if index === 0}
-					<span class="thumbnail-indicator">Thumbnail</span>
+					<span class="thumbnail-indicator" title={thumbnailTitle}>Thumbnail</span>
 				{/if}
 				<button
 					class="remove-btn" 
 					aria-label="Remove image" 
+					title="Remove image"
 					onclick={(e) => removeImage(index, e)}
 				>
 					&times;

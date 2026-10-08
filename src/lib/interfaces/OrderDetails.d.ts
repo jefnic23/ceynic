@@ -83,7 +83,7 @@ export interface Link {
 export interface Capture {
   id: string;
   status: string;
-  unitamount: UnitAmount;
+  amount: UnitAmount;
   sellerProtection: SellerProtection;
   finalCapture: boolean;
   disbursementMode?: string | null;
@@ -121,15 +121,15 @@ export interface Breakdown {
 export interface Item {
   name: string;
   quantity: string;
-  unitAmount: UnitAmount;
+  unitAmount?: UnitAmount | null;
   tax?: Tax | null;
   discount?: DiscountPercent | DiscountAmount | null;
   description?: string | null;
   unitOfMeasure?: string | null;
 }
 export interface Tax {
-  name: string;
-  percent: string;
+  name?: string | null;
+  percent?: string | null;
   taxNote?: string | null;
 }
 export interface DiscountPercent {

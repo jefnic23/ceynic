@@ -10,10 +10,9 @@ export interface ProductOut {
   price: number | string;
   height: number;
   width: number;
-  description: string | null;
+  description?: string | null;
   enabled: boolean;
-  thumbnail: string;
-  dateAdded: string;
+  dateAdded?: string | null;
   mediumId: number;
   storefrontId: number;
   id: number;
@@ -21,7 +20,7 @@ export interface ProductOut {
   medium?: MediumOut | null;
 }
 export interface ProductImageOut {
-  publicId: string;
+  url: string;
   position: number;
   width: number;
   height: number;

@@ -155,7 +155,7 @@
 
 	.container label {
 		position: absolute;
-		top: 21%;
+		top: 10px;
 		left: 13px;
 		transform: translateY(-100%);
 		background: white;

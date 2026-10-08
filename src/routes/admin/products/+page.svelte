@@ -9,11 +9,13 @@
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { currencyFormatter } from '$lib/utils/formatters';
-	import { CldImage } from 'svelte-cloudinary';
+	import ProductImage from '$lib/components/ProductImage.svelte';
 	import Icon from '@iconify/svelte';
 	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
 	import Dropdown from '$lib/components/shared/Dropdown.svelte';
 	import { enhance } from '$app/forms';
+	import Input from '$lib/components/shared/Input.svelte';
+	import TextArea from '$lib/components/shared/TextArea.svelte';
 
 	interface Props {
 		data: PageData;
@@ -23,10 +25,38 @@
 
 	let showModal: boolean = $state(false);
 	let loadingModal: boolean = $state(false);
-	let selectedProduct: ProductOut = $state()!;
+	let modalMode: 'create' | 'update' = $state('update');
+	let selectedProduct: ProductOut = $state(createEmptyProduct());
 	let files: File[] = $state([]);
 
+	function createEmptyProduct(): ProductOut {
+		return {
+			id: 0,
+			title: '',
+			description: '',
+			price: 1.00,
+			height: 1,
+			width: 1,
+			enabled: true,
+			dateAdded: '',
+			mediumId: 1,
+			storefrontId: 0,
+			images: [],
+			medium: null
+		};
+	}
+
+	function openCreateModal() {
+		modalMode = 'create';
+		selectedProduct = createEmptyProduct();
+		files = [];
+		loadingModal = false;
+		showModal = true;
+	}
+
 	async function openEditModal(product: ProductOut) {
+		modalMode = 'update';
+		files = [];
 		showModal = true;
 		loadingModal = true;
 		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
@@ -46,10 +76,10 @@
 </script>
 
 <div class="container">
-	<Card>
+	<Card width="-webkit-fill-available">
 		<div class="header">
 			<h1>Products</h1>
-			<Button style={ButtonStyle.Info}>
+			<Button style={ButtonStyle.Info} onclick={openCreateModal}>
 				<div>Add New Product</div>
 				<Icon icon="material-symbols:add-rounded" />
 			</Button>
@@ -75,8 +105,8 @@
 						<tr>
 							<td>
 								<div class="thumbnail">
-									<CldImage
-										src={product.images?.[0]?.publicId || ""}
+									<ProductImage
+										url={product.images?.[0]?.url}
 										alt={product.title}
 										width={48}
 										height={48}
@@ -116,12 +146,13 @@
 </div>
 
 {#if showModal}
-	<Modal bind:showModal title="Edit Product">
+	<Modal bind:showModal title={modalMode === 'create' ? 'Add New Product' : 'Edit Product'}>
 		{#if loadingModal}
 			<div>loading product...</div>
 		{:else}
 			<form 
 				method="POST" 
+				action={modalMode === 'create' ? '?/create' : '?/update'}
 				enctype="multipart/form-data" 
 				class="edit" 
 				use:enhance={({ formData }) => {
@@ -130,26 +161,26 @@
 					formData.delete('images');
 
 					// Attach every NEW image in the right order
-					files.forEach((item, _) => {
+					files.forEach((item) => {
 						if (item instanceof File) {
 							formData.append('images', item, item.name);
 						}
 					});
 
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						await update();
-						showModal = !showModal;
+						if (result.type === 'success') showModal = false;
 					}
 				}}
 			>
-				<input type="hidden" id="id" name="id" value={selectedProduct.id} />
+				{#if modalMode === 'update'}
+					<input type="hidden" id="id" name="id" value={selectedProduct.id} />
+				{/if}
 				<div class="form-input">
-					<label for="title">Title</label>
-					<input id="title" name="title" type="text" bind:value={selectedProduct.title} />
+					<Input id="title" label="Title" bind:value={selectedProduct.title} />
 				</div>
 				<div class="form-input">
-					<label for="description">Description</label>
-					<textarea id="description" name="description" bind:value={selectedProduct.description}></textarea>
+					<TextArea id="description" label="Description" bind:value={selectedProduct.description as string}/>
 				</div>
 
 				<div class="form-row">
@@ -158,18 +189,16 @@
 							bind:value={selectedProduct.price as number} 
 							id={"price"} 
 							label={"Price"}
-							min={0.01} 
+							min={1.00}
 							step={0.01} 
 							className={"price"} 
 						/>
 					</div>
 
 					<div class="form-input">
-						<input type="hidden" id="medium_id" name="medium_id" value={selectedProduct.medium?.id} />
-						<Dropdown id={"medium"} label={"Medium"} value={selectedProduct.medium?.name || ""}>
-							<!-- todo: pass in available mediums -->
-							<option value="Painting">Painting</option>
-							<option value="Print">Print</option>
+						<Dropdown id="medium_id" label="Medium" value={String(selectedProduct.mediumId)}>
+							<option value="1">Painting</option>
+							<option value="2">Print</option>
 						</Dropdown>
 					</div>
 				</div>
@@ -215,7 +244,7 @@
 
 				<div class="form-buttons">
 					<Button buttonType={"submit"}>
-						Submit
+						{modalMode === 'create' ? 'Add Product' : 'Update Product'}
 					</Button>
 					<Button style={ButtonStyle.Cancel} onclick={() => showModal = false}>
 						Cancel
@@ -241,7 +270,7 @@
 	}
 
 	table {
-		width: calc(100vw - 180px);
+		width: 100%;
 		max-width: 1500px;
 		border-collapse: collapse;
 		text-align: left;
@@ -263,11 +292,6 @@
 
 	tbody tr:nth-of-type(odd) {
 		background-color: #e9e9e9;
-	}
-
-	textarea {
-		resize: vertical;
-		height: 89px;
 	}
 
 	input {

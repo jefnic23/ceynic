@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
+	import ProductImage from '$lib/components/ProductImage.svelte';
+	import type { ProductOut } from "$lib/interfaces/ProductOut";
 	import { page } from "$app/state";
 	import { onMount } from "svelte";
-	import { CldImage } from "svelte-cloudinary";
 
 	interface Props {
 		product: ProductOut;
@@ -25,11 +25,12 @@
 >
 	{#if (product.images?.length as number) > 0}
 		<a href="/products/{product.id}" data-sveltekit-preload-data>
-			<CldImage 
-				src={(product.images as ProductImageOut[])[0]?.publicId} 
+			<ProductImage
+				url={product.images?.[0]?.url}
 				alt={product.title} 
-				width={(product.images as ProductImageOut[])[0]?.width}
-				height={(product.images as ProductImageOut[])[0]?.height}
+				width={product.images?.[0]?.width}
+				height={product.images?.[0]?.height}
+				fill
 				loading={"lazy"}
 				onload={() => load(product.id)}
 				data-pin-do={!isMobile ? "buttonPin" : undefined}
@@ -46,6 +47,7 @@
 		position: relative;
 		margin-bottom: 34px;
 		display: inline-block;
+		width: 100%;
 		vertical-align: top;
 		opacity: 0;
 		transition: opacity 0.5s ease-in-out;
@@ -53,5 +55,9 @@
 
 	.masonry-item.visible {
 		opacity: 1;
+	}
+
+	a {
+		display: block;
 	}
 </style>

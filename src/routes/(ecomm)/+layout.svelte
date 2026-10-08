@@ -1,12 +1,49 @@
 <script lang="ts">
-	import { PUBLIC_MEASUREMENT_ID } from '$env/static/public';
+	import { PUBLIC_MEASUREMENT_ID, PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
+	import { loadScript } from '@paypal/paypal-js';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import Footer from '$lib/components/Footer.svelte';
-	import { onNavigate } from '$app/navigation';
+	import { afterNavigate, onNavigate } from '$app/navigation';
+	import { onMount, setContext } from 'svelte';
 	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
 	import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
 	import type { Snippet } from 'svelte';
+	import { paypalContextKey, type PayPalContext } from '$lib/state/paypalContext';
+
+	const paypalContext: PayPalContext = $state({ paypal: null });
+	setContext(paypalContextKey, paypalContext);
+
+	onMount(async () => {
+		try {
+			paypalContext.paypal = await loadScript({
+				clientId: PUBLIC_PAYPAL_CLIENT_ID,
+				currency: 'USD',
+				dataPageType: 'checkout',
+				intent: 'authorize'
+				// debug: true
+				// todo: add merchantId
+			});
+		} catch (error) {
+			// todo: log error and show something in the UI
+		}
+	});
+
+	onMount(() => {
+		// Pinterest injects scripts into the document; wait until Svelte has hydrated the head.
+		if (document.querySelector('script[src="https://assets.pinterest.com/js/pinit.js"]')) return;
+
+		const script = document.createElement('script');
+		script.src = 'https://assets.pinterest.com/js/pinit.js';
+		script.async = true;
+		script.dataset.pinHover = 'true';
+		script.dataset.pinSticky = 'false';
+		document.body.appendChild(script);
+	});
+
+	afterNavigate(() => {
+		window.PinUtils?.build();
+	});
 
 	onNavigate((navigation) => {
 		if (!document?.startViewTransition) return;

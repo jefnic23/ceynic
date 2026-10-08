@@ -2,31 +2,46 @@
 	import type { ProductImageOut } from '$lib/interfaces/ProductOut';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
+	import type { Action } from 'svelte/action';
 
 	interface Props {
 		previews: ProductImageOut[];
 		files: File[];
 	}
 
-	let { 
-		previews,
-		files = $bindable()
-	}: Props = $props();
+	let { previews, files = $bindable() }: Props = $props();
 
-	let initialFileHashes: Set<string> = $state(new Set());
-	let fileHashes: Set<string> = $state(new Set());
+	let initialFileHashes: string[] = $state([]);
+	let fileHashes: string[] = $state([]);
 	let filesChanged: boolean = $derived(!areEqual(initialFileHashes, fileHashes));
+	let previewError: string | null = $state(null);
 	let draggedIndex: number | null = $state(null);
 	let hoverIndex: number | null = $state(null);
 
-	const thumbnailTitle = "This image will be used as the product thumbnail";
+	const thumbnailTitle = 'This image will be used as the product thumbnail';
 
 	async function hashFile(file: File): Promise<string> {
 		const arrayBuffer = await file.arrayBuffer();
 		const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
 		const hashArray = Array.from(new Uint8Array(hashBuffer));
-		return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+		return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 	}
+
+	const previewFile: Action<HTMLImageElement, File> = (node, file) => {
+		let url = URL.createObjectURL(file);
+		node.src = url;
+
+		return {
+			update(nextFile) {
+				URL.revokeObjectURL(url);
+				url = URL.createObjectURL(nextFile);
+				node.src = url;
+			},
+			destroy() {
+				URL.revokeObjectURL(url);
+			}
+		};
+	};
 
 	function handleDragStart(index: number) {
 		draggedIndex = index;
@@ -37,10 +52,14 @@
 		if (draggedIndex === null || targetIndex === hoverIndex) return;
 
 		const reordered = [...files];
+		const reorderedHashes = [...fileHashes];
 		const [moved] = reordered.splice(draggedIndex, 1);
+		const [movedHash] = reorderedHashes.splice(draggedIndex, 1);
 		reordered.splice(targetIndex, 0, moved);
+		reorderedHashes.splice(targetIndex, 0, movedHash);
 
 		files = reordered;
+		fileHashes = reorderedHashes;
 		draggedIndex = targetIndex; // update drag position
 		hoverIndex = targetIndex;
 	}
@@ -68,8 +87,8 @@
 
 		for (const file of droppedFiles) {
 			const hash = await hashFile(file);
-			if (!fileHashes.has(hash)) {
-				fileHashes = new Set(fileHashes).add(hash);
+			if (!fileHashes.includes(hash)) {
+				fileHashes = [...fileHashes, hash];
 				uniqueNewFiles.push(file);
 			}
 		}
@@ -83,16 +102,24 @@
 		if (event.key === 'ArrowLeft' && index > 0) {
 			event.preventDefault();
 			const reordered = [...files];
+			const reorderedHashes = [...fileHashes];
 			const [moved] = reordered.splice(index, 1);
+			const [movedHash] = reorderedHashes.splice(index, 1);
 			reordered.splice(index - 1, 0, moved);
+			reorderedHashes.splice(index - 1, 0, movedHash);
 			files = reordered;
+			fileHashes = reorderedHashes;
 			setTimeout(() => focusImage(index - 1), 0);
 		} else if (event.key === 'ArrowRight' && index < files.length - 1) {
 			event.preventDefault();
 			const reordered = [...files];
+			const reorderedHashes = [...fileHashes];
 			const [moved] = reordered.splice(index, 1);
+			const [movedHash] = reorderedHashes.splice(index, 1);
 			reordered.splice(index + 1, 0, moved);
+			reorderedHashes.splice(index + 1, 0, movedHash);
 			files = reordered;
+			fileHashes = reorderedHashes;
 			setTimeout(() => focusImage(index + 1), 0);
 		}
 	}
@@ -106,59 +133,63 @@
 	async function handleSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const selectedFiles = target.files ? Array.from(target.files) : [];
-		const newFiles = selectedFiles.filter((file) => file.type.startsWith('image/'));
-		for (const file of newFiles) {
+		const uniqueNewFiles: File[] = [];
+		for (const file of selectedFiles.filter((item) => item.type.startsWith('image/'))) {
 			const hash = await hashFile(file);
-			if (!fileHashes.has(hash)) {
-				fileHashes = new Set(fileHashes).add(hash);
+			if (!fileHashes.includes(hash)) {
+				fileHashes = [...fileHashes, hash];
+				uniqueNewFiles.push(file);
 			}
 		}
-		files = [...files, ...newFiles];
+		files = [...files, ...uniqueNewFiles];
+		target.value = '';
 	}
 
 	// Removes a selected image from the list
 	function removeImage(index: number, event: MouseEvent) {
 		event.stopPropagation(); // Prevents triggering the dropzone click event
 		files = files.filter((_, i) => i !== index);
+		fileHashes = fileHashes.filter((_, i) => i !== index);
 	}
 
 	async function createFileFromImage(productImage: ProductImageOut) {
-		const filename = productImage.publicId;
-		const response = await fetch(`../api/proxy/${productImage.publicId}`);
+		const imageUrl = new URL(productImage.url);
+		const filename = decodeURIComponent(
+			imageUrl.pathname.split('/').pop() || `image-${productImage.id}`
+		);
+		const response = await fetch(productImage.url);
+		if (!response.ok) throw new Error(`Unable to load image: ${filename}`);
 		const blob = await response.blob();
-		const file = new File([blob], filename as string, { type: blob.type });
-		return file;
+		return new File([blob], filename, { type: blob.type });
 	}
 
-	function areEqual<T>(setA: Set<T>, setB: Set<T>): boolean {
-		const arrA = Array.from(setA);
-        const arrB = Array.from(setB);
+	function areEqual<T>(arrayA: T[], arrayB: T[]): boolean {
+		if (arrayA.length !== arrayB.length) {
+			return false;
+		}
 
-        if (arrA.length !== arrB.length) {
-            return false;
-        }
+		for (let i = 0; i < arrayA.length; i++) {
+			if (arrayA[i] !== arrayB[i]) {
+				return false;
+			}
+		}
 
-        for (let i = 0; i < arrA.length; i++) {
-            if (arrA[i] !== arrB[i]) {
-                return false;
-            }
-        }
-
-        return true;
+		return true;
 	}
 
 	let fileInput: HTMLInputElement = $state()!;
 
 	onMount(async () => {
 		if (previews.length > 0) {
-			const resolvedFiles = await Promise.all(previews.map(createFileFromImage));
-			files = resolvedFiles;
-			for (const file of resolvedFiles) {
-				const hash = await hashFile(file);
-				if (!fileHashes.has(hash)) {
-					fileHashes = new Set(fileHashes).add(hash);
-					initialFileHashes = new Set(initialFileHashes).add(hash);
-				}
+			try {
+				const resolvedFiles = await Promise.all(previews.map(createFileFromImage));
+				const resolvedHashes = await Promise.all(resolvedFiles.map(hashFile));
+				files = resolvedFiles;
+				fileHashes = resolvedHashes;
+				initialFileHashes = [...resolvedHashes];
+			} catch (error) {
+				console.error(error);
+				previewError = 'Existing images could not be loaded. Please try again.';
 			}
 		}
 	});
@@ -176,13 +207,12 @@
 >
 	<div class="instructions">
 		<Icon icon="material-symbols:upload-rounded" />
-		<div>
-			Drag & drop images here, or click to select
-		</div>
-		<div>
-			Move images to reorder
-		</div>
+		<div>Drag & drop images here, or click to select</div>
+		<div>Move images to reorder</div>
 	</div>
+	{#if previewError}
+		<p class="preview-error" role="alert">{previewError}</p>
+	{/if}
 	<input type="hidden" id="filesChanged" name="filesChanged" bind:value={filesChanged} />
 	<input
 		id="images"
@@ -197,7 +227,7 @@
 	<div class="image-preview">
 		{#each files as file, index}
 			<div
-				class="image-wrapper 
+				class="image-wrapper
 					{index === 0 ? 'thumbnail' : ''} 
 					{index === draggedIndex ? 'dragged' : ''} 
 					{index === hoverIndex ? 'hovered' : ''}"
@@ -211,13 +241,19 @@
 				ondragend={handleDragEnd}
 				onkeydown={(e) => handleKeyDown(e, index)}
 			>
-				<img class="image" title={index === 0 ? thumbnailTitle : file.name} src={URL.createObjectURL(file)} alt={file.name} />
+				<img
+					use:previewFile={file}
+					class="image"
+					title={index === 0 ? thumbnailTitle : file.name}
+					alt={file.name}
+				/>
 				{#if index === 0}
 					<span class="thumbnail-indicator" title={thumbnailTitle}>Thumbnail</span>
 				{/if}
 				<button
-					class="remove-btn" 
-					aria-label="Remove image" 
+					type="button"
+					class="remove-btn"
+					aria-label="Remove image"
 					title="Remove image"
 					onclick={(e) => removeImage(index, e)}
 				>
@@ -249,6 +285,10 @@
 		align-items: center;
 	}
 
+	.preview-error {
+		color: #b91c1c;
+	}
+
 	.image-preview {
 		display: flex;
 		flex-wrap: wrap;
@@ -265,7 +305,9 @@
 		border: 2px solid transparent;
 		border-radius: 8px;
 		overflow: hidden;
-		transition: transform 150ms ease, border-color 150ms ease;
+		transition:
+			transform 150ms ease,
+			border-color 150ms ease;
 	}
 
 	.image-wrapper.dragged {

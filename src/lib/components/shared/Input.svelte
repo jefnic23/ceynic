@@ -3,8 +3,9 @@
 		id?: string;
 		label?: string;
 		type?: string;
-		min: number | null;
-		max: number | null;
+		min?: number | null;
+		max?: number | null;
+		required?: boolean;
 		value: string | number;
 	}
 
@@ -12,18 +13,19 @@
 		id = '',
 		label = '',
 		type = 'text',
-		min,
-		max,
-		value
+		min = null,
+		max = null,
+		required = false,
+		value = $bindable()
 	}: Props = $props();
 </script>
 
 <div class="container">
 	<label for={id}>{label}</label>
 	{#if type === 'number'}
-		<input {id} name={id} type="number" {min} {max} {value} placeholder=" " />
+		<input {id} name={id} type="number" {min} {max} {value} placeholder=" " required={required} />
 	{:else}
-		<input {id} name={id} type="text" {value} placeholder=" " />
+		<input {id} name={id} type="text" {value} placeholder=" " required={required}  />
 	{/if}
 </div>
 
@@ -36,7 +38,7 @@
 
 	.container label {
 		position: absolute;
-		top: 21%;
+		top: 10px;
 		left: 13px;
 		transform: translateY(-100%);
 		background: white;

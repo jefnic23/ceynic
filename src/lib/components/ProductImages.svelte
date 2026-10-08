@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
-	import { CldImage } from "svelte-cloudinary";
+	import ProductImage from '$lib/components/ProductImage.svelte';
 	import { quintOut } from "svelte/easing";
 	import { crossfade } from "svelte/transition";
 	import Modal from "$lib/components/shared/Modal.svelte";
@@ -98,12 +98,13 @@
             {#each (product.images as ProductImageOut[]) as image, i}
                 <li class:selected={i === selectedIndex}>
                     <a href="#{i}" onclick={() => handleThumbnail(i)}>
-                        <CldImage 
-                            src={image.publicId} 
-                            alt={image.publicId}
+                        <ProductImage
+							url={image.url}
+                            alt={product.title}
                             width={60}
                             height={60}
-                            radius={8}
+                            rounded
+							crop
                             data-pin-nopin="true"
                         />
                     </a>
@@ -123,16 +124,17 @@
         tabindex="0" 
         aria-pressed="false"
     >
-        {#key selectedImage?.publicId}
+        {#key selectedImage?.url}
             <div 
-                in:receive={{ key: selectedImage?.publicId }}
-                out:send={{ key: selectedImage?.publicId }}
+				in:receive={{ key: selectedImage?.url }}
+				out:send={{ key: selectedImage?.url }}
             >
-                <CldImage 
-                    src={selectedImage?.publicId || ""} 
+                <ProductImage
+					url={selectedImage?.url}
                     alt={product.title}
-                    width={(product.images as ProductImageOut[])[0]?.width}
-                    height={(product.images as ProductImageOut[])[0]?.height}
+                    width={selectedImage?.width}
+                    height={selectedImage?.height}
+					style="max-height: 75dvh;"
                     data-pin-do="buttonPin"
                     data-pin-url={url}
                     data-pin-description={product.title}
@@ -149,11 +151,12 @@
                 <Icon icon="material-symbols:arrow-back-ios-rounded" width={32} height={32} />
             </button>
 
-            <CldImage
-                src={modalImage?.publicId || ""} 
+            <ProductImage
+				url={modalImage.url}
                 alt={product.title}
-                width={(product.images as ProductImageOut[])[0]?.width}
-                height={(product.images as ProductImageOut[])[0]?.height}
+                width={modalImage.width}
+                height={modalImage.height}
+				style="max-height: calc(100dvh - 8rem);"
                 data-pin-nopin="true"
             />
 
@@ -165,10 +168,11 @@
 {/if}
 
 <style>
-    .images {
+	.images {
 		display: flex;
 		flex-direction: row;
 		flex: 5;
+		min-width: 0;
 		padding: 1rem;
         column-gap: 1rem;
 	}
@@ -177,6 +181,7 @@
 		list-style: none;
 		padding: 0;
         margin: 0;
+		flex-shrink: 0;
 	}
 
 	li {
@@ -192,13 +197,25 @@
 		border-radius: 8px;
 	}
 
+	li a {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
     .image  {
         display: grid;
+		flex: 1;
+		min-width: 0;
         cursor: sw-resize;
     }
 
     .image > div {
         grid-area: 1 / 1;
+		display: flex;
+		justify-content: center;
+		width: 100%;
+		min-width: 0;
     }
 
     .modal-image {
@@ -206,6 +223,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		max-width: calc(100vw - 4rem);
+		max-height: calc(100dvh - 8rem);
 	}
 
 	.arrow {

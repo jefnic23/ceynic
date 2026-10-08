@@ -33,7 +33,8 @@
 		"svelte-check": "^4.2.1",
 		"tslib": "^2.4.1",
 		"typescript": "^5.5.0",
-		"vite": "^6.3.5"
+		"vite": "^6.3.5",
+		"vite-plugin-devtools-json": "^1.1.0"
 	},
 	"type": "module",
 	"dependencies": {
@@ -41,6 +42,6 @@
 		"@sveltejs/adapter-node": "^5.2.9",
 		"jwt-decode": "^4.0.0",
 		"marked": "^15.0.6",
-		"svelte-cloudinary": "^2.3.0"
+		"zod": "^4.3.5"
 	}
 }

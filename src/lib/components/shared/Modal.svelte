@@ -23,25 +23,11 @@
 		if (dialog && showModal) dialog.showModal();
 	});
 
-	function handleClick(event: Event) {
-		event.stopPropagation();
-	}
-
 	// todo: clicking outside modal if showClose is true should also close modal
 </script>
 
 <dialog bind:this={dialog} onclose={() => (showModal = false)} class={type}>
-	<div 
-		onclick={handleClick}
-		onkeydown={(e) => { 
-            if (e.key !== "Enter" && e.key !== " ") return; 
-            e.preventDefault();
-            (e.target as HTMLElement).click();
-        }} 
-		role="button" 
-        tabindex="0" 
-        aria-pressed="false"
-	>
+	<div>
 		<div class="header {showClose ? 'justify-between' : 'justify-center'}">
 			<h2>{title}</h2>
 			<!-- svelte-ignore a11y_autofocus -->

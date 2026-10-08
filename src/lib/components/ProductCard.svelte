@@ -1,8 +1,8 @@
 <script lang="ts">
     import Card from "$lib/components/shared/Card.svelte";
-	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
+	import ProductImage from '$lib/components/ProductImage.svelte';
+	import type { ProductOut } from "$lib/interfaces/ProductOut";
 	import { onMount } from "svelte";
-	import { CldImage } from "svelte-cloudinary";
 
     interface Props {
         product: ProductOut;
@@ -20,8 +20,8 @@
 <Card>
     <div class="product">
         <a href="/products/{product.id}" data-sveltekit-preload-data>
-            <CldImage 
-                src={(product.images as ProductImageOut[])[0]?.publicId} 
+            <ProductImage
+				url={product.images?.[0]?.url}
                 alt={product.title} 
                 width={!isMobile ? 256 : 225}
                 height={!isMobile ? 256 : 225}

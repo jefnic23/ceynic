@@ -1,15 +1,14 @@
 <script lang="ts">
-    import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
-	import { loadScript, type PayPalNamespace } from '@paypal/paypal-js';
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { type PageData } from './$types';
 	import PayPal from '$lib/components/PayPal.svelte';
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { cart } from '$lib/state/cart.svelte';
+	import { paypalContextKey, type PayPalContext } from '$lib/state/paypalContext';
 	import { currencyFormatter } from '$lib/utils/formatters';
-	import { CldImage } from 'svelte-cloudinary';
+	import ProductImage from '$lib/components/ProductImage.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
@@ -34,24 +33,8 @@
         cart.current.products = [];
 	}
 
-    // todo: Stripe/Amazon Pay needs to be added here as well
-    let paypal: PayPalNamespace | null = $state(null);
-
-    // todo: add this to layout so it loads earlier
-	onMount(async () => {
-		try {
-			paypal = await loadScript({
-				clientId: PUBLIC_PAYPAL_CLIENT_ID,
-				currency: 'USD',
-				dataPageType: 'checkout',
-				intent: 'authorize',
-				// debug: true
-				// todo: add merchantId
-			});
-		} catch (error) {
-			// todo: log error and show something in the UI
-		}
-	});
+	// todo: Stripe/Amazon Pay needs to be added here as well
+	const paypalContext = getContext<PayPalContext>(paypalContextKey);
 
     function handleRemove(product: ProductOut) {
         cart.current.products = cart.current.products.filter(p => p.id !== product.id);
@@ -68,8 +51,8 @@
                     <div class="column gap">
                         {#each cart.current.products as product}
                             <div class="product" style:row-gap="1rem" style:column-gap="1rem">
-                                <CldImage
-                                    src={product.images?.[0]?.publicId || ""}
+                                <ProductImage
+									url={product.images?.[0]?.url}
                                     alt={product.title}
                                     width={128}
                                     height={128}
@@ -111,7 +94,7 @@
                                 <Skeleton />
                             {:then paymentProcessor} 
                                 {#if paymentProcessor === PaymentProcessor.PAYPAL}
-                                    <PayPal paypal={paypal} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} />
+                                    <PayPal paypal={paypalContext.paypal} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} />
                                 {/if}
                             {/await}
                         </div>

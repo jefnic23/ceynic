@@ -1,0 +1,58 @@
+{
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "description": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        },
+        "price": {
+            "anyOf": [
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "mediumId": {
+            "type": "integer"
+        },
+        "height": {
+            "type": "integer"
+        },
+        "width": {
+            "type": "integer"
+        },
+        "enabled": {
+            "type": "boolean"
+        },
+        "images": {
+            "items": {
+                "format": "binary",
+                "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+        }
+    },
+    "required": [
+        "title",
+        "price",
+        "mediumId",
+        "height",
+        "width",
+        "enabled",
+        "images"
+    ],
+    "type": "object"
+}

@@ -1,26 +1,20 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
-
 	interface Props {
-		id: string;
-		label: string;
+		id?: string;
+		label?: string;
 		value: string;
-        children?: Snippet;
 	}
 
 	let {
-		id,
-		label,
-		value,
-        children
+		id = '',
+		label = '',
+		value = $bindable()
 	}: Props = $props();
 </script>
 
 <div class="container">
 	<label for={id}>{label}</label>
-	<select {id} name={id} {value} style:padding="13px">
-        {@render children?.()}
-    </select>
+	<textarea {id} name={id} {value} placeholder=" "></textarea>
 </div>
 
 <style>
@@ -41,15 +35,18 @@
 		transition: all 0.2s ease;
 	}
 
-	.container select {
+	.container textarea {
 		width: 100%;
 		padding: 10px;
 		font-size: 1em;
 		box-sizing: border-box;
+		resize: vertical;
+		height: 89px;
+		max-height: 477px;
 	}
 
-	.container :global(select:focus + label),
-	.container :global(select:not(:placeholder-shown) + label) {
+	.container :global(textarea:focus + label),
+	.container :global(textarea:not(:placeholder-shown) + label) {
 		top: -10px;
 		font-size: 0.7em;
 		color: #007bff;

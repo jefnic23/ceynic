@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ProductImageOut } from '$lib/interfaces/ProductOut';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import type { Action } from 'svelte/action';
@@ -15,6 +16,7 @@
 	let fileHashes: string[] = $state([]);
 	let filesChanged: boolean = $derived(!areEqual(initialFileHashes, fileHashes));
 	let previewError: string | null = $state(null);
+	let loadingPreviews: boolean = $state(previews.length > 0);
 	let draggedIndex: number | null = $state(null);
 	let hoverIndex: number | null = $state(null);
 
@@ -190,6 +192,8 @@
 			} catch (error) {
 				console.error(error);
 				previewError = 'Existing images could not be loaded. Please try again.';
+			} finally {
+				loadingPreviews = false;
 			}
 		}
 	});
@@ -225,6 +229,14 @@
 		style="display: none;"
 	/>
 	<div class="image-preview">
+		{#if loadingPreviews}
+			<span class="sr-only" role="status">Loading existing images…</span>
+			{#each previews as preview (preview.id)}
+				<div class="image-wrapper placeholder" aria-hidden="true">
+					<Skeleton />
+				</div>
+			{/each}
+		{/if}
 		{#each files as file, index}
 			<div
 				class="image-wrapper
@@ -308,6 +320,22 @@
 		transition:
 			transform 150ms ease,
 			border-color 150ms ease;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.placeholder {
+		cursor: default;
 	}
 
 	.image-wrapper.dragged {

@@ -4,6 +4,9 @@
 	interface Props {
 		showModal: boolean;
 		showClose?: boolean;
+		dismissible?: boolean;
+		busy?: boolean;
+		busyLabel?: string;
 		type?: 'info' | 'success' | 'warning' | 'error' | 'none';
 		title?: string;
 		children?: Snippet;
@@ -12,6 +15,9 @@
 	let {
 		showModal = $bindable(),
 		showClose = true,
+		dismissible = true,
+		busy = false,
+		busyLabel = 'Loading…',
 		type = 'none',
 		title = '',
 		children
@@ -26,16 +32,31 @@
 	// todo: clicking outside modal if showClose is true should also close modal
 </script>
 
-<dialog bind:this={dialog} onclose={() => (showModal = false)} class={type}>
+<dialog
+	bind:this={dialog}
+	onclose={() => (showModal = false)}
+	oncancel={(event) => {
+		if (!dismissible || busy) event.preventDefault();
+	}}
+	class={type}
+>
 	<div>
-		<div class="header {showClose ? 'justify-between' : 'justify-center'}">
-			<h2>{title}</h2>
-			<!-- svelte-ignore a11y_autofocus -->
-			{#if showClose}
-				<button title="Close" class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
-			{/if}
+		<div inert={busy} aria-busy={busy}>
+			<div class="header {showClose ? 'justify-between' : 'justify-center'}">
+				<h2>{title}</h2>
+				<!-- svelte-ignore a11y_autofocus -->
+				{#if showClose && dismissible && !busy}
+					<button title="Close" class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
+				{/if}
+			</div>
+			{@render children?.()}
 		</div>
-		{@render children?.()}
+		{#if busy}
+			<div class="busy-overlay" role="status" aria-live="polite">
+				<span class="busy-spinner" aria-hidden="true"></span>
+				<span>{busyLabel}</span>
+			</div>
+		{/if}
 	</div>
 </dialog>
 
@@ -53,10 +74,37 @@
 	}
 
 	dialog > div {
+		position: relative;
 		padding: 1em 1em 1em 1.34em;
 		transition:
 			max-height 0.3s ease,
 			height 0.3s ease;
+	}
+
+	.busy-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		background: rgba(255, 255, 255, 0.85);
+	}
+
+	.busy-spinner {
+		width: 2rem;
+		height: 2rem;
+		border: 3px solid #cbd5e1;
+		border-top-color: #2196f3;
+		border-radius: 50%;
+		animation: spin 0.7s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	dialog[open] {

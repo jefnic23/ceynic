@@ -134,7 +134,7 @@
                     alt={product.title}
                     width={selectedImage?.width}
                     height={selectedImage?.height}
-					style="max-height: 75dvh;"
+					style="width: 100%; height: 100%; object-fit: contain;"
                     data-pin-do="buttonPin"
                     data-pin-url={url}
                     data-pin-description={product.title}
@@ -156,7 +156,7 @@
                 alt={product.title}
                 width={modalImage.width}
                 height={modalImage.height}
-				style="max-height: calc(100dvh - 8rem);"
+				style="width: 100%; height: 100%; object-fit: contain;"
                 data-pin-nopin="true"
             />
 
@@ -206,7 +206,10 @@
     .image  {
         display: grid;
 		flex: 1;
+		width: 100%;
 		min-width: 0;
+		aspect-ratio: 1;
+		max-height: 75dvh;
         cursor: sw-resize;
     }
 
@@ -214,8 +217,11 @@
         grid-area: 1 / 1;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 		width: 100%;
+		height: 100%;
 		min-width: 0;
+		min-height: 0;
     }
 
     .modal-image {
@@ -223,8 +229,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		max-width: calc(100vw - 4rem);
-		max-height: calc(100dvh - 8rem);
+		width: min(calc(100vw - 4rem), calc(100dvh - 8rem), 46em);
+		aspect-ratio: 1;
 	}
 
 	.arrow {

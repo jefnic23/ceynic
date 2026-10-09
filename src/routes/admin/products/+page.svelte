@@ -16,6 +16,7 @@
 	import { enhance } from '$app/forms';
 	import Input from '$lib/components/shared/Input.svelte';
 	import TextArea from '$lib/components/shared/TextArea.svelte';
+	import { waitForMinimumDuration } from '$lib/utils/minimumDuration';
 
 	interface Props {
 		data: PageData;
@@ -25,6 +26,8 @@
 
 	let showModal: boolean = $state(false);
 	let loadingModal: boolean = $state(false);
+	let isUpdating: boolean = $state(false);
+	let updateError: string | null = $state(null);
 	let modalMode: 'create' | 'update' = $state('update');
 	let selectedProduct: ProductOut = $state(createEmptyProduct());
 	let files: File[] = $state([]);
@@ -51,12 +54,14 @@
 		selectedProduct = createEmptyProduct();
 		files = [];
 		loadingModal = false;
+		updateError = null;
 		showModal = true;
 	}
 
 	async function openEditModal(product: ProductOut) {
 		modalMode = 'update';
 		files = [];
+		updateError = null;
 		showModal = true;
 		loadingModal = true;
 		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
@@ -146,7 +151,12 @@
 </div>
 
 {#if showModal}
-	<Modal bind:showModal title={modalMode === 'create' ? 'Add New Product' : 'Edit Product'}>
+	<Modal
+		bind:showModal
+		busy={isUpdating}
+		busyLabel="Updating product…"
+		title={modalMode === 'create' ? 'Add New Product' : 'Edit Product'}
+	>
 		{#if loadingModal}
 			<div>loading product...</div>
 		{:else}
@@ -155,7 +165,13 @@
 				action={modalMode === 'create' ? '?/create' : '?/update'}
 				enctype="multipart/form-data" 
 				class="edit" 
-				use:enhance={({ formData }) => {
+				use:enhance={({ formData, cancel }) => {
+					const updating = modalMode === 'update';
+					if (updating && isUpdating) {
+						cancel();
+						return;
+					}
+
 					// Remove the empty <input type="file"> contents
 					formData.delete('medium');
 					formData.delete('images');
@@ -167,12 +183,44 @@
 						}
 					});
 
+					const busyStartedAt = updating ? performance.now() : 0;
+					if (updating) {
+						isUpdating = true;
+						updateError = null;
+					}
+
 					return async ({ result, update }) => {
-						await update();
-						if (result.type === 'success') showModal = false;
+						if (!updating) {
+							await update();
+							if (result.type === 'success') showModal = false;
+							return;
+						}
+
+						let updateSucceeded = false;
+						try {
+							if (result.type === 'error') {
+								updateError = 'Unable to update product. Please try again.';
+							} else {
+								await update();
+								if (result.type === 'success') updateSucceeded = true;
+								else if (result.type === 'failure') {
+									updateError = 'Unable to update product. Please review the fields and try again.';
+								}
+							}
+						} catch (error) {
+							console.error('Product update failed:', error);
+							updateError = 'Unable to update product. Please try again.';
+						} finally {
+							await waitForMinimumDuration(busyStartedAt);
+							isUpdating = false;
+							if (updateSucceeded) showModal = false;
+						}
 					}
 				}}
 			>
+				{#if updateError}
+					<p class="update-error" role="alert">{updateError}</p>
+				{/if}
 				{#if modalMode === 'update'}
 					<input type="hidden" id="id" name="id" value={selectedProduct.id} />
 				{/if}
@@ -308,6 +356,11 @@
 		flex-direction: column;
 		row-gap: 1rem;
 		width: 35em;
+	}
+
+	.update-error {
+		color: #b91c1c;
+		margin: 0;
 	}
 
 	.form-row {

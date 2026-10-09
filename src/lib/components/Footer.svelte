@@ -46,7 +46,7 @@
 			<a href="/admin" style:color="#666666" style:text-decoration="none" target="_blank">Administration</a>
 		</div>
 		<div>
-			Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.org</a>
+			Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.net</a>
 		</div>
     </div>
 </div>

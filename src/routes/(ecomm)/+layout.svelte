@@ -1,33 +1,13 @@
 <script lang="ts">
-	import { PUBLIC_MEASUREMENT_ID, PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
-	import { loadScript } from '@paypal/paypal-js';
+	import { PUBLIC_MEASUREMENT_ID } from '$env/static/public';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import Footer from '$lib/components/Footer.svelte';
 	import { afterNavigate, onNavigate } from '$app/navigation';
-	import { onMount, setContext } from 'svelte';
+	import { onMount } from 'svelte';
 	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
 	import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
 	import type { Snippet } from 'svelte';
-	import { paypalContextKey, type PayPalContext } from '$lib/state/paypalContext';
-
-	const paypalContext: PayPalContext = $state({ paypal: null });
-	setContext(paypalContextKey, paypalContext);
-
-	onMount(async () => {
-		try {
-			paypalContext.paypal = await loadScript({
-				clientId: PUBLIC_PAYPAL_CLIENT_ID,
-				currency: 'USD',
-				dataPageType: 'checkout',
-				intent: 'authorize'
-				// debug: true
-				// todo: add merchantId
-			});
-		} catch (error) {
-			// todo: log error and show something in the UI
-		}
-	});
 
 	onMount(() => {
 		data.pinterestEnabled.then((enabled) => {
@@ -79,7 +59,7 @@
 <GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
 
 <div class="wrapper">
-	<EcommHeader url={page.url} {name} />
+	<EcommHeader url={page.url} {name} paymentProcessor={data.paymentProcessor} />
 
 	{#key data.url}
 		<main>

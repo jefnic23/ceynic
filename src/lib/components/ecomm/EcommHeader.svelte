@@ -4,13 +4,15 @@
 	import Hamburger from "../Hamburger.svelte";
 	import Icon from "@iconify/svelte";
 	import { cart } from "$lib/state/cart.svelte";
+	import type { PaymentProcessor } from '$lib/enums/paymentProcessor';
 
 	interface Props {
 		url: URL;
 		name?: string;
+		paymentProcessor: PaymentProcessor | null;
 	}
 
-	let { url, name = "" }: Props = $props();
+	let { url, name = "", paymentProcessor }: Props = $props();
 
 	let open = $state(false);
 	let isMobile = $state(false);
@@ -105,21 +107,22 @@
 		</nav>
 	</div>
 	<div class="header-right">
-		<!-- todo: don't show cart if no payment processor is found -->
-		<a 
-			href="/cart" 
-			data-sveltekit-preload-data
-			class:active={url.pathname === '/cart'} 
-			style:position="relative"
-			onclick={toggleMobileHeader}
-		>
-			<Icon icon="material-symbols:shopping-cart-rounded" width={32} height={32} />
-			{#if showBadge}
-				<span class="cart-badge {animateBounce ? 'bounce' : ''} {animateShrink ? 'shrink' : ''}">
-					{displayCount}
-				</span>
-			{/if}
-		</a>
+		{#if paymentProcessor !== null}
+			<a 
+				href="/cart" 
+				data-sveltekit-preload-data
+				class:active={url.pathname === '/cart'} 
+				style:position="relative"
+				onclick={toggleMobileHeader}
+			>
+				<Icon icon="material-symbols:shopping-cart-rounded" width={32} height={32} />
+				{#if showBadge}
+					<span class="cart-badge {animateBounce ? 'bounce' : ''} {animateShrink ? 'shrink' : ''}">
+						{displayCount}
+					</span>
+				{/if}
+			</a>
+		{/if}
 	</div>
 {/snippet}
 

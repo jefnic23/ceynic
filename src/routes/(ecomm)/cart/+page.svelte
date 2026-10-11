@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { onMount } from 'svelte';
+	import { loadScript, type PayPalNamespace } from '@paypal/paypal-js';
+	import { PUBLIC_API_URL } from '$env/static/public';
 	import { type PageData } from './$types';
 	import PayPal from '$lib/components/PayPal.svelte';
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { cart } from '$lib/state/cart.svelte';
-	import { paypalContextKey, type PayPalContext } from '$lib/state/paypalContext';
 	import { currencyFormatter } from '$lib/utils/formatters';
 	import ProductImage from '$lib/components/ProductImage.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
@@ -33,8 +34,36 @@
         cart.current.products = [];
 	}
 
-	// todo: Stripe/Amazon Pay needs to be added here as well
-	const paypalContext = getContext<PayPalContext>(paypalContextKey);
+	let paypal: PayPalNamespace | null = $state(null);
+	let paypalError = $state(false);
+
+	onMount(() => {
+		let cancelled = false;
+		async function initializePayPal() {
+			try {
+				if (data.paymentProcessor !== PaymentProcessor.PAYPAL) return;
+
+				const response = await fetch(`${PUBLIC_API_URL}/settings/paypalClientId`);
+				if (!response.ok) throw new Error('Unable to load PayPal client ID.');
+				const { clientId }: { clientId: string } = await response.json();
+				if (!clientId) throw new Error('PayPal client ID is missing.');
+
+				const sdk = await loadScript({
+					clientId,
+					currency: 'USD',
+					dataPageType: 'checkout',
+					intent: 'authorize'
+				});
+				if (!sdk) throw new Error('Unable to load PayPal.');
+				if (!cancelled) paypal = sdk;
+			} catch {
+				if (!cancelled) paypalError = true;
+			}
+		}
+
+		void initializePayPal();
+		return () => { cancelled = true; };
+	});
 
     function handleRemove(product: ProductOut) {
         cart.current.products = cart.current.products.filter(p => p.id !== product.id);
@@ -90,13 +119,15 @@
                                     {currencyFormatter.format(subtotal())}
                                 </div>
                             </div>
-                            {#await data.paymentProcessor}
-                                <Skeleton />
-                            {:then paymentProcessor} 
-                                {#if paymentProcessor === PaymentProcessor.PAYPAL}
-                                    <PayPal paypal={paypalContext.paypal} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} />
-                                {/if}
-                            {/await}
+							{#if data.paymentProcessor === PaymentProcessor.PAYPAL}
+								{#if paypalError}
+									<p role="alert">PayPal checkout is unavailable right now.</p>
+								{:else if paypal}
+									<PayPal {paypal} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} />
+								{:else}
+									<Skeleton />
+								{/if}
+							{/if}
                         </div>
                     </Card> 
                 </div>

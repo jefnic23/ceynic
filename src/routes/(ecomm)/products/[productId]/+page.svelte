@@ -33,6 +33,11 @@
 	function handleViewInCart() {
 		goto('/cart');
 	}
+
+	function handleInquire(product: ProductOut) {
+		const message = `Hello, I'm interested in purchasing ${product.title}.`;
+		goto(`/contact?message=${encodeURIComponent(message)}`);
+	}
 </script>
 
 <div class="wrapper">
@@ -67,7 +72,11 @@
 					<div class="price">{currencyFormatter.format(product.price as number)}</div>
 					<div class="shipping">+ <i>free shipping</i></div>
 				</div>
-				{#if cart.current.products.find(p => p.id === product.id) === undefined}
+				{#if data.paymentProcessor === null}
+					<Button onclick={() => handleInquire(product)} style={ButtonStyle.Info}>
+						Inquire about this work
+					</Button>
+				{:else if cart.current.products.find(p => p.id === product.id) === undefined}
 					<Button onclick={() => handleAddToCart(product)} style={ButtonStyle.Info}>
 						Add to Cart
 					</Button>

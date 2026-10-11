@@ -4,6 +4,7 @@
 	import type { ActionData } from './$types';
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import Button from '$lib/components/shared/Button.svelte';
 
 	interface Props {
@@ -80,6 +81,7 @@
 					id="message"
 					name="message"
 					placeholder="Write something..."
+					value={page.url.searchParams.get('message') ?? ''}
 					required
 				></textarea>
 			</div>

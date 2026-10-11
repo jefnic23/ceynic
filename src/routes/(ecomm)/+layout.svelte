@@ -30,19 +30,23 @@
 	});
 
 	onMount(() => {
-		// Pinterest injects scripts into the document; wait until Svelte has hydrated the head.
-		if (document.querySelector('script[src="https://assets.pinterest.com/js/pinit.js"]')) return;
+		data.pinterestEnabled.then((enabled) => {
+			if (!enabled) return;
 
-		const script = document.createElement('script');
-		script.src = 'https://assets.pinterest.com/js/pinit.js';
-		script.async = true;
-		script.dataset.pinHover = 'true';
-		script.dataset.pinSticky = 'false';
-		document.body.appendChild(script);
+			// Pinterest injects scripts into the document; wait until Svelte has hydrated the head.
+			if (document.querySelector('script[src="https://assets.pinterest.com/js/pinit.js"]')) return;
+
+			const script = document.createElement('script');
+			script.src = 'https://assets.pinterest.com/js/pinit.js';
+			script.async = true;
+			script.dataset.pinHover = 'true';
+			script.dataset.pinSticky = 'false';
+			document.body.appendChild(script);
+		});
 	});
 
-	afterNavigate(() => {
-		window.PinUtils?.build();
+	afterNavigate(async () => {
+		if (await data.pinterestEnabled) window.PinUtils?.build();
 	});
 
 	onNavigate((navigation) => {

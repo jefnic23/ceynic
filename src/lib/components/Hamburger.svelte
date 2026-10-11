@@ -15,8 +15,8 @@
 
 <style>
     button {
-        width: 21px;
-        height: 13px;
+        width: 25px;
+        height: 25px;
         position: relative;
         -webkit-transform: rotate(0deg);
         -moz-transform: rotate(0deg);

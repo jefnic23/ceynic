@@ -46,7 +46,7 @@
 <style>
 	.masonry-layout {
 		transition: all 0.5s ease-in-out;
-		column-gap: 55px;
+		column-gap: 13px;
 		column-fill: initial;
 		width: 100%;
 	}

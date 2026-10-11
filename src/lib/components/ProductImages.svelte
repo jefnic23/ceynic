@@ -269,7 +269,7 @@
 
         li {
             float: left;
-            margin: 0 8px;
+            margin: 8px;
         }
 	}
 </style>

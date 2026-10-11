@@ -142,6 +142,7 @@
 	.description {
 		text-align: justify;
 		hyphens: auto;
+		white-space: pre-line;
 	}
 
 	.price {

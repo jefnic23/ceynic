@@ -1,12 +1,21 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { ProductMetadata } from '$lib/interfaces/ProductMetadata';
 import type { ProductOut } from '$lib/interfaces/ProductOut';
+import { ProductFilter } from '$lib/enums/productFilter';
 
-export const load = async ({ fetch, url }) => {
+export const load = async ({ fetch, url, parent }) => {
+    const { sortAndFilterEnabled: enabled } = await parent();
+    const sortAndFilterEnabled = await enabled;
+
     const fetchProducts = async () => {
-        const searchParams = url.searchParams ? `?${url.searchParams}` : '';
+        const searchParams = new URLSearchParams(url.searchParams);
+        if (!sortAndFilterEnabled) {
+            for (const param of ['sort', ...Object.values(ProductFilter)]) {
+                searchParams.delete(param);
+            }
+        }
 
-        const response = await fetch(`${PUBLIC_API_URL}/products${searchParams}`);
+        const response = await fetch(`${PUBLIC_API_URL}/products${searchParams.size ? `?${searchParams}` : ''}`);
 
         if (!response.ok) {
             console.log("Error retrieving products.");
@@ -33,6 +42,7 @@ export const load = async ({ fetch, url }) => {
 
     return {
         products: fetchProducts(),
-        metadata: fetchMetadata(),
+        metadata: sortAndFilterEnabled ? fetchMetadata() : Promise.resolve(null),
+        sortAndFilterEnabled,
     }
 }

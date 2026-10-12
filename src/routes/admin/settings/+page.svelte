@@ -13,6 +13,14 @@
 		/>
 		Enable Pinterest save buttons on the storefront
 	</label>
+	<label>
+		<input
+			type="checkbox"
+			name="sortAndFilterEnabled"
+			checked={form?.sortAndFilterEnabled ?? data.sortAndFilterEnabled}
+		/>
+		Enable sort and filter options on the storefront
+	</label>
 	<button type="submit">Save site settings</button>
 	{#if form?.message}
 		<p role="alert">{form.message}</p>

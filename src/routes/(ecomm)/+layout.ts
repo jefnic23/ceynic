@@ -31,16 +31,15 @@ export const load = async ({ url, fetch }) => {
         return responseData;
     }
 
-    const fetchPinterestEnabled = async (): Promise<boolean> => {
+    const fetchSiteSettings = async (): Promise<SiteSettings> => {
         const response = await fetch(`${PUBLIC_API_URL}/settings/siteSettings`);
 
         if (!response.ok) {
             console.log('Error retrieving site settings.');
-            return false;
+            return { pinterestEnabled: false, sortAndFilterEnabled: true };
         }
 
-        const settings: SiteSettings = await response.json();
-        return settings.pinterestEnabled === true;
+        return await response.json();
     }
 
     const fetchPaymentProcessor = async (): Promise<PaymentProcessor | null> => {
@@ -56,11 +55,14 @@ export const load = async ({ url, fetch }) => {
         return processor as PaymentProcessor | null;
     }
 
+    const siteSettings = fetchSiteSettings();
+
     return {
         url: url.pathname,
         name: fetchName(),
         socialMediaLinks: fetchSocialMediaLinks(),
-        pinterestEnabled: fetchPinterestEnabled(),
+        pinterestEnabled: siteSettings.then(settings => settings.pinterestEnabled === true),
+        sortAndFilterEnabled: siteSettings.then(settings => settings.sortAndFilterEnabled !== false),
         paymentProcessor: await fetchPaymentProcessor()
     }
 }

@@ -97,7 +97,7 @@
 		return metadata as ProductMetadata;
 	}
 
-	let loadMetadataPromise = loadMetadata();
+	let loadMetadataPromise = data.sortAndFilterEnabled ? loadMetadata() : Promise.resolve(null);
 
 	async function handleSort(_: CustomEvent) {
 		const url = new URL(window.location.href);
@@ -147,7 +147,8 @@
 	}
 </script>
 
-<div class="container">
+<div class={data.sortAndFilterEnabled ? 'container' : 'container without-filters'}>
+	{#if data.sortAndFilterEnabled}
 	<aside 
 		class="filters" 
 		class:is-mobile={isMobile} 
@@ -300,13 +301,14 @@
 			<Button onclick={handleClear} style={ButtonStyle.Cancel}>Clear</Button>
 		</div>
 	</aside>
+	{/if}
 	<div class="column products">
 		{#await data.products}
 			<div class="product-grid">
 				<Skeleton />
 			</div>
 		{:then products}
-			{#if isMobile}
+			{#if isMobile && data.sortAndFilterEnabled}
 				<div class="row" style:justify-content={"flex-start"}>
 					<Button onclick={toggleSidebar} style={ButtonStyle.Neutral}>
 						<div>Filter & Sort</div>
@@ -335,6 +337,10 @@
 		padding: 1rem;
 		width: 100%; 
 		max-width: 1600px;
+	}
+
+	.container.without-filters {
+		grid-template-columns: 1fr;
 	}
 
 	.products {

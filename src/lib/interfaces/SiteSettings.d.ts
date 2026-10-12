@@ -7,4 +7,5 @@
 
 export interface SiteSettings {
   pinterestEnabled?: boolean;
+  sortAndFilterEnabled?: boolean;
 }

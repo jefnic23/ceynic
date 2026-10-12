@@ -67,5 +67,24 @@ async function submitProduct({ request, cookies }: RequestEvent, method: 'POST' 
 
 export const actions: Actions = {
 	create: (event) => submitProduct(event, 'POST'),
-	update: (event) => submitProduct(event, 'PUT')
+	update: (event) => submitProduct(event, 'PUT'),
+	delete: async ({ request, cookies, fetch }) => {
+		const id = (await request.formData()).get('id');
+		if (typeof id !== 'string' || !/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id))) {
+			return fail(400, { message: 'Invalid product ID.' });
+		}
+
+		try {
+			const response = await fetch(`${PUBLIC_API_URL}/products/${id}`, {
+				method: 'DELETE',
+				headers: { Authorization: `Bearer ${cookies.get('access')}` }
+			});
+
+			if (!response.ok) return fail(502, { message: 'Unable to delete product.' });
+		} catch {
+			return fail(502, { message: 'Unable to delete product.' });
+		}
+
+		return { success: true };
+	}
 };

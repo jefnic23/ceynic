@@ -16,7 +16,9 @@
 	import { enhance } from '$app/forms';
 	import Input from '$lib/components/shared/Input.svelte';
 	import TextArea from '$lib/components/shared/TextArea.svelte';
+	import Toast from '$lib/components/shared/Toast.svelte';
 	import { waitForMinimumDuration } from '$lib/utils/minimumDuration';
+	import { useDismissToast, useToast } from '$lib/state/toast';
 
 	interface Props {
 		data: PageData;
@@ -27,10 +29,24 @@
 	let showModal: boolean = $state(false);
 	let loadingModal: boolean = $state(false);
 	let isUpdating: boolean = $state(false);
-	let updateError: string | null = $state(null);
 	let modalMode: 'create' | 'update' = $state('update');
 	let selectedProduct: ProductOut = $state(createEmptyProduct());
 	let files: File[] = $state([]);
+	let formToast: { id: number; title: string; message: string } | null = $state(null);
+	let formToastVisible = $state(false);
+	let nextFormToastId = 0;
+	const showToast = useToast();
+	const dismissToast = useDismissToast();
+
+	function showFormError(title: string, message: string) {
+		formToast = { id: ++nextFormToastId, title, message };
+		formToastVisible = true;
+		showToast({ type: 'error', title, message });
+	}
+
+	$effect(() => {
+		if (formToast && !formToastVisible) dismissToast();
+	});
 
 	function createEmptyProduct(): ProductOut {
 		return {
@@ -54,14 +70,14 @@
 		selectedProduct = createEmptyProduct();
 		files = [];
 		loadingModal = false;
-		updateError = null;
+		formToast = null;
 		showModal = true;
 	}
 
 	async function openEditModal(product: ProductOut) {
 		modalMode = 'update';
 		files = [];
-		updateError = null;
+		formToast = null;
 		showModal = true;
 		loadingModal = true;
 		const response = await fetch(`${PUBLIC_API_URL}/products/${product.id}`);
@@ -135,10 +151,33 @@
 									<div>Edit</div>
 									<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
 								</Button>
-								<Button style={ButtonStyle.Cancel}>
-									<div>Delete</div>
-									<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
-								</Button>
+								<form
+									method="POST"
+									action="?/delete"
+									class="delete-form"
+									use:enhance={() => {
+										const title = product.title;
+						return async ({ result, update }) => {
+							if (result.type === 'success') {
+								try {
+									await update();
+									showToast({ type: 'success', title: 'Product deleted', message: `"${title}" was deleted.` });
+								} catch (error) {
+									console.error('Product list refresh failed:', error);
+									showToast({ type: 'warning', title: 'Product deleted', message: 'The product list could not be refreshed.' });
+								}
+											} else {
+												showToast({ type: 'error', title: 'Product not deleted', message: 'Unable to delete product. Please try again.' });
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="id" value={product.id} />
+									<Button type="submit" style={ButtonStyle.Cancel}>
+										<div>Delete</div>
+										<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
+									</Button>
+								</form>
 							</td>
 						</tr>
 					{/each}
@@ -160,6 +199,13 @@
 		{#if loadingModal}
 			<div>loading product...</div>
 		{:else}
+			{#if formToast}
+				<div class="form-toast">
+					{#key formToast.id}
+						<Toast bind:showToast={formToastVisible} type="error" title={formToast.title} message={formToast.message} />
+					{/key}
+				</div>
+			{/if}
 			<form 
 				method="POST" 
 				action={modalMode === 'create' ? '?/create' : '?/update'}
@@ -186,41 +232,59 @@
 					const busyStartedAt = updating ? performance.now() : 0;
 					if (updating) {
 						isUpdating = true;
-						updateError = null;
 					}
 
 					return async ({ result, update }) => {
 						if (!updating) {
-							await update();
-							if (result.type === 'success') showModal = false;
+							if (result.type === 'success') {
+								try {
+									await update();
+									showModal = false;
+									showToast({ type: 'success', title: 'Product added', message: 'The product was added.' });
+								} catch (error) {
+									console.error('Product list refresh failed:', error);
+									showModal = false;
+									showToast({ type: 'warning', title: 'Product added', message: 'The product list could not be refreshed.' });
+								}
+							} else {
+								showFormError('Product not added', result.type === 'failure'
+									? 'Please review the product details and try again.'
+									: 'Unable to add product. Please try again.');
+							}
 							return;
 						}
 
 						let updateSucceeded = false;
+						let refreshFailed = false;
+						let failureMessage = 'Unable to update product. Please try again.';
 						try {
-							if (result.type === 'error') {
-								updateError = 'Unable to update product. Please try again.';
-							} else {
+							if (result.type === 'success') {
 								await update();
-								if (result.type === 'success') updateSucceeded = true;
-								else if (result.type === 'failure') {
-									updateError = 'Unable to update product. Please review the fields and try again.';
-								}
+								updateSucceeded = true;
+							} else if (result.type === 'failure') {
+								failureMessage = 'Please review the product details and try again.';
 							}
 						} catch (error) {
 							console.error('Product update failed:', error);
-							updateError = 'Unable to update product. Please try again.';
+							if (result.type === 'success') {
+								updateSucceeded = true;
+								refreshFailed = true;
+							}
 						} finally {
 							await waitForMinimumDuration(busyStartedAt);
 							isUpdating = false;
-							if (updateSucceeded) showModal = false;
+							if (updateSucceeded) {
+								showModal = false;
+								showToast(refreshFailed
+									? { type: 'warning', title: 'Product updated', message: 'The product list could not be refreshed.' }
+									: { type: 'success', title: 'Product updated', message: 'The product was updated.' });
+							} else {
+								showFormError('Product not updated', failureMessage);
+							}
 						}
 					}
 				}}
 			>
-				{#if updateError}
-					<p class="update-error" role="alert">{updateError}</p>
-				{/if}
 				{#if modalMode === 'update'}
 					<input type="hidden" id="id" name="id" value={selectedProduct.id} />
 				{/if}
@@ -291,10 +355,10 @@
 				<Dropzone previews={selectedProduct.images || []} bind:files={files} />
 
 				<div class="form-buttons">
-					<Button buttonType={"submit"}>
+					<Button type="submit">
 						{modalMode === 'create' ? 'Add Product' : 'Update Product'}
 					</Button>
-					<Button style={ButtonStyle.Cancel} onclick={() => showModal = false}>
+					<Button type="button" style={ButtonStyle.Cancel} onclick={() => showModal = false}>
 						Cancel
 					</Button>
 				</div>
@@ -351,6 +415,10 @@
 		padding: 0.5rem;
 	}
 
+	.delete-form {
+		display: inline-block;
+	}
+
 	.edit {
 		display: flex;
 		flex-direction: column;
@@ -358,9 +426,9 @@
 		width: 35em;
 	}
 
-	.update-error {
-		color: #b91c1c;
-		margin: 0;
+	.form-toast {
+		width: min(100%, 35em);
+		margin-bottom: 1rem;
 	}
 
 	.form-row {

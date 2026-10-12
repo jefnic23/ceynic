@@ -1,9 +1,23 @@
 <script lang="ts">
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
+	import { useToast } from '$lib/state/toast';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let processor = $state(form?.processor ?? (data.processor === PaymentProcessor.PAYPAL ? PaymentProcessor.PAYPAL : 'None'));
+	const showToast = useToast();
+
+	$effect(() => {
+		if (form?.message) {
+			showToast({ type: 'error', title: 'Payment settings update failed', message: form.message });
+		} else if (form?.success) {
+			showToast({
+				type: 'success',
+				title: 'Payment settings saved',
+				message: 'Your payment settings have been updated.'
+			});
+		}
+	});
 </script>
 
 <form method="POST">
@@ -22,11 +36,6 @@
 		<input id="client_secret" name="client_secret" type="password" autocomplete="new-password" required={!data.paypalConfigured} />
 	{/if}
 	<button type="submit">Save payment settings</button>
-	{#if form?.message}
-		<p role="alert">{form.message}</p>
-	{:else if form?.success}
-		<p role="status">Payment settings saved.</p>
-	{/if}
 </form>
 
 <style>

@@ -33,8 +33,8 @@
 				fill
 				loading={"lazy"}
 				onload={() => load(product.id)}
-				data-pin-do={!isMobile ? "buttonPin" : undefined}
-				data-pin-url={!isMobile ? page.url : undefined}
+				data-pin-media={!isMobile && product.images?.[0]?.url ? new URL(product.images[0].url, page.url).href : undefined}
+				data-pin-url={!isMobile ? new URL(`/products/${product.id}`, page.url).href : undefined}
 				data-pin-description={!isMobile ? product.title : undefined}
 				data-pin-no-hover={isMobile ? "true" : undefined}
 			/>

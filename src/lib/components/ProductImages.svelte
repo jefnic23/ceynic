@@ -4,7 +4,7 @@
 	import { quintOut } from "svelte/easing";
 	import { crossfade } from "svelte/transition";
 	import Modal from "$lib/components/shared/Modal.svelte";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import Icon from "@iconify/svelte";
 	import { page } from "$app/state";
 
@@ -76,16 +76,20 @@
         touchEndX = null;
     }
 
-    function handleThumbnail(index: number) {
+    async function handleThumbnail(index: number) {
         selectedIndex = index;
+        await tick();
+        window.PinUtils?.build();
     }
 
-	onMount(() => {
+		onMount(() => {
         const hash = page.url.hash;
         const index = hash ? parseInt(hash.substring(1)) : 0;
-        if (!isNaN(index) && index >= 0 && index < (product.images as ProductImageOut[]).length) {
+		if (!isNaN(index) && index >= 0 && index < (product.images as ProductImageOut[]).length) {
 			selectedIndex = index;
 		}
+
+		tick().then(() => window.PinUtils?.build());
 
 		window.addEventListener('keydown', handleKeydown);
 		return () => window.removeEventListener('keydown', handleKeydown);
@@ -135,9 +139,9 @@
                     width={selectedImage?.width}
                     height={selectedImage?.height}
 					style="width: 100%; height: 100%; object-fit: contain;"
-                    data-pin-do="buttonPin"
-                    data-pin-url={url}
-                    data-pin-description={product.title}
+					data-pin-media={selectedImage?.url ? new URL(selectedImage.url, url).href : undefined}
+					data-pin-url={new URL(`/products/${product.id}`, url).href}
+					data-pin-description={product.title}
                 />
             </div>
         {/key}

@@ -2,12 +2,17 @@
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
+	import { onMount, tick } from 'svelte';
 
 	interface Props {
 		products?: ProductOut[];
 	}
 
 	let { products = [] }: Props = $props();
+
+	onMount(() => {
+		if (products.length > 0) tick().then(() => window.PinUtils?.build());
+	});
 
 	let loadedImages = $state(new Set<number>());
 

@@ -21,6 +21,7 @@
 			script.async = true;
 			script.dataset.pinHover = 'true';
 			script.dataset.pinSticky = 'false';
+			script.onload = () => window.PinUtils?.build();
 			document.body.appendChild(script);
 		});
 	});

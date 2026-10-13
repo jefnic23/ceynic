@@ -11,14 +11,14 @@
 	let {
 		id,
 		label,
-		value,
+		value = $bindable(),
         children
 	}: Props = $props();
 </script>
 
 <div class="container">
 	<label for={id}>{label}</label>
-	<select {id} name={id} {value} style:padding="13px">
+	<select {id} name={id} bind:value style:padding="13px">
         {@render children?.()}
     </select>
 </div>

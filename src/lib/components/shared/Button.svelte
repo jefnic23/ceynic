@@ -11,6 +11,7 @@
 		loading?: boolean;
 		fullWidth?: boolean;
 		tooltip?: string | null;
+		appearance?: 'default' | 'plain';
 		buttonType?: "submit" | "reset" | "button";
 		children?: Snippet;
 	}
@@ -22,14 +23,18 @@
 		loading = false,
 		fullWidth = false,
 		tooltip = null,
+		appearance = 'default',
 		buttonType = "button",
+		type,
+		class: className = '',
 		children,
 		...rest
 	}: Props = $props();
 </script>
 
 <button
-	class="base-button type={buttonType} {style} {size} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''}"
+	class="base-button {style} {size} {appearance} {fullWidth ? 'full-width' : ''} {disabled ? 'disabled' : ''} {className}"
+	type={type ?? buttonType}
 	title={tooltip}
 	{disabled}
 	{...rest}
@@ -93,6 +98,13 @@
 		padding: 0.75rem 2rem;
 	}
 
+	.plain {
+		padding: 0;
+		background: transparent;
+		color: inherit;
+		border-radius: 0;
+	}
+
 	/* Full Width */
 	.full-width {
 		width: 100%;
@@ -126,7 +138,7 @@
 	}
 
 	/* Hover Effects */
-	button:hover:not(:disabled) {
+	button:hover:not(:disabled):not(.plain) {
 		transform: scale(1.03); /* Slight scale-up effect */
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
 	}

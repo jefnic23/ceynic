@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ProductImageOut } from '$lib/interfaces/ProductOut';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import type { Action } from 'svelte/action';
@@ -262,15 +263,16 @@
 				{#if index === 0}
 					<span class="thumbnail-indicator" title={thumbnailTitle}>Thumbnail</span>
 				{/if}
-				<button
+				<Button
 					type="button"
 					class="remove-btn"
+					appearance="plain"
 					aria-label="Remove image"
 					title="Remove image"
 					onclick={(e) => removeImage(index, e)}
 				>
 					&times;
-				</button>
+				</Button>
 			</div>
 		{/each}
 	</div>
@@ -361,7 +363,7 @@
 		object-fit: cover;
 	}
 
-	.remove-btn {
+	:global(button.remove-btn) {
 		position: absolute;
 		top: 5px;
 		right: 5px;
@@ -374,7 +376,7 @@
 			background-color 0.2s ease;
 	}
 
-	.remove-btn:hover {
+	:global(button.remove-btn:hover) {
 		transform: scale(1.2);
 		background-color: rgba(255, 0, 0, 0.8);
 		color: white;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from '$lib/components/shared/Button.svelte';
 	import { cubicIn } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 
@@ -35,9 +36,9 @@
 		<div class="content">
 			<div class="header">
 				<strong>{title}</strong>
-				<button type="button" aria-label="Close toast" onclick={() => (showToast = false)}>
+				<Button type="button" class="toast-close" appearance="plain" aria-label="Close toast" onclick={() => (showToast = false)}>
 					&times;
-				</button>
+				</Button>
 			</div>
 			<p>{message}</p>
 		</div>
@@ -86,7 +87,7 @@
 		font-size: 1rem;
 	}
 
-	button {
+	:global(button.toast-close) {
 		border: 0;
 		background: none;
 		color: #333;

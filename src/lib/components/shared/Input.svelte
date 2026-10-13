@@ -1,32 +1,34 @@
 <script lang="ts">
+	import type { HTMLInputAttributes } from 'svelte/elements';
+
 	interface Props {
 		id?: string;
+		name?: string;
 		label?: string;
-		type?: string;
+		type?: 'text' | 'number' | 'email' | 'password';
 		min?: number | null;
 		max?: number | null;
 		required?: boolean;
+		autocomplete?: HTMLInputAttributes['autocomplete'];
 		value: string | number;
 	}
 
 	let {
 		id = '',
+		name = id,
 		label = '',
 		type = 'text',
 		min = null,
 		max = null,
 		required = false,
+		autocomplete,
 		value = $bindable()
 	}: Props = $props();
 </script>
 
 <div class="container">
 	<label for={id}>{label}</label>
-	{#if type === 'number'}
-		<input {id} name={id} type="number" {min} {max} {value} placeholder=" " required={required} />
-	{:else}
-		<input {id} name={id} type="text" {value} placeholder=" " required={required}  />
-	{/if}
+	<input {id} {name} {type} min={type === 'number' ? min : undefined} max={type === 'number' ? max : undefined} bind:value {autocomplete} placeholder=" " {required} />
 </div>
 
 <style>

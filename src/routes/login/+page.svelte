@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/shared/Button.svelte';
+	import Input from '$lib/components/shared/Input.svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import Card from '$lib/components/shared/Card.svelte';
@@ -19,18 +20,11 @@
 			<form method="POST" use:enhance>
 				<div class="input-container">
 					<Icon icon="material-symbols:person" />
-					<input id="email" name="username" value="" placeholder="Email" type="email" required />
+					<Input id="email" name="username" label="Email" value="" type="email" autocomplete="username" required />
 				</div>
 				<div class="input-container">
 					<Icon icon="material-symbols:lock" />
-					<input
-						id="password"
-						name="password"
-						value=""
-						placeholder="Password"
-						type="password"
-						required
-					/>
+					<Input id="password" label="Password" value="" type="password" autocomplete="current-password" required />
 				</div>
 				<!-- {#if form?.invalid}
 					<p class="error">Username and password is required.</p>
@@ -39,7 +33,7 @@
 				{#if form?.credentials}
 					<p class="error">You have entered the wrong credentials.</p>
 				{/if}
-				<Button>Submit</Button>
+				<Button type="submit">Submit</Button>
 			</form>
 		</div>
 	</Card>
@@ -73,32 +67,7 @@
 		display: flex;
 		align-items: center;
 		margin-bottom: 1rem;
-		border-bottom: 2px solid #ccc;
+		gap: 0.5rem;
 		width: 89%;
-	}
-
-	input {
-		flex-grow: 1;
-		padding: 0.5rem 0;
-		border: none;
-		outline: none;
-		background-color: transparent;
-		margin-left: 0.5em;
-	}
-
-	input::placeholder {
-		color: #aaa;
-	}
-
-	input:-webkit-autofill,
-	input:-webkit-autofill:hover,
-	input:-webkit-autofill:focus {
-		-webkit-box-shadow: 0 0 0px 1000px white inset !important;
-		box-shadow: 0 0 0px 1000px white inset !important;
-		-webkit-text-fill-color: #000 !important;
-	}
-
-	.input-container:focus-within {
-		border-bottom-color: #007bff; /* Change this to your desired color */
 	}
 </style>

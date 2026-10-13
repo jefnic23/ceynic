@@ -3,6 +3,7 @@
 	import { enhance } from "$app/forms";
 	import type { LayoutData } from './$types';
 	import Sidebar from '$lib/components/shared/Sidebar.svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 	import { onNavigate } from '$app/navigation';
 	import Icon from "@iconify/svelte";
 
@@ -51,10 +52,10 @@
 				</a>
 			</nav>
 			<form action="/admin/logout" method="POST" use:enhance>
-				<button type="submit" title="Log Out">
+				<Button type="submit" title="Log Out" appearance="plain" class="sidebar-button">
 					<Icon icon="material-symbols:logout-rounded" width={32} height={32}  />
 					<span class="label">Log Out</span>
-				</button>
+				</Button>
 			</form>
 		</div>
 	</Sidebar>
@@ -98,7 +99,7 @@
 	}
 
 	nav a,
-	form button {
+	form :global(button.sidebar-button) {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -118,7 +119,7 @@
 	}
 
 	nav a:hover,
-	form button:hover {
+	form :global(button.sidebar-button:hover) {
 		background-color: #eaeaea;
 		color: #000;
 	}

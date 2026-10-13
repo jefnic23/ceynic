@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from '$lib/components/shared/Button.svelte';
+
     interface Props {
         open?: boolean;
     }
@@ -6,15 +8,15 @@
     let { open = $bindable(false) }: Props = $props();
 </script>
 
-<button class:open onclick={() => open = !open} aria-label="Main menu">
+<Button type="button" class={open ? 'hamburger-button open' : 'hamburger-button'} appearance="plain" onclick={() => open = !open} aria-label="Main menu">
     <span></span>
     <span></span>
     <span></span>
     <span></span>
-</button>
+</Button>
 
 <style>
-    button {
+    :global(button.hamburger-button) {
         width: 25px;
         height: 25px;
         position: relative;
@@ -31,7 +33,7 @@
         border: none;
 	}
 
-	button span {
+	:global(button.hamburger-button) span {
 		display: block;
         position: absolute;
         height: 3px;
@@ -50,39 +52,39 @@
         transition: .25s ease-in-out;
 	}
 
-	button span:nth-child(1) {
+    :global(button.hamburger-button) span:nth-child(1) {
         top: 0px;
     }
 
-    button span:nth-child(2),button span:nth-child(3) {
+    :global(button.hamburger-button) span:nth-child(2), :global(button.hamburger-button) span:nth-child(3) {
         top: 8px;
     }
 
-    button span:nth-child(4) {
+    :global(button.hamburger-button) span:nth-child(4) {
         top: 16px;
     }
 
-    button.open span:nth-child(1) {
+    :global(button.hamburger-button.open) span:nth-child(1) {
         top: 8px;
         width: 0%;
         left: 50%;
     }
 
-    button.open span:nth-child(2) {
+    :global(button.hamburger-button.open) span:nth-child(2) {
         -webkit-transform: rotate(45deg);
         -moz-transform: rotate(45deg);
         -o-transform: rotate(45deg);
         transform: rotate(45deg);
     }
 
-    button.open span:nth-child(3) {
+    :global(button.hamburger-button.open) span:nth-child(3) {
         -webkit-transform: rotate(-45deg);
         -moz-transform: rotate(-45deg);
         -o-transform: rotate(-45deg);
         transform: rotate(-45deg);
     }
 
-    button.open span:nth-child(4) {
+    :global(button.hamburger-button.open) span:nth-child(4) {
         top: 8px;
         width: 0%;
         left: 50%;

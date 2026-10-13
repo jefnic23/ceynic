@@ -1,4 +1,7 @@
 <script lang="ts">
+	import Button from '$lib/components/shared/Button.svelte';
+	import Dropdown from '$lib/components/shared/Dropdown.svelte';
+	import Input from '$lib/components/shared/Input.svelte';
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import { useToast } from '$lib/state/toast';
 	import type { ActionData, PageData } from './$types';
@@ -21,21 +24,18 @@
 </script>
 
 <form method="POST">
-	<label for="processor">Payment processor</label>
-	<select id="processor" name="processor" bind:value={processor}>
+	<Dropdown id="processor" label="Payment processor" bind:value={processor}>
 		<option value="None">None</option>
 		<option value={PaymentProcessor.PAYPAL}>PayPal</option>
-	</select>
+	</Dropdown>
 	{#if processor === PaymentProcessor.PAYPAL}
 		{#if data.paypalConfigured}
 			<p>PayPal credentials are configured. Leave both fields blank to keep them, or enter both to replace them.</p>
 		{/if}
-		<label for="client_id">PayPal client ID</label>
-		<input id="client_id" name="client_id" autocomplete="off" value={form?.clientId ?? ''} required={!data.paypalConfigured} />
-		<label for="client_secret">PayPal client secret</label>
-		<input id="client_secret" name="client_secret" type="password" autocomplete="new-password" required={!data.paypalConfigured} />
+		<Input id="client_id" label="PayPal client ID" autocomplete="off" value={form?.clientId ?? ''} required={!data.paypalConfigured} />
+		<Input id="client_secret" label="PayPal client secret" type="password" autocomplete="new-password" value="" required={!data.paypalConfigured} />
 	{/if}
-	<button type="submit">Save payment settings</button>
+	<Button type="submit">Save payment settings</Button>
 </form>
 
 <style>
@@ -44,14 +44,7 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 0.75rem;
-	}
-
-	input,
-	select {
-		max-width: 100%;
-	}
-
-	button {
-		margin-top: 0.5rem;
+		width: 100%;
+		max-width: 30rem;
 	}
 </style>

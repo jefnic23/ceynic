@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from '$lib/components/shared/Button.svelte';
+	import Checkbox from '$lib/components/shared/Checkbox.svelte';
 	import { useToast } from '$lib/state/toast';
 	import type { ActionData, PageData } from './$types';
 
@@ -19,23 +21,9 @@
 </script>
 
 <form method="POST">
-	<label>
-		<input
-			type="checkbox"
-			name="pinterestEnabled"
-			checked={form?.pinterestEnabled ?? data.pinterestEnabled}
-		/>
-		Enable Pinterest save buttons on the storefront
-	</label>
-	<label>
-		<input
-			type="checkbox"
-			name="sortAndFilterEnabled"
-			checked={form?.sortAndFilterEnabled ?? data.sortAndFilterEnabled}
-		/>
-		Enable sort and filter options on the storefront
-	</label>
-	<button type="submit">Save site settings</button>
+	<Checkbox name="pinterestEnabled" label="Enable Pinterest save buttons on the storefront" checked={form?.pinterestEnabled ?? data.pinterestEnabled} />
+	<Checkbox name="sortAndFilterEnabled" label="Enable sort and filter options on the storefront" checked={form?.sortAndFilterEnabled ?? data.sortAndFilterEnabled} />
+	<Button type="submit">Save site settings</Button>
 </form>
 
 <style>
@@ -44,11 +32,5 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 1rem;
-	}
-
-	label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
 	}
 </style>

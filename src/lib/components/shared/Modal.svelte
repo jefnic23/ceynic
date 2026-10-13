@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Button from '$lib/components/shared/Button.svelte';
 
 	interface Props {
 		showModal: boolean;
@@ -46,7 +47,7 @@
 				<h2>{title}</h2>
 				<!-- svelte-ignore a11y_autofocus -->
 				{#if showClose && dismissible && !busy}
-					<button title="Close" class="close-button" autofocus onclick={() => dialog?.close()}>&times;</button>
+					<Button type="button" title="Close" class="close-button" appearance="plain" autofocus onclick={() => dialog?.close()}>&times;</Button>
 				{/if}
 			</div>
 			{@render children?.()}
@@ -149,7 +150,7 @@
 	}
 
 	/* Close button styling */
-	.close-button {
+	:global(button.close-button) {
 		background: none;
 		border: none;
 		font-size: 1.5em;
@@ -160,7 +161,7 @@
 			color 0.2s ease;
 	}
 
-	.close-button:hover {
+	:global(button.close-button:hover) {
 		transform: scale(1.2);
 		color: #000;
 	}

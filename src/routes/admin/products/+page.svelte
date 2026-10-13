@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/shared/Button.svelte';
+	import Checkbox from '$lib/components/shared/Checkbox.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
@@ -338,18 +339,7 @@
 				</div>
 
 				<div class="form-row">
-					<div class="form-input">
-						<label for="enabled">Enabled</label>
-						<div class="checkbox">
-							<input 
-								id="enabled" 
-								name="enabled"
-								type="checkbox" 
-								value={selectedProduct.enabled} 
-								bind:checked={selectedProduct.enabled} 
-							/>
-						</div>
-					</div>
+					<Checkbox name="enabled" label="Enabled" bind:checked={selectedProduct.enabled} />
 				</div>
 
 				<Dropzone previews={selectedProduct.images || []} bind:files={files} />
@@ -406,10 +396,6 @@
 		background-color: #e9e9e9;
 	}
 
-	input {
-		width: 100%;
-	}
-
 	.thumbnail {
 		display: flex;
 		padding: 0.5rem;
@@ -451,17 +437,6 @@
 		align-items: center;
 		justify-content: flex-end;
 		column-gap: 1rem;
-	}
-
-	.checkbox {
-		display: flex;
-		justify-content: flex-start;
-	}
-
-	.checkbox input {
-		height: 21px;
-		width: 21px;
-		margin: 0;
 	}
 
 	:is(tbody > tr):hover {

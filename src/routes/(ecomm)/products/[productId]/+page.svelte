@@ -36,7 +36,12 @@
 
 	function handleInquire(product: ProductOut) {
 		const message = `Hello, I'm interested in purchasing ${product.title}.`;
-		goto(`/contact?message=${encodeURIComponent(message)}`);
+		const searchParams = new URLSearchParams({ message, productId: String(product.id) });
+		const imageIndex = page.url.hash.slice(1);
+		if (/^\d+$/.test(imageIndex) && Number(imageIndex) < (product.images?.length ?? 0)) {
+			searchParams.set('imageIndex', imageIndex);
+		}
+		goto(`/contact?${searchParams}`);
 	}
 </script>
 

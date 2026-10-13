@@ -157,15 +157,15 @@
 									class="delete-form"
 									use:enhance={() => {
 										const title = product.title;
-						return async ({ result, update }) => {
-							if (result.type === 'success') {
-								try {
-									await update();
-									showToast({ type: 'success', title: 'Product deleted', message: `"${title}" was deleted.` });
-								} catch (error) {
-									console.error('Product list refresh failed:', error);
-									showToast({ type: 'warning', title: 'Product deleted', message: 'The product list could not be refreshed.' });
-								}
+										return async ({ result, update }) => {
+											if (result.type === 'success') {
+												try {
+													await update();
+													showToast({ type: 'success', title: 'Product deleted', message: `"${title}" was deleted.` });
+												} catch (error) {
+													console.error('Product list refresh failed:', error);
+													showToast({ type: 'warning', title: 'Product deleted', message: 'The product list could not be refreshed.' });
+												}
 											} else {
 												showToast({ type: 'error', title: 'Product not deleted', message: 'Unable to delete product. Please try again.' });
 											}

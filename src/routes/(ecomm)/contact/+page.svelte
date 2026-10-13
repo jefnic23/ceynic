@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { ActionData } from './$types';
-	import { applyAction, deserialize, enhance } from '$app/forms';
+	import type { ActionData, PageData } from './$types';
+	import { applyAction, deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/shared/Button.svelte';
+	import ProductImage from '$lib/components/ProductImage.svelte';
 
 	interface Props {
 		form: ActionData;
+		data: PageData;
 	}
 
-	let { form }: Props = $props();
+	let { form, data }: Props = $props();
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -45,7 +47,16 @@
 </svelte:head>
 
 <div class="wrapper">
-	<h3>Please contact me if you have any questions or comments</h3>
+	<h3>
+		{data.inquiry
+			? 'Interested in purchasing this work? Send me a message.'
+			: 'Please contact me if you have any questions or comments'}
+	</h3>
+	{#if data.inquiry?.imageUrl}
+		<div class="inquiry-image">
+			<ProductImage url={data.inquiry.imageUrl} alt={data.inquiry.title} />
+		</div>
+	{/if}
 	<form class="wrapper form" method="POST" onsubmit={handleSubmit}>
 		{#if form?.success}
 			<div>Thank you for your message!</div>
@@ -106,6 +117,19 @@
 
 	.form {
 		max-width: 500px;
+	}
+
+	.inquiry-image {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+		max-width: 320px;
+		max-height: 320px;
+	}
+
+	.inquiry-image :global(img) {
+		max-height: 320px;
+		object-fit: contain;
 	}
 
 	.form-element {

@@ -60,10 +60,7 @@
 		border-radius: 0.25rem;
 		overflow: hidden;
 		position: relative;
-		transition:
-			background-color 0.3s ease,
-			transform 0.2s ease,
-			box-shadow 0.2s ease;
+		transition: background-color 0.3s ease;
 	}
 
 	/* Style Variants */
@@ -138,8 +135,19 @@
 	}
 
 	/* Hover Effects */
-	button:hover:not(:disabled):not(.plain) {
-		transform: scale(1.03); /* Slight scale-up effect */
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
+	.submit:hover:not(:disabled):not(.plain) {
+		background-color: #43a047;
+	}
+	.cancel:hover:not(:disabled):not(.plain) {
+		background-color: #e53935;
+	}
+	.info:hover:not(:disabled):not(.plain) {
+		background-color: #1e88e5;
+	}
+	.warning:hover:not(:disabled):not(.plain) {
+		background-color: #fb8c00;
+	}
+	.neutral:hover:not(:disabled):not(.plain) {
+		background-color: #e5e5e5;
 	}
 </style>

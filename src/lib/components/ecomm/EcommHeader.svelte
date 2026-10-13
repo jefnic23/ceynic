@@ -173,6 +173,7 @@
 		margin: 0 0.5rem;
 		color: rgba(0, 0, 0, 0.55);
 		font-size: 16px;
+		font-weight: 400;
 		width: fit-content;
 		transition:
 			color 0.15s ease-in-out,
@@ -181,7 +182,7 @@
 	}
 
 	nav a.active {
-		font-weight: bold;
+		color: rgba(0, 0, 0, 0.85);
 	}
 
 	nav a.active::after {

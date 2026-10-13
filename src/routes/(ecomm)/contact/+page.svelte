@@ -7,7 +7,6 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/shared/Button.svelte';
 	import ProductImage from '$lib/components/ProductImage.svelte';
-	import { tick } from 'svelte';
 
 	interface Props {
 		form: ActionData;
@@ -15,10 +14,6 @@
 	}
 
 	let { form, data }: Props = $props();
-
-	$effect(() => {
-		if (data.inquiry?.imageUrl) tick().then(() => window.PinUtils?.build());
-	});
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -62,9 +57,8 @@
 			<ProductImage
 				url={data.inquiry.imageUrl}
 				alt={data.inquiry.title}
-				data-pin-media={new URL(data.inquiry.imageUrl, page.url).href}
-				data-pin-url={new URL(`/products/${data.inquiry.productId}`, page.url).href}
-				data-pin-description={data.inquiry.title}
+				data-pin-no-hover="true"
+				data-pin-nopin="true"
 			/>
 		</div>
 	{/if}

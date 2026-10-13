@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
             ? product.images?.[imageIndex] ?? product.images?.[0]
             : product.images?.[0];
 
-        return { inquiry: { productId: product.id, title: product.title, imageUrl: image?.url ?? null } };
+        return { inquiry: { title: product.title, imageUrl: image?.url ?? null } };
     } catch {
         return { inquiry: null };
     }

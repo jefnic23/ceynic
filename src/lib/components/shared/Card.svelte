@@ -19,9 +19,10 @@
 <style>
     .card {
         background: #fff;
+        box-sizing: border-box;
         padding: 21px;
         border-radius: 8px;
         box-shadow: rgba(0, 0, 0, 0.13) 0px 3px 13px;
-        margin: auto;
+        margin: 0 auto;
     }
 </style>

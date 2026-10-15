@@ -92,6 +92,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{name || 'Shop'}</title>
+</svelte:head>
+
 <GoogleAnalytics measurementId={PUBLIC_MEASUREMENT_ID} />
 
 <div class="wrapper">

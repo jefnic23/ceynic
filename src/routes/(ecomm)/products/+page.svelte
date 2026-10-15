@@ -147,6 +147,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Browse</title>
+</svelte:head>
+
 <div class={data.sortAndFilterEnabled ? 'container' : 'container without-filters'}>
 	{#if data.sortAndFilterEnabled}
 	<aside 

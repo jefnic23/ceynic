@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { type PageData } from './$types';
+	import { goto } from '$app/navigation';
 	import PayPal from '$lib/components/PayPal.svelte';
 	import { PaymentProcessor } from '$lib/enums/paymentProcessor';
 	import { usePayPal } from '$lib/state/paypal';
-	import Modal from '$lib/components/shared/Modal.svelte';
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { cart } from '$lib/state/cart.svelte';
 	import { currencyFormatter } from '$lib/utils/formatters';
@@ -23,13 +23,9 @@
         const prices = cart.current.products.map(p => parseFloat(p.price as string));
 		return prices.reduce((a, b) => a + b, 0.0)
     });
-    let showModal: boolean = $state(false);
-	let orderId: string = $state("");
-
 	function confirmOrder(orderID: string) {
-		orderId = orderID;
-		showModal = !showModal; // todo: order confirmation page instead?
         cart.current.products = [];
+		void goto(`/orders/${encodeURIComponent(orderID)}/confirmation`);
 	}
 
 	const paypal = usePayPal();
@@ -112,15 +108,6 @@
         </div>
     {/if}
 </div>
-
-{#if showModal}
-	<Modal bind:showModal title={"Order Confirmed!"} type={"success"}>
-		<div>
-			<div>Your order has been confirmed.</div>
-			<div>Order ID: {orderId}</div>
-		</div>
-	</Modal>
-{/if}
 
 <style>
     .container {

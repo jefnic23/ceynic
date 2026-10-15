@@ -19,10 +19,10 @@
 
 		try {
 			await paypal?.Buttons({
-					onShippingChange: function (_, actions) {
+					onShippingChange: (_, actions) => {
 						return actions.resolve();
 					},
-					createOrder: async function () {
+					createOrder: async () => {
 						const response = await fetch(`${PUBLIC_API_URL}/orders`, {
 							method: 'POST',
 							headers: {
@@ -32,14 +32,14 @@
 						});
 
 						if (!response.ok) {
-							console.log('Error creating order.');
+							throw new Error('Error creating order.');
 						}
 
 						const json = await response.json();
 
 						return json.orderId;
 					},
-					onApprove: async function (data, _) {
+					onApprove: async (data) => {
 						const response = await fetch(`${PUBLIC_API_URL}/orders/${data.orderID}/authorize`, {
 							method: 'POST',
 							headers: {
@@ -49,11 +49,8 @@
 						});
 
 						if (!response.ok) {
-							console.log('Error creating order.');
-							// todo: raise exception
+							throw new Error('Error authorizing order.');
 						}
-
-						const json = await response.json();
 
 						confirmOrder(data.orderID);
 					}

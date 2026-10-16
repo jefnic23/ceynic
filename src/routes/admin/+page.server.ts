@@ -8,6 +8,28 @@ interface UserOut {
 	lastName: string | null;
 }
 
+function ordersByMonth(orders: OrderOut[]) {
+	const now = new Date();
+	const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+	const months = Array.from({ length: 6 }, (_, index) => {
+		const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5 + index, 1));
+		return {
+			key: date.getUTCFullYear() * 12 + date.getUTCMonth(),
+			label: monthFormatter.format(date),
+			count: 0
+		};
+	});
+	const monthsByKey = new Map(months.map((month) => [month.key, month]));
+
+	for (const order of orders) {
+		const created = new Date(order.createTime);
+		const month = monthsByKey.get(created.getUTCFullYear() * 12 + created.getUTCMonth());
+		if (month) month.count += 1;
+	}
+
+	return months.map(({ label, count }) => ({ label, count }));
+}
+
 export const load: PageServerLoad = async ({ fetch, cookies }) => {
 	const fetchUser = async (): Promise<UserOut | null> => {
 		const response = await fetch(`${PUBLIC_API_URL}/users`, {
@@ -24,7 +46,7 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
 		return await response.json();
 	};
 
-	const fetchPendingOrders = async (): Promise<OrderOut[]> => {
+	const fetchOrders = async (): Promise<OrderOut[]> => {
 		const response = await fetch(`${PUBLIC_API_URL}/orders`, {
 			method: 'GET',
 			headers: {
@@ -37,12 +59,14 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
 			return [];
 		}
 
-		const orders: OrderOut[] = await response.json();
-		return orders.filter((order) => order.status === 'PENDING');
+		return await response.json();
 	};
+
+	const orders = fetchOrders();
 
 	return {
 		user: fetchUser(),
-		pendingOrders: fetchPendingOrders()
+		pendingOrders: orders.then((items) => items.filter((order) => order.status === 'PENDING')),
+		monthlyOrders: orders.then(ordersByMonth)
 	};
 };

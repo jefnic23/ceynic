@@ -12,12 +12,35 @@
 	import Button from '$lib/components/shared/Button.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
+	import { PUBLIC_API_URL } from '$env/static/public';
+	import { onMount } from 'svelte';
 
     interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+	let unavailableIds: number[] = $state([]);
+	let checkingAvailability = $state(true);
+	let hasUnavailableItems = $derived(cart.current.products.some(product => unavailableIds.includes(product.id)));
+
+	async function refreshAvailability() {
+		const ids = [...new Set(cart.current.products.map(product => product.id))];
+		const unavailable = await Promise.all(ids.map(async id => {
+			try {
+				const response = await fetch(`${PUBLIC_API_URL}/products/${id}`);
+				if (!response.ok) return id;
+				const product: ProductOut = await response.json();
+				return product.sold ? id : null;
+			} catch {
+				return id;
+			}
+		}));
+		unavailableIds = unavailable.filter((id): id is number => id !== null);
+		checkingAvailability = false;
+	}
+
+	onMount(() => { void refreshAvailability(); });
 
     let subtotal: () => number = $derived(() => {
         const prices = cart.current.products.map(p => parseFloat(p.price as string));
@@ -60,7 +83,10 @@
                                             </a>
                                         </div>
                                         <div class="description">{product.description}</div>
-                                        <div>{currencyFormatter.format(product.price as number)}</div>
+										<div>{currencyFormatter.format(product.price as number)}</div>
+										{#if unavailableIds.includes(product.id)}
+											<div role="status">Sold or unavailable — remove this item to continue.</div>
+										{/if}
                                     </div>
                                     <div class="remove">
                                         <Button onclick={() => handleRemove(product)} style={ButtonStyle.Neutral}>Remove</Button>
@@ -84,11 +110,15 @@
                                     {currencyFormatter.format(subtotal())}
                                 </div>
                             </div>
-							{#if data.paymentProcessor === PaymentProcessor.PAYPAL}
+							{#if hasUnavailableItems}
+								<p role="alert">Remove sold or unavailable items before checking out.</p>
+							{:else if checkingAvailability}
+								<Skeleton />
+							{:else if data.paymentProcessor === PaymentProcessor.PAYPAL}
 								{#if paypal.error}
 									<p role="alert">PayPal checkout is unavailable right now.</p>
 								{:else if paypal.sdk}
-									<PayPal paypal={paypal.sdk} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} />
+									<PayPal paypal={paypal.sdk} productIds={cart.current.products.map(p => p.id) || []} confirmOrder={confirmOrder} onConflict={refreshAvailability} />
 								{:else}
 									<Skeleton />
 								{/if}

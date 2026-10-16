@@ -6,9 +6,11 @@
 		paypal: PayPalNamespace | null;
 		productIds: number[];
 		confirmOrder: CallableFunction;
+		onConflict: () => Promise<void>;
 	}
 
-	let { paypal, productIds, confirmOrder }: Props = $props();
+	let { paypal, productIds, confirmOrder, onConflict }: Props = $props();
+	let checkoutError: string | null = $state(null);
 
 	$effect(() => {
 		if (paypal) renderButtons();
@@ -19,10 +21,14 @@
 
 		try {
 			await paypal?.Buttons({
+					onError: () => {
+						checkoutError ??= 'Unable to complete checkout. Please try again.';
+					},
 					onShippingChange: (_, actions) => {
 						return actions.resolve();
 					},
 					createOrder: async () => {
+						checkoutError = null;
 						const response = await fetch(`${PUBLIC_API_URL}/orders`, {
 							method: 'POST',
 							headers: {
@@ -32,6 +38,10 @@
 						});
 
 						if (!response.ok) {
+							if (response.status === 409) {
+								checkoutError = 'An item has sold. Remove it from your cart before checking out.';
+								await onConflict();
+							}
 							throw new Error('Error creating order.');
 						}
 
@@ -49,6 +59,10 @@
 						});
 
 						if (!response.ok) {
+							if (response.status === 409) {
+								checkoutError = 'An item has sold. Remove it from your cart before checking out.';
+								await onConflict();
+							}
 							throw new Error('Error authorizing order.');
 						}
 
@@ -86,9 +100,10 @@
 				})
 				.render('#paypal-container-element');
 		} catch (error) {
-			// log error and show something in the UI
+			checkoutError = 'Unable to load checkout. Please try again.';
 		}
 	};
 </script>
 
 <div id="paypal-container-element"></div>
+{#if checkoutError}<p role="alert">{checkoutError}</p>{/if}

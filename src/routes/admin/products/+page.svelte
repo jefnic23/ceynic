@@ -72,6 +72,7 @@
 			dateAdded: '',
 			mediumId: 1,
 			storefrontId: 0,
+			sold: false,
 			images: [],
 			medium: null
 		};

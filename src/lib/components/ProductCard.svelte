@@ -28,7 +28,7 @@
                 data-pin-nopin="true" 
             />
             <div class="title">{product.title}</div>
-            <div class="price">${product.price}</div>
+            <div class="price">${product.price}{#if product.sold}<span class="sold">Sold</span>{/if}</div>
         </a>
     </div>
 </Card>
@@ -60,6 +60,11 @@
     .price {
         font-weight: 500;
     }
+
+	.sold {
+		color: #666;
+        margin-left: 5px;
+	}
 
     @media only screen and (max-width: 400px) {
 		.title {

@@ -102,6 +102,9 @@
         "id": {
             "type": "integer"
         },
+        "sold": {
+            "type": "boolean"
+        },
         "images": {
             "default": null,
             "items": {
@@ -129,7 +132,8 @@
         "enabled",
         "mediumId",
         "storefrontId",
-        "id"
+        "id",
+        "sold"
     ],
     "type": "object"
 }

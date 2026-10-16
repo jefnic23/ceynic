@@ -6,4 +6,5 @@ export enum ProductFilter {
     MaxWidth = 'max_width',
     MinHeight = 'min_height',
     MaxHeight = 'max_height',
+    Sold = 'sold',
 }

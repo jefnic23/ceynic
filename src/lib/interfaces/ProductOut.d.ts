@@ -16,6 +16,7 @@ export interface ProductOut {
   mediumId: number;
   storefrontId: number;
   id: number;
+  sold: boolean;
   images?: ProductImageOut[];
   medium?: MediumOut | null;
 }

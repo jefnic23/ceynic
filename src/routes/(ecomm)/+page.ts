@@ -3,7 +3,7 @@ import type { ProductOut, MediumOut } from '$lib/interfaces/ProductOut';
 
 export const load = async ({ fetch }) => {
     const fetchProducts = async () => {
-        const response = await fetch(`${PUBLIC_API_URL}/products`);
+        const response = await fetch(`${PUBLIC_API_URL}/products?sold=true`);
 
         if (!response.ok) {
             console.log("Error retrieving products.");

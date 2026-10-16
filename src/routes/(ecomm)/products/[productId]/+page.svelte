@@ -25,6 +25,7 @@
     `;
 
 	function handleAddToCart(product: ProductOut) {
+		if (product.sold) return;
 		cart.current.products.push(product);
 		// todo: add toast message with redirect to cart
 		// console.log($state.snapshot(cart));
@@ -77,7 +78,9 @@
 					<div class="price">{currencyFormatter.format(product.price as number)}</div>
 					<div class="shipping">+ <i>free shipping</i></div>
 				</div>
-				{#if data.paymentProcessor === null}
+				{#if product.sold}
+					<Button disabled={true} style={ButtonStyle.Neutral}>Sold</Button>
+				{:else if data.paymentProcessor === null}
 					<Button onclick={() => handleInquire(product)} style={ButtonStyle.Info}>
 						Inquire about this work
 					</Button>

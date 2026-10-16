@@ -64,7 +64,9 @@
 	let maxWidthChanged: boolean = $state(false);
 	let minHeightChanged: boolean = $state(false);
 	let maxHeightChanged: boolean = $state(false);
-	let filterApplied = $derived(mediumsChanged || minPriceChanged || maxPriceChanged || minWidthChanged || maxWidthChanged || minHeightChanged || maxHeightChanged);
+	let soldChanged: boolean = $state(false);
+	let includeSold: boolean = $state(page.url.searchParams.get(ProductFilter.Sold) === 'true');
+	let filterApplied = $derived(mediumsChanged || minPriceChanged || maxPriceChanged || minWidthChanged || maxWidthChanged || minHeightChanged || maxHeightChanged || soldChanged);
 
 	let mediums: string[] = $state(page.url.searchParams.getAll('medium') || []);
 
@@ -121,9 +123,13 @@
 		if (maxWidthChanged) url.searchParams.set(ProductFilter.MaxWidth, maxWidth.toString());
 		if (minHeightChanged) url.searchParams.set(ProductFilter.MinHeight, minHeight.toString());
 		if (maxHeightChanged) url.searchParams.set(ProductFilter.MaxHeight, maxHeight.toString());
+		if (soldChanged) {
+			if (includeSold) url.searchParams.set(ProductFilter.Sold, 'true');
+			else url.searchParams.delete(ProductFilter.Sold);
+		}
 		if (sort !== "") url.searchParams.set('sort', sort)
 
-		if (url.searchParams.size === 0)  return;
+		if (url.searchParams.size === 0 && page.url.searchParams.size === 0) return;
 
 		await goto(url, { replaceState: true, keepFocus: true });
 	}
@@ -143,6 +149,8 @@
 		maxWidthChanged = false;
 		minHeightChanged = false;
 		maxHeightChanged = false;
+		includeSold = false;
+		soldChanged = false;
 		await goto('products', { replaceState: true, keepFocus: true });
 	}
 </script>
@@ -298,8 +306,25 @@
 						</div>
 					</div>
 				</div>
-			</div>
+		</div>
 		{/await}
+		<div class="row">
+			<div class="column">
+				<h4>Availability</h4>
+				<div class="row justify-left">
+					<input
+						type="checkbox"
+						id="include-sold"
+						checked={includeSold}
+						onchange={(event) => {
+							includeSold = event.currentTarget.checked;
+							soldChanged = true;
+						}}
+						/>
+					<label for="include-sold">Sold</label>
+				</div>
+			</div>
+		</div>
 		<div class="filter-buttons">
 			<Button onclick={handleFilter}>Filter</Button>
 			<Button onclick={handleClear} style={ButtonStyle.Cancel}>Clear</Button>

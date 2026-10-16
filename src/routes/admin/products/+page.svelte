@@ -27,6 +27,16 @@
 	}
 
 	let { data }: Props = $props();
+	const productColumns = [
+		{ label: '' },
+		{ label: 'Title', sortValue: (product: ProductOut) => product.title },
+		{ label: 'Price', sortValue: (product: ProductOut) => Number(product.price) },
+		{ label: 'Height', sortValue: (product: ProductOut) => product.height },
+		{ label: 'Width', sortValue: (product: ProductOut) => product.width },
+		{ label: 'Medium', sortValue: (product: ProductOut) => product.medium?.name },
+		{ label: 'Enabled', sortValue: (product: ProductOut) => product.enabled },
+		{ label: 'Actions' }
+	];
 
 	let showModal: boolean = $state(false);
 	let loadingModal: boolean = $state(false);
@@ -110,49 +120,36 @@
 		{#await data.products}
 			<Skeleton />
 		{:then products}
-			<Table label="Products" minWidth="64rem">
-				<thead>
+			<Table label="Products" minWidth="64rem" rows={products} columns={productColumns} emptyMessage="No products found.">
+				{#snippet row(product)}
 					<tr>
-						<th></th>
-						<th>Title</th>
-						<th>Price</th>
-						<th>Height</th>
-						<th>Width</th>
-						<th>Medium</th>
-						<th>Enabled</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each products as product}
-						<tr>
-							<td>
-								<div class="thumbnail">
-									<ProductImage
-										url={product.images?.[0]?.url}
-										alt={product.title}
-										width={48}
-										height={48}
-									/>
-								</div>
-							</td>
-							<td>{product.title}</td>
-							<td>{currencyFormatter.format((product.price as number))}</td>
-							<td>{product.height}"</td>
-							<td>{product.width}"</td>
-							<td>{product.medium?.name}</td>
-							<td>
-								<span class="status" class:enabled={product.enabled}>
-									<Icon icon={product.enabled ? 'material-symbols:check-rounded' : 'material-symbols:close-rounded'} width={16} height={16} />
-									{product.enabled ? 'Enabled' : 'Disabled'}
-								</span>
-							</td>
-							<td>
-								<div class="actions">
-									<Button style={ButtonStyle.Info} onclick={async () => await openEditModal(product)}>
-										<div>Edit</div>
-										<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
-									</Button>
+						<td>
+							<div class="thumbnail">
+								<ProductImage
+									url={product.images?.[0]?.url}
+									alt={product.title}
+									width={48}
+									height={48}
+								/>
+							</div>
+						</td>
+						<td>{product.title}</td>
+						<td>{currencyFormatter.format((product.price as number))}</td>
+						<td>{product.height}"</td>
+						<td>{product.width}"</td>
+						<td>{product.medium?.name}</td>
+						<td>
+							<span class="status" class:enabled={product.enabled}>
+								<Icon icon={product.enabled ? 'material-symbols:check-rounded' : 'material-symbols:close-rounded'} width={16} height={16} />
+								{product.enabled ? 'Enabled' : 'Disabled'}
+							</span>
+						</td>
+						<td>
+							<div class="actions">
+								<Button style={ButtonStyle.Info} onclick={async () => await openEditModal(product)}>
+									<div>Edit</div>
+									<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
+								</Button>
 								<form
 									method="POST"
 									action="?/delete"
@@ -173,20 +170,17 @@
 											}
 										};
 									}}
-									>
-										<input type="hidden" name="id" value={product.id} />
-										<Button type="submit" style={ButtonStyle.Cancel}>
-											<div>Delete</div>
-											<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
-										</Button>
-									</form>
-								</div>
-							</td>
-						</tr>
-					{:else}
-						<tr><td colspan="8">No products found.</td></tr>
-					{/each}
-				</tbody>
+								>
+									<input type="hidden" name="id" value={product.id} />
+									<Button type="submit" style={ButtonStyle.Cancel}>
+										<div>Delete</div>
+										<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
+									</Button>
+								</form>
+							</div>
+						</td>
+					</tr>
+				{/snippet}
 			</Table>
 		{:catch error}
 			<div>Something went wrong: {error.message}</div>

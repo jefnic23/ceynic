@@ -9,6 +9,7 @@
 		min?: number | null;
 		max?: number | null;
 		required?: boolean;
+		readonly?: boolean;
 		autocomplete?: HTMLInputAttributes['autocomplete'];
 		value: string | number;
 	}
@@ -21,6 +22,7 @@
 		min = null,
 		max = null,
 		required = false,
+		readonly = false,
 		autocomplete,
 		value = $bindable()
 	}: Props = $props();
@@ -28,7 +30,7 @@
 
 <div class="container">
 	<label for={id}>{label}</label>
-	<input {id} {name} {type} min={type === 'number' ? min : undefined} max={type === 'number' ? max : undefined} bind:value {autocomplete} placeholder=" " {required} />
+	<input {id} {name} {type} min={type === 'number' ? min : undefined} max={type === 'number' ? max : undefined} bind:value {autocomplete} placeholder=" " {required} {readonly} />
 </div>
 
 <style>

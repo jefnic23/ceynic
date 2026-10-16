@@ -2,6 +2,7 @@
 	import Button from '$lib/components/shared/Button.svelte';
 	import Checkbox from '$lib/components/shared/Checkbox.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
+	import Table from '$lib/components/shared/Table.svelte';
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
@@ -98,7 +99,7 @@
 </script>
 
 <div class="container">
-	<Card width="-webkit-fill-available">
+	<Card width="100%">
 		<div class="header">
 			<h1>Products</h1>
 			<Button style={ButtonStyle.Info} onclick={openCreateModal}>
@@ -109,7 +110,7 @@
 		{#await data.products}
 			<Skeleton />
 		{:then products}
-			<table>
+			<Table label="Products" minWidth="64rem">
 				<thead>
 					<tr>
 						<th></th>
@@ -141,17 +142,17 @@
 							<td>{product.width}"</td>
 							<td>{product.medium?.name}</td>
 							<td>
-								{#if product.enabled}
-									<Icon icon="material-symbols:check-rounded" width={32} height={32} color={"green"} />
-								{:else}
-									<Icon icon="material-symbols:close-rounded" width={32} height={32} color={"red"} />
-								{/if}
+								<span class="status" class:enabled={product.enabled}>
+									<Icon icon={product.enabled ? 'material-symbols:check-rounded' : 'material-symbols:close-rounded'} width={16} height={16} />
+									{product.enabled ? 'Enabled' : 'Disabled'}
+								</span>
 							</td>
 							<td>
-								<Button style={ButtonStyle.Info} onclick={async () => await openEditModal(product)}>
-									<div>Edit</div>
-									<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
-								</Button>
+								<div class="actions">
+									<Button style={ButtonStyle.Info} onclick={async () => await openEditModal(product)}>
+										<div>Edit</div>
+										<Icon icon="material-symbols:edit-rounded" width={16} height={16} />
+									</Button>
 								<form
 									method="POST"
 									action="?/delete"
@@ -172,18 +173,21 @@
 											}
 										};
 									}}
-								>
-									<input type="hidden" name="id" value={product.id} />
-									<Button type="submit" style={ButtonStyle.Cancel}>
-										<div>Delete</div>
-										<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
-									</Button>
-								</form>
+									>
+										<input type="hidden" name="id" value={product.id} />
+										<Button type="submit" style={ButtonStyle.Cancel}>
+											<div>Delete</div>
+											<Icon icon="material-symbols:delete-rounded" width={16} height={16} />
+										</Button>
+									</form>
+								</div>
 							</td>
 						</tr>
+					{:else}
+						<tr><td colspan="8">No products found.</td></tr>
 					{/each}
 				</tbody>
-			</table>
+			</Table>
 		{:catch error}
 			<div>Something went wrong: {error.message}</div>
 		{/await}
@@ -362,6 +366,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+		min-width: 0;
 	}
 
 	.header {
@@ -369,36 +374,35 @@
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
-	}
-
-	table {
-		width: 100%;
-		max-width: 1500px;
-		border-collapse: collapse;
-		text-align: left;
-		font-size: 18px;
-		margin: auto;
-		overflow: auto;
-		white-space: nowrap;
-	}
-
-	th {
-		background-color: #04AA6D;
-		color: white;
-	}
-
-	tr {
-		height: fit-content;
-		vertical-align: middle;
-	}
-
-	tbody tr:nth-of-type(odd) {
-		background-color: #e9e9e9;
+		flex-wrap: wrap;
+		gap: 0.5rem;
 	}
 
 	.thumbnail {
 		display: flex;
-		padding: 0.5rem;
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.status {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		background: #fef2f2;
+		color: #991b1b;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+
+	.status.enabled {
+		background: #f0fdf4;
+		color: #166534;
 	}
 
 	.delete-form {
@@ -439,8 +443,4 @@
 		column-gap: 1rem;
 	}
 
-	:is(tbody > tr):hover {
-		outline: 2px solid #666;
-		outline-offset: -2px;
-	}
 </style>

@@ -75,6 +75,7 @@
 
 	main {
 		width: 100%;
+		min-width: 0;
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;

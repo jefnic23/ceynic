@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/state';
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import type { Address, Item, OrderDetails } from '$lib/interfaces/OrderDetails';
+	import type { Address, OrderDetails } from '$lib/interfaces/OrderDetails';
 	import type { PageServerData } from './$types';
 
 	interface Props {
@@ -27,70 +26,111 @@
 			}, 0.0)
 		);
 	}
-</script>
 
-{#snippet address(order: OrderDetails)}
-	{@const address: Address | undefined = order.purchaseUnits?.[0]?.shipping?.address}
-	<div>
-		{address?.addressLine1}
-		{address?.addressLine2}, 
-		{address?.adminArea2}, 
-		{address?.adminArea1}, 
-		{address?.postalCode}
-	</div>
-	<div>{address?.countryCode}</div>
-{/snippet}
+	function formatAddress(address: Address): string {
+		return [
+			address.addressLine1,
+			address.addressLine2,
+			address.adminArea2,
+			address.adminArea1,
+			address.postalCode,
+			address.countryCode
+		].filter(Boolean).join(', ');
+	}
+</script>
 
 <div class="wrapper">
 	{#await data.order}
-		<div>loading products...</div>
+		<div>Loading order...</div>
 	{:then order}
-        <div>
-            <h2>Order #{order.id}</h2>
-            <div>Status: {order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED" ? "Pending" : "Captured"}</div>
-        </div>
-		<Card>
-			<table>
-				<thead>
-					<tr>
-						<th>Product Description</th>
-						<th>Amount</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each order.purchaseUnits as purchaseUnit}
-						{#each (purchaseUnit?.items as Item[]) as item}
-							<tr>
-								<td>{item.description}</td>
-								<td>${item.unitAmount?.value}</td>
-							</tr>
-						{/each}
-					{/each}
-				</tbody>
-			</table>
-			<div>Order total: {getTotalAmount(order)}</div>
-		</Card>
-		<Card>
-			<div>
-				<h2>Customer Details</h2>
-				<div>{order.payer.name.givenName} {order.payer.name.surname}</div>
-				<div>{order.payer.emailAddress}</div>
-				{@render address(order)}
+		<header>
+			<h1>Order #{order.id}</h1>
+			<p>Status: {order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === 'CREATED' ? 'Pending' : 'Captured'}</p>
+		</header>
+		<Card width="100%">
+			<h2>Order summary</h2>
+			{#each order.purchaseUnits as purchaseUnit}
+				{#each purchaseUnit.items ?? [] as item}
+					<div class="item">
+						<span>{item.name} × {item.quantity}</span>
+						{#if item.unitAmount}
+							<span>{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
+						{/if}
+					</div>
+				{/each}
+			{/each}
+			<div class="total">
+				<strong>Order total</strong>
+				<strong>{getTotalAmount(order)}</strong>
 			</div>
 		</Card>
-		<Card>
-			<div>
-				<h2>Order History</h2>
-				<div>Order placed: {new Date(order.createTime).toLocaleString()}</div>
+		<Card width="100%">
+			<div class="details">
+				<h2>Customer details</h2>
+				<div>
+					<p>{order.payer.name.givenName} {order.payer.name.surname}</p>
+					<p>{order.payer.emailAddress}</p>
+					{#if order.purchaseUnits?.[0]?.shipping?.address}
+						<p>{formatAddress(order.purchaseUnits[0].shipping.address)}</p>
+					{/if}
+				</div>
 			</div>
 		</Card>
-        <form method="POST" use:enhance>
+		<Card width="100%">
+			<div class="details">
+				<h2>Order history</h2>
+				<p>Order placed: {new Date(order.createTime).toLocaleString()}</p>
+			</div>
+		</Card>
+		<form method="POST" use:enhance>
 			{#if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED"}
 				<Button name={"action"} value={"capture"}>Complete Order</Button>
 				<Button name={"action"} value={"void"} style={ButtonStyle.Cancel}>Void</Button>
 			{:else if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CAPTURED"}
 				<Button name={"action"} value={"refund"} style={ButtonStyle.Info}>Refund</Button>
 			{/if}
-        </form>
+		</form>
 	{/await}
 </div>
+
+<style>
+	.wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		width: 100%;
+		max-width: 750px;
+	}
+
+	h1, h2, p {
+		margin: 0;
+	}
+
+	header, form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	form {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.item, .total {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 0;
+	}
+
+	.total {
+		border-top: 1px solid #e7e7e7;
+	}
+
+	.details {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+</style>

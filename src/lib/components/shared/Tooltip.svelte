@@ -1,18 +1,77 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+
 	interface Props {
 		content?: string;
 		position?: string;
+		infoLabel?: string;
 		children?: import('svelte').Snippet;
 	}
 
-	let { content = '', position = 'top', children }: Props = $props();
+	let { content = '', position = 'top', infoLabel, children }: Props = $props();
+	let container: HTMLDivElement | undefined = $state();
+	let button: HTMLButtonElement | undefined = $state();
+	let hovered = $state(false);
+	let focused = $state(false);
+	let clicked = $state(false);
+	let visible = $derived(hovered || focused || clicked);
+	const tooltipId = $props.id();
 </script>
 
-<div class="tooltip-container">
-	{@render children?.()}
-	<div class="tooltip" data-position={position}>
-		{content}
-	</div>
+<svelte:window
+	onclick={(event) => {
+		if (infoLabel && !container?.contains(event.target as Node)) clicked = false;
+	}}
+	onkeydown={(event) => {
+		if (infoLabel && event.key === 'Escape') {
+			clicked = false;
+			hovered = false;
+			button?.blur();
+		}
+	}}
+/>
+
+<div
+	class="tooltip-container"
+	class:info={!!infoLabel}
+	bind:this={container}
+	onpointerenter={() => {
+		if (infoLabel) hovered = true;
+	}}
+	onpointerleave={() => {
+		if (infoLabel) hovered = false;
+	}}
+>
+	{#if infoLabel}
+		<button
+			bind:this={button}
+			type="button"
+			class="trigger"
+			aria-label={`More information about ${infoLabel}`}
+			aria-expanded={visible}
+			aria-describedby={visible ? tooltipId : undefined}
+			onfocus={() => (focused = true)}
+			onblur={() => {
+				focused = false;
+				clicked = false;
+			}}
+			onclick={() => (clicked = !clicked)}
+		>
+			<Icon icon="material-symbols:info-outline-rounded" width={18} height={18} aria-hidden="true" />
+		</button>
+	{:else}
+		{@render children?.()}
+	{/if}
+	{#if !infoLabel || visible}
+		<div
+			class="tooltip"
+			data-position={position}
+			id={infoLabel ? tooltipId : undefined}
+			role={infoLabel ? 'tooltip' : undefined}
+		>
+			{content}
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -21,12 +80,12 @@
 		display: inline-block;
 	}
 
-	.tooltip-container :global(> :first-child) {
+	.tooltip-container:not(.info) :global(> :first-child) {
 		text-decoration: underline dashed;
         text-underline-position: under;
 	}
 
-	.tooltip-container :global(> :first-child):hover {
+	.tooltip-container:not(.info) :global(> :first-child):hover {
 		cursor: help;
 	}
 	
@@ -50,7 +109,7 @@
 		white-space: normal; /* Allow text to wrap */
 	}
 
-	.tooltip-container:hover .tooltip {
+	.tooltip-container:not(.info):hover .tooltip {
 		opacity: 1;
 		transform: scale(1);
         pointer-events: none;
@@ -82,5 +141,42 @@
 		/* top: 50%; */
 		transform: translateY(-50%);
 		margin-left: 0.5rem;
+	}
+
+	.tooltip-container.info {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: transparent;
+		color: #4b5563;
+		cursor: help;
+	}
+
+	.trigger:hover {
+		color: #1e88e5;
+	}
+
+	.trigger:focus-visible {
+		outline: 2px solid #1e88e5;
+		outline-offset: 2px;
+	}
+
+	.tooltip-container.info .tooltip {
+		left: 0;
+		width: 16rem;
+		max-width: calc(100vw - 3rem);
+		opacity: 1;
+		transform: none;
+		line-height: 1.4;
 	}
 </style>

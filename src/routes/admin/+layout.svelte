@@ -77,10 +77,15 @@
 		width: 100%;
 		min-width: 0;
 		display: flex;
-		justify-content: center;
+		justify-content: flex-start;
 		align-items: flex-start;
 		margin: 1rem;
 		view-transition-name: main;
+	}
+
+	main :global(.card) {
+		margin-left: 0;
+		margin-right: 0;
 	}
 
 	.sidebar {

@@ -1,7 +1,5 @@
 import inspect
-from collections import Counter
 from datetime import UTC, datetime
-from decimal import Decimal, InvalidOperation
 from functools import wraps
 from typing import Annotated
 
@@ -10,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import col, select
 
 from src.database import ASYNC_SESSION_DEPENDENCY
-from src.enums.order_status import SOLD_ORDER_STATUSES
+from src.enums.order_status import SOLD_ORDER_STATUSES, OrderStatus
 from src.enums.payment_processor import PaymentProcessorEnum
 from src.models.account_settings import AccountSettings
 from src.models.order import Order, OrderOut
@@ -168,7 +166,7 @@ class OrdersService:
             order_id=order_id,
             authorization_id=response.authorization_id,
             capture_id=None,
-            status="PENDING",
+            status=OrderStatus.PENDING,
             create_time=response.create_time or datetime.now(UTC),
             storefront_id=storefront_id,
             payment_processor=processor_name,
@@ -204,7 +202,7 @@ class OrdersService:
         order = await self.update(
             storefront_id=storefront_id,
             order_id=order_id,
-            updates=OrderUpdate(status="PENDING", authorization_id=response.id),
+            updates=OrderUpdate(authorization_id=response.id, status=OrderStatus.PENDING),
         )
         await self._session.commit()
         await self._session.refresh(order)
@@ -220,7 +218,7 @@ class OrdersService:
         response = await payment_processor.void_payment(storefront_id=storefront_id, authorization_id=authorization_id)
 
         order = await self.update(
-            storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status=response.status)
+            storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status=OrderStatus.VOIDED)
         )
         await self._session.commit()
         await self._session.refresh(order)
@@ -238,7 +236,7 @@ class OrdersService:
         order = await self.update(
             storefront_id=storefront_id,
             order_id=order_id,
-            updates=OrderUpdate(capture_id=response.id, status="COMPLETED"),
+            updates=OrderUpdate(capture_id=response.id, status=OrderStatus.COMPLETED),
         )
         await self._session.commit()
         await self._session.refresh(order)
@@ -253,7 +251,7 @@ class OrdersService:
 
         response = await payment_processor.refund_payment(storefront_id, capture_id=capture_id)
 
-        await self.update(storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status="REFUNDED"))
+        await self.update(storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status=OrderStatus.REFUNDED))
         await self._session.commit()
         return response
 

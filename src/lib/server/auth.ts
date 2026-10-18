@@ -61,9 +61,18 @@ export function handleLogout(cookies: Cookies) {
     setCookie('refresh', '', 0, cookies);
 }
 
-export function isExpired(token: string): boolean {
-    const decodedToken = jwtDecode(token);
+export function getTokenExpiry(token: string | undefined): number | null {
+    if (!token) return null;
 
-    return (decodedToken.exp as number) >
-        Math.floor(Date.now() / 1000)
+    try {
+        const { exp } = jwtDecode(token);
+        return typeof exp === 'number' && Number.isFinite(exp) ? exp * 1000 : null;
+    } catch {
+        return null;
+    }
+}
+
+export function isExpired(token: string): boolean {
+    const expiresAt = getTokenExpiry(token);
+    return expiresAt === null || expiresAt <= Date.now();
 }

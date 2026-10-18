@@ -4,7 +4,7 @@
 	import type { LayoutData } from './$types';
 	import Sidebar from '$lib/components/shared/Sidebar.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
-	import { onNavigate } from '$app/navigation';
+	import { invalidateAll, onNavigate } from '$app/navigation';
 	import Icon from "@iconify/svelte";
 
 	onNavigate((navigation) => {
@@ -24,6 +24,45 @@
 	}
 
 	let { data, children }: Props = $props();
+
+	$effect(() => {
+		const expiresAt = data.refreshExpiresAt;
+		if (expiresAt === null) return;
+
+		let active = true;
+		let checking = false;
+		let timer: ReturnType<typeof setTimeout>;
+
+		function checkSession() {
+			clearTimeout(timer);
+			if (Date.now() >= expiresAt) {
+				if (checking) return;
+				checking = true;
+				void invalidateAll().catch(() => {
+					// The server remains authoritative; retry if the recheck cannot complete.
+				}).finally(() => {
+					checking = false;
+					// Retry if the recheck failed without navigating away or updating the expiry.
+					if (active) timer = setTimeout(checkSession, 30_000);
+				});
+			} else {
+				// Browser timers cannot reliably wait longer than 2^31 - 1 ms.
+				timer = setTimeout(checkSession, Math.min(expiresAt - Date.now(), 2_147_483_647));
+			}
+		}
+
+		function onVisibilityChange() {
+			if (document.visibilityState === 'visible') checkSession();
+		}
+
+		checkSession();
+		document.addEventListener('visibilitychange', onVisibilityChange);
+		return () => {
+			active = false;
+			clearTimeout(timer);
+			document.removeEventListener('visibilitychange', onVisibilityChange);
+		};
+	});
 </script>
 
 <div class="container">

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Form
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 
@@ -15,12 +15,8 @@ async def send_contact_email(
     name: Annotated[str, Form()],
     email: Annotated[EmailStr, Form()],
     message: Annotated[str, Form()],
-    messages: Annotated[MessagesService, Depends()],
-    background_tasks: BackgroundTasks,
+    messages_service: Annotated[MessagesService, Depends()],
 ) -> JSONResponse:
-    fast_mail = messages.get_fast_mail(from_name=name, from_email=email)
-    message = messages.build_message(from_name=name, message=message)
-
-    background_tasks.add_task(fast_mail.send_message, message, "contact.html")
+    messages_service.send_contact_message(name, email, message)
 
     return JSONResponse("Email sent.")

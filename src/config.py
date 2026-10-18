@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     PAYPAL_BASE_URL: str
     RECAPTCHA_SECRET_KEY: str
     SECRET_KEY: str
+    STOREFRONT_ORIGIN_TEMPLATE: str = "https://{subdomain}.ceynic.net"
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from hashlib import sha256
+from hmac import compare_digest, new as hmac_new
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.config import Settings, get_settings
 from src.database import ASYNC_SESSION_DEPENDENCY
@@ -16,12 +16,10 @@ from src.services.users_service import UsersService
 
 
 class AuthService:
-    PASSWORD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
     def __init__(
         self,
-        session: ASYNC_SESSION_DEPENDENCY, 
-        settings: Annotated[Settings, Depends(get_settings)], 
+        session: ASYNC_SESSION_DEPENDENCY,
+        settings: Annotated[Settings, Depends(get_settings)],
         users_service: Annotated[UsersService, Depends()],
         refresh_tokens_service: Annotated[RefreshTokensService, Depends()],
     ):
@@ -34,15 +32,16 @@ class AuthService:
         user = await self._users_service.get_user_by_email(email=email)
         if not user:
             return False
-        if not AuthService.verify_password(secret=password, hash=user.password):
+        if not user.verify_password(secret=password):
             return False
         return user
 
     def generate_access_token(self, sub: int, expiry_minutes: int = 5) -> str:
-        exp = datetime.now(timezone.utc) + timedelta(minutes=expiry_minutes)
+        exp = datetime.now(UTC) + timedelta(minutes=expiry_minutes)
         claims = {
             "exp": exp,
             "sub": str(sub),
+            "purpose": "access",
         }
         return jwt.encode(
             claims=claims,
@@ -50,13 +49,12 @@ class AuthService:
             algorithm="HS256",
         )
 
-    async def generate_refresh_token(
-        self, sub: int, expiry_minutes: int = 43200
-    ) -> str:
-        exp = datetime.now(timezone.utc) + timedelta(minutes=expiry_minutes)
+    async def generate_refresh_token(self, sub: int, expiry_minutes: int = 43200) -> str:
+        exp = datetime.now(UTC) + timedelta(minutes=expiry_minutes)
         claims = {
             "exp": exp,
             "sub": str(sub),
+            "purpose": "refresh",
         }
         token = jwt.encode(
             claims=claims,
@@ -73,26 +71,48 @@ class AuthService:
         await self._session.commit()
         return token
 
+    def generate_reset_token(self, user: User, expiry_minutes: int = 30) -> str:
+        claims = {
+            "exp": datetime.now(UTC) + timedelta(minutes=expiry_minutes),
+            "sub": str(user.id),
+            "purpose": "reset",
+            "password_version": self._password_version(user),
+        }
+        return jwt.encode(claims=claims, key=self._settings.SECRET_KEY, algorithm="HS256")
+
+    def _password_version(self, user: User) -> str:
+        return hmac_new(self._settings.SECRET_KEY.encode(), user.password.encode(), sha256).hexdigest()
+
+    async def verify_reset_token(self, token: str) -> User:
+        payload = self.verify_token(token, purpose="reset")
+        user = await self._users_service.get_user_by_id(int(payload["sub"]))
+        version = payload.get("password_version")
+        if not user or not isinstance(version, str) or not compare_digest(version, self._password_version(user)):
+            raise credentials_exception
+        return user
+
+    async def verify_refresh_token(self, token: str) -> int:
+        payload = self.verify_token(token, purpose="refresh")
+        user_id = int(payload["sub"])
+        stored_token = await self._refresh_tokens_service.get_refresh_token(user_id=user_id)
+        if not stored_token or not compare_digest(stored_token.token, token):
+            raise credentials_exception
+        if not await self._users_service.get_user_by_id(user_id):
+            raise credentials_exception
+        return user_id
+
     def verify_token(
-        self, token: str, exception: HTTPException = credentials_exception
-    ) -> dict[str, any]:
+        self, token: str, purpose: str = "access", exception: HTTPException = credentials_exception
+    ) -> dict[str, object]:
         try:
             payload = jwt.decode(token, self._settings.SECRET_KEY, algorithms=["HS256"])
-            user_id: str | None = payload.get("sub")
-            if user_id is None:
+            user_id = payload.get("sub")
+            if (
+                not isinstance(user_id, str)
+                or not user_id.isdecimal()
+                or payload.get("purpose") != purpose
+            ):
                 raise exception
         except JWTError:
             raise exception
         return payload
-
-    @staticmethod
-    def verify_password(
-        secret: str, hash: str, password_context: CryptContext = PASSWORD_CONTEXT
-    ) -> bool:
-        return password_context.verify(secret=secret, hash=hash)
-
-    @staticmethod
-    def hash_password(
-        secret: str, password_context: CryptContext = PASSWORD_CONTEXT
-    ) -> str:
-        return password_context.hash(secret=secret)

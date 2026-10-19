@@ -9,6 +9,7 @@
 		busy?: boolean;
 		busyLabel?: string;
 		type?: 'info' | 'success' | 'warning' | 'error' | 'none';
+		size?: 'default' | 'image';
 		title?: string;
 		children?: Snippet;
 	}
@@ -20,6 +21,7 @@
 		busy = false,
 		busyLabel = 'Loading…',
 		type = 'none',
+		size = 'default',
 		title = '',
 		children
 	}: Props = $props();
@@ -40,6 +42,7 @@
 		if (!dismissible || busy) event.preventDefault();
 	}}
 	class={type}
+	class:image-modal={size === 'image'}
 >
 	<div>
 		<div inert={busy} aria-busy={busy}>
@@ -70,6 +73,15 @@
 		padding: 0;
 		overflow-y: auto;
 		overscroll-behavior: contain;
+	}
+
+	dialog.image-modal {
+		max-inline-size: min(76rem, calc(100dvw - 1rem));
+		max-block-size: 94dvh;
+	}
+
+	dialog.image-modal > div {
+		padding-inline: 0.75rem;
 	}
 
 	dialog::backdrop {

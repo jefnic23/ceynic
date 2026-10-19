@@ -148,7 +148,7 @@
 </div>
 
 {#if showModal && modalImage}
-    <Modal bind:showModal={showModal}>
+    <Modal bind:showModal={showModal} size="image">
         <div class="modal-image" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
             <button class="arrow left" onclick={goToPrevious} aria-label="Previous image">
                 <Icon icon="material-symbols:arrow-back-ios-rounded" width={32} height={32} />
@@ -235,8 +235,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: min(calc(100vw - 4rem), calc(100dvh - 8rem), 46em);
-		aspect-ratio: 1;
+		inline-size: min(calc(100dvw - 3rem), 72rem);
+		block-size: min(78dvh, 72rem);
 	}
 
 	.arrow {

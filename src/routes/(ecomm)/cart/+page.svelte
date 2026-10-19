@@ -85,7 +85,9 @@
                     </CartSummary>
                 <div class="form-actions">
                     <Button 
-                        onclick={() => cart.current.products = []}
+                        onclick={() => {
+                            cart.current.products = [];
+                        }}
                         style={ButtonStyle.Neutral}
                     >
                         Empty Cart

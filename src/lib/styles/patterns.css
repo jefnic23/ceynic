@@ -1,0 +1,61 @@
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    inline-size: 100%;
+}
+
+.form-stack > button:last-child {
+    align-self: flex-start;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 1rem;
+    inline-size: 100%;
+}
+
+.form-actions,
+.section-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.form-actions { justify-content: flex-end; gap: 1rem; }
+.section-header { justify-content: space-between; }
+
+.field-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    inline-size: 100%;
+}
+
+.field-with-icon > svg { flex: none; }
+
+.auth-form {
+    align-items: center;
+    margin-block-end: 0.83em;
+}
+
+button.text-button {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+button.text-button:active { color: color-mix(in oklch, var(--link), var(--ink) 30%); }
+
+@media (hover: hover) and (pointer: fine) {
+    button.text-button:hover { color: color-mix(in oklch, var(--link), var(--ink) 25%); }
+}
+
+.prose > * { margin-block: 0; }
+.prose > * + * { margin-block-start: 1em; }
+.prose > :is(h2, h3) { margin-block-start: 1.5em; }
+
+.price, td, time { font-variant-numeric: tabular-nums; }

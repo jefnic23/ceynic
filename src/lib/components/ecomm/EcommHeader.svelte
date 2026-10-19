@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from "$lib/components/shared/Header.svelte";
-	import { onDestroy, onMount } from "svelte";
+	import { onMount } from "svelte";
 	import Hamburger from "../Hamburger.svelte";
 	import Icon from "@iconify/svelte";
 	import { cart } from "$lib/state/cart.svelte";
@@ -15,52 +15,21 @@
 	let { url, name = "", paymentProcessor }: Props = $props();
 
 	let open = $state(false);
-	let isMobile = $state(false);
 	let headerElement: HTMLElement | undefined = $state();
 
 	function toggleMobileHeader() {
-		if (isMobile && open) open = !open
+		open = false;
 	}
-
-	function updateBodyClass() {
-        if (open) {
-            document?.body?.classList?.add('menu-open');
-        } else {
-            document?.body?.classList?.remove('menu-open');
-        }
-    }
-
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			updateBodyClass();
-		}
-	});
-
-	function checkIsMobile() {
-        isMobile = window.innerWidth <= 768;
-    }
 
 	function handleOutsideClick(event: MouseEvent) {
 		if (headerElement && !headerElement.contains((event.target as HTMLElement))) {
 			open = false;
-			updateBodyClass();
 		}
 	}
 
 	onMount(() => {
-		if (typeof window !== 'undefined') {
-			window.addEventListener('resize', checkIsMobile);
-			document?.addEventListener('click', handleOutsideClick);
-			checkIsMobile();
-		}
-    });
-
-	onDestroy(() => {
-		if (typeof window !== 'undefined') {
-			window.removeEventListener('resize', checkIsMobile);
-			document?.removeEventListener('click', handleOutsideClick);
-			document?.body?.classList?.remove('menu-open');
-		}
+		document.addEventListener('click', handleOutsideClick);
+		return () => document.removeEventListener('click', handleOutsideClick);
 	});
 
 	let previousCount: number = $state(cart.current.products.length || 0);
@@ -93,13 +62,11 @@
 
 {#snippet header()}
 	<div class="header-left">
-		{#if isMobile}
-			<Hamburger bind:open={open} />
-		{/if}
+		<div class="mobile-toggle"><Hamburger bind:open={open} /></div>
 	</div>
 	<div class="header-center">
-		<a href="/" data-sveltekit-preload-data class="header-text" style:font-size={isMobile ? "xx-large" : "xxx-large"} onclick={toggleMobileHeader}>{name}</a>
-		<nav class={isMobile ? `mobile-menu ${open ? 'open' : ''}` : ''}>
+		<a href="/" data-sveltekit-preload-data class="header-text" onclick={toggleMobileHeader}>{name}</a>
+		<nav class="mobile-menu" class:open>
 			<a href="/" data-sveltekit-preload-data class:active={url.pathname === '/'} onclick={toggleMobileHeader}>Home</a>
 			<a href="/products" data-sveltekit-preload-data class:active={url.pathname.startsWith('/products')} onclick={toggleMobileHeader}>Browse</a>
 			<a href="/about" data-sveltekit-preload-data class:active={url.pathname === '/about'} onclick={toggleMobileHeader}>About</a>
@@ -112,7 +79,6 @@
 				href="/cart" 
 				data-sveltekit-preload-data
 				class:active={url.pathname === '/cart'} 
-				style:position="relative"
 				onclick={toggleMobileHeader}
 			>
 				<Icon icon="material-symbols:shopping-cart-rounded" width={32} height={32} />
@@ -132,49 +98,35 @@
 </svelte:head>
 
 <Header open={open}>
-	{#if isMobile}
-		<div class="header mobile" class:open bind:this={headerElement}>
-			{@render header()}
-		</div>
-	{:else}
-		<div class="header desktop">
-			{@render header()}
-		</div>
-	{/if}
+	<div class="header" class:open bind:this={headerElement}>
+		{@render header()}
+	</div>
 </Header>
 
 <style>
     .header {
-		background-color: #f8f8f8;
-		border-bottom: 1px solid #e7e7e7;
+		background-color: var(--surface-muted);
+		border-block-end: 1px solid var(--border);
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
-		padding: 0 1rem;
-		transition: border-bottom 0.3s linear;
+		padding: 1rem;
+		min-block-size: 150px;
+		transition: border-block-end-color 0.3s linear;
 	}
 
 	.header.open {
-		border-bottom: 1px solid #f8f8f8;
-	}
-
-	.mobile {
-		min-height: 58px;
-	}
-
-	.desktop {
-		min-height: 150px;
-		padding: 1rem;
+		border-block-end-color: var(--surface-muted);
 	}
 
 	nav a {
 		position: relative;
 		text-transform: uppercase;
-		margin: 0 0.5rem;
-		color: rgba(0, 0, 0, 0.55);
+		margin-inline: 0.5rem;
+		color: color-mix(in oklch, var(--ink) 55%, transparent);
 		font-size: 16px;
 		font-weight: 400;
-		width: fit-content;
+		inline-size: fit-content;
 		transition:
 			color 0.15s ease-in-out,
 			background-color 0.15s ease-in-out,
@@ -182,16 +134,16 @@
 	}
 
 	nav a.active {
-		color: rgba(0, 0, 0, 0.85);
+		color: color-mix(in oklch, var(--ink) 85%, transparent);
 	}
 
 	nav a.active::after {
 		content: '';
 		position: absolute;
-		left: 0;
-		bottom: 0;
-		width: 100%;
-		height: 2px;
+		inset-inline-start: 0;
+		inset-block-end: 0;
+		inline-size: 100%;
+		block-size: 2px;
 		background: currentColor;
 		view-transition-name: active-page;
 	}
@@ -199,6 +151,7 @@
 	a {
 		text-decoration: none;
 	}
+	a:active { color: var(--ink); }
 
 	.header-left {
 		display: flex;
@@ -220,54 +173,34 @@
 	}
 
 	.header-right a {
-		color: rgba(0, 0, 0, 0.55);
-		height: 32px;
-		width: 32px;
+		color: color-mix(in oklch, var(--ink) 55%, transparent);
+		block-size: 32px;
+		inline-size: 32px;
+		position: relative;
 	}
 
 	.header-text {
 		font-family: 'Dancing Script', cursive;
 		font-weight: 700;
 		font-style: normal;
-		color: #62b2b2;
+		color: oklch(0.73 0.08 193);
 		text-align: center;
 		text-transform: none;
 		margin: 0;
+		font-size: xxx-large;
 	}
 
 	nav.mobile-menu {
 		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-		max-height: 0;
-		transition: max-height 377ms ease-in-out 199ms;
-		background-color: #f8f8f8;
-		border-bottom: 1px solid #e7e7e7;
-		position: absolute;
-		top: 100%;
-		left: 0;
-		width: 100%;
-		box-shadow: 0 5px 5px -5px rgba(0, 0, 0, 0.15);
-		padding: 0 1rem;
 	}
-
-	nav.mobile-menu a {
-		margin: 0.5rem 0;
-	}
-
-	/* When the menu is open */
-	nav.mobile-menu.open {
-		max-height: 500px; /* large enough to fit all items */
-		opacity: 1;
-		transition: max-height 377ms ease-in-out;
-	}
+	.mobile-toggle { display: none; }
 
 	.cart-badge {
 		position: absolute;
-		bottom: 0;
-		left: 0;
-		background: red;
-		color: white;
+		inset-block-end: 0;
+		inset-inline-start: 0;
+		background: var(--danger);
+		color: var(--surface);
 		font-size: 0.75rem;
 		font-weight: bold;
 		border-radius: 9999px;
@@ -275,11 +208,35 @@
 		line-height: normal;
 		transform: translate(-34%, 34%);
 		pointer-events: none;
-		transition: transform 0.2s ease;
 	}
 
-	.bounce {
-		animation: bounce 0.4s ease;
+	@media (width <= 768px) {
+		.header { min-block-size: 58px; padding-block: 0; padding-inline: 1rem; }
+		.mobile-toggle { display: block; }
+		.header-text { font-size: xx-large; }
+		nav.mobile-menu {
+			position: absolute;
+			inset-block-start: 100%;
+			inset-inline: 0;
+			display: flex;
+			flex-direction: column;
+			background: var(--surface-muted);
+			border-block-end: 1px solid var(--border);
+			box-shadow: 0 5px 5px -5px color-mix(in oklch, var(--ink) 15%, transparent);
+			padding-inline: 1rem;
+			clip-path: inset(0 -3rem 100%);
+			visibility: hidden;
+		}
+		nav.mobile-menu.open { clip-path: inset(0 -3rem -3rem); visibility: visible; }
+		nav.mobile-menu a { margin-block: 0.5rem; }
+	}
+	@media (width <= 768px) and (prefers-reduced-motion: no-preference) {
+		nav.mobile-menu { transition: clip-path 250ms var(--ease-out), visibility 250ms; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.cart-badge { transition: transform 0.2s var(--ease-out); }
+		.bounce { animation: bounce 0.4s var(--ease-out); }
+		.shrink { animation: shrink 0.2s var(--ease-out) forwards; }
 	}
 
 	@keyframes bounce {
@@ -288,10 +245,6 @@
 		50%  { transform: translate(-34%, 34%) scale(0.95); }
 		75%  { transform: translate(-34%, 34%) scale(1.05); }
 		100% { transform: translate(-34%, 34%) scale(1); }
-	}
-
-	.shrink {
-		animation: shrink 0.2s ease forwards;
 	}
 
 	@keyframes shrink {

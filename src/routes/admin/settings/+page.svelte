@@ -20,17 +20,8 @@
 	});
 </script>
 
-<form method="POST">
+<form class="form-stack" method="POST">
 	<Checkbox name="pinterestEnabled" label="Enable Pinterest save buttons on the storefront" checked={form?.pinterestEnabled ?? data.pinterestEnabled} />
 	<Checkbox name="sortAndFilterEnabled" label="Enable sort and filter options on the storefront" checked={form?.sortAndFilterEnabled ?? data.sortAndFilterEnabled} />
 	<Button type="submit">Save site settings</Button>
 </form>
-
-<style>
-	form {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 1rem;
-	}
-</style>

@@ -58,27 +58,27 @@
 		padding: 0.5rem 1.5rem;
 		font-size: 1rem;
 		border-radius: 0.25rem;
-		overflow: hidden;
+		overflow: clip;
 		position: relative;
 		transition: background-color 0.3s ease;
 	}
 
 	/* Style Variants */
 	.submit {
-		background-color: #4caf50;
-		color: white;
+		background-color: var(--success);
+		color: var(--surface);
 	}
 	.cancel {
-		background-color: #f44336;
-		color: white;
+		background-color: var(--danger);
+		color: var(--surface);
 	}
 	.info {
-		background-color: #2196f3;
-		color: white;
+		background-color: var(--info);
+		color: var(--surface);
 	}
 	.warning {
-		background-color: #ff9800;
-		color: white;
+		background-color: var(--warning);
+		color: var(--surface);
 	}
 
 	/* Size Variants */
@@ -104,24 +104,24 @@
 
 	/* Full Width */
 	.full-width {
-		width: 100%;
+		inline-size: 100%;
 	}
 
 	/* Disabled State */
 	button:disabled,
 	.disabled {
-		background-color: #e0e0e0;
-		color: #9e9e9e;
+		background-color: var(--border);
+		color: var(--ink-muted);
 		cursor: not-allowed;
 	}
 
 	/* Loading Spinner */
 	.spinner {
-		border: 2px solid rgba(255, 255, 255, 0.6);
-		border-top: 2px solid white;
+		border: 2px solid color-mix(in oklch, var(--surface) 60%, transparent);
+		border-block-start-color: var(--surface);
 		border-radius: 50%;
-		width: 1em;
-		height: 1em;
+		inline-size: 1em;
+		block-size: 1em;
 		animation: spin 0.6s linear infinite;
 	}
 
@@ -134,20 +134,12 @@
 		}
 	}
 
-	/* Hover Effects */
-	.submit:hover:not(:disabled):not(.plain) {
-		background-color: #43a047;
-	}
-	.cancel:hover:not(:disabled):not(.plain) {
-		background-color: #e53935;
-	}
-	.info:hover:not(:disabled):not(.plain) {
-		background-color: #1e88e5;
-	}
-	.warning:hover:not(:disabled):not(.plain) {
-		background-color: #fb8c00;
-	}
-	.neutral:hover:not(:disabled):not(.plain) {
-		background-color: #e5e5e5;
+	button:focus-visible { outline-color: var(--info); }
+	button:active:not(:disabled) { filter: brightness(0.88); }
+	@media (hover: hover) and (pointer: fine) {
+		:is(.submit, .cancel, .info, .warning):hover:not(:disabled):not(.plain) {
+			filter: brightness(0.95);
+		}
+		.neutral:hover:not(:disabled):not(.plain) { background-color: color-mix(in oklch, var(--border), var(--surface) 35%); }
 	}
 </style>

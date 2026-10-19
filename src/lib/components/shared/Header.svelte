@@ -34,7 +34,7 @@
 	}
 
 	function action(node: HTMLElement): void {
-		node.style.transitionDuration = duration;
+		node.style.setProperty('--header-duration', duration);
 	}
 
 	$effect(() => {
@@ -56,9 +56,8 @@
 <style>
 	div {
 		position: sticky;
-		width: 100%;
-		top: 0;
-		transition: transform 377ms ease-in-out;
+		inline-size: 100%;
+		inset-block-start: 0;
 		z-index: 9999999;
 		will-change: transform;
 		view-transition-name: header;
@@ -71,4 +70,5 @@
 	.unpin {
 		transform: translateY(-100%);
 	}
+	@media (prefers-reduced-motion: no-preference) { div { transition: transform var(--header-duration, 377ms) var(--ease-out); } }
 </style>

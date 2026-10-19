@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/shared/Button.svelte';
-	import Card from '$lib/components/shared/Card.svelte';
+	import AuthLayout from '$lib/components/shared/AuthLayout.svelte';
 	import Input from '$lib/components/shared/Input.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -13,9 +13,7 @@
 	<meta name="referrer" content="no-referrer" />
 </svelte:head>
 
-<div class="wrapper">
-	<Card>
-		<div class="body">
+<AuthLayout>
 			<h2>Reset password</h2>
 			{#if form?.success}
 				<p>Your password has been reset.</p>
@@ -25,7 +23,7 @@
 				<a href="/login">Request another link</a>
 			{:else}
 				<p>Enter a new password for your account.</p>
-				<form method="POST" use:enhance>
+				<form class="form-stack auth-form" method="POST" use:enhance>
 					<Input id="password" label="New password" type="password" value="" autocomplete="new-password" required />
 					<Input id="confirmation" label="Confirm password" type="password" value="" autocomplete="new-password" required />
 					{#if form?.resetError}
@@ -37,39 +35,14 @@
 					<Button type="submit">Reset password</Button>
 				</form>
 			{/if}
-		</div>
-	</Card>
-</div>
+</AuthLayout>
 
 <style>
-	.wrapper {
-		display: flex;
-		width: fit-content;
-		min-height: 100vh;
-		margin: auto;
-		align-items: center;
-	}
-
-	.body {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 377px;
-	}
-
 	h2 {
-		margin: 0;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		width: 100%;
+		margin-block: 0;
 	}
 
 	.error {
-		color: #b00020;
+		color: var(--danger);
 	}
 </style>

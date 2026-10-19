@@ -3,8 +3,12 @@
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import type { Address, OrderDetails } from '$lib/interfaces/OrderDetails';
+	import type { OrderDetails } from '$lib/interfaces/OrderDetails';
 	import type { PageServerData } from './$types';
+	import PageContainer from '$lib/components/shared/PageContainer.svelte';
+	import OrderLine from '$lib/components/shared/OrderLine.svelte';
+	import OrderSummary from '$lib/components/shared/OrderSummary.svelte';
+	import { formatAddress } from '$lib/utils/formatters';
 
 	interface Props {
 		data: PageServerData;
@@ -27,19 +31,10 @@
 		);
 	}
 
-	function formatAddress(address: Address): string {
-		return [
-			address.addressLine1,
-			address.addressLine2,
-			address.adminArea2,
-			address.adminArea1,
-			address.postalCode,
-			address.countryCode
-		].filter(Boolean).join(', ');
-	}
 </script>
 
-<div class="wrapper">
+<PageContainer>
+	<div class="order-page">
 	{#await data.order}
 		<div>Loading order...</div>
 	{:then order}
@@ -47,23 +42,22 @@
 			<h1>Order #{order.id}</h1>
 			<p>Status: {order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === 'CREATED' ? 'Pending' : 'Captured'}</p>
 		</header>
-		<Card width="100%">
-			<h2>Order summary</h2>
+		<OrderSummary>
 			{#each order.purchaseUnits as purchaseUnit}
 				{#each purchaseUnit.items ?? [] as item}
-					<div class="item">
+					<OrderLine>
 						<span>{item.name} × {item.quantity}</span>
 						{#if item.unitAmount}
 							<span>{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
 						{/if}
-					</div>
+					</OrderLine>
 				{/each}
 			{/each}
-			<div class="total">
+			<OrderLine total>
 				<strong>Order total</strong>
 				<strong>{getTotalAmount(order)}</strong>
-			</div>
-		</Card>
+			</OrderLine>
+		</OrderSummary>
 		<Card width="100%">
 			<div class="details">
 				<h2>Customer details</h2>
@@ -91,19 +85,18 @@
 			{/if}
 		</form>
 	{/await}
-</div>
+	</div>
+</PageContainer>
 
 <style>
-	.wrapper {
+	.order-page {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
-		width: 100%;
-		max-width: 750px;
 	}
 
 	h1, h2, p {
-		margin: 0;
+		margin-block: 0;
 	}
 
 	header, form {
@@ -115,17 +108,6 @@
 	form {
 		flex-direction: row;
 		flex-wrap: wrap;
-	}
-
-	.item, .total {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.75rem 0;
-	}
-
-	.total {
-		border-top: 1px solid #e7e7e7;
 	}
 
 	.details {

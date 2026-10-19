@@ -23,7 +23,7 @@
 	});
 </script>
 
-<form method="POST">
+<form class="form-stack" method="POST">
 	<Dropdown id="processor" label="Payment processor" bind:value={processor}>
 		<option value="None">None</option>
 		<option value={PaymentProcessor.PAYPAL}>PayPal</option>
@@ -40,11 +40,7 @@
 
 <style>
 	form {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
 		gap: 0.75rem;
-		width: 100%;
-		max-width: 30rem;
+		max-inline-size: 30rem;
 	}
 </style>

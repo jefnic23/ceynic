@@ -79,30 +79,31 @@
 
 <style>
 	.table-scroll {
-		width: 100%;
-		max-width: 100%;
+		inline-size: 100%;
+		max-inline-size: 100%;
 		overflow-x: auto;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--border);
 		border-radius: 0.5rem;
-		background: #fff;
+		background: var(--surface);
 	}
 
 	table {
-		width: 100%;
+		inline-size: 100%;
 		border-collapse: collapse;
-		text-align: left;
-		color: #374151;
+		text-align: start;
+		color: var(--ink);
 	}
 
 	table :global(th),
 	table :global(td) {
-		padding: 0.75rem 1rem;
+		padding-block: 0.75rem;
+		padding-inline: 1rem;
 		vertical-align: middle;
 	}
 
 	table :global(th) {
-		background: #f9fafb;
-		color: #4b5563;
+		background: var(--surface-muted);
+		color: var(--ink-muted);
 		font-size: 0.75rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
@@ -125,38 +126,39 @@
 		cursor: pointer;
 	}
 
-	.sort-button:hover,
 	.sort-button.active {
-		color: #111827;
+		color: var(--ink);
+	}
+	.sort-button:active { color: var(--link); }
+	@media (hover: hover) and (pointer: fine) {
+		.sort-button:hover { color: var(--ink); }
+		table :global(tbody tr:hover) { background: var(--surface-muted); }
 	}
 
 	.sort-button:focus-visible {
-		outline: 2px solid #2563eb;
+		outline: 2px solid var(--link);
 		outline-offset: 4px;
 		border-radius: 2px;
 	}
 
 	.sort-icon {
-		color: #9ca3af;
+		color: var(--ink-muted);
 		font-size: 0.875rem;
 		line-height: 1;
 	}
 
 	.sort-button.active .sort-icon {
-		color: #2563eb;
+		color: var(--link);
 	}
 
 	table :global(tbody tr) {
-		border-top: 1px solid #e5e7eb;
-	}
-
-	table :global(tbody tr:hover) {
-		background: #f9fafb;
+		border-block-start: 1px solid var(--border);
 	}
 
 	table :global(td[colspan]) {
-		padding: 2rem 1rem;
+		padding-block: 2rem;
+		padding-inline: 1rem;
 		text-align: center;
-		color: #6b7280;
+		color: var(--ink-muted);
 	}
 </style>

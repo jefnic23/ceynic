@@ -53,7 +53,7 @@
 		<span class="icon">▼</span>
 	</div>
 	{#if isDropdownOpen}
-		<div class="dropdown-list" transition:slide={{ duration: 233 }}>
+		<div class="dropdown-list" transition:slide={{ duration: typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: no-preference)').matches ? 233 : 0 }}>
 			{#each options as option}
 				<div 
 					class:selected={option.value === selected} 
@@ -80,14 +80,14 @@
 <style>
 	.dropdown-container {
 		position: relative;
-		width: 200px;
+		inline-size: 200px;
 		cursor: pointer;
 	}
 
 	.dropdown-header {
 		padding: 0.5rem 1rem;
-		background-color: #f9f9f9;
-		border: 1px solid #ccc;
+		background-color: var(--surface-muted);
+		border: 1px solid var(--border);
 		border-radius: 5px;
 		display: flex;
 		justify-content: space-between;
@@ -97,14 +97,14 @@
 	}
 
 	.dropdown-header.open {
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
 	}
+	.dropdown-header:active { background: var(--border); }
 
 	.dropdown-header .icon {
-		margin-left: 10px;
+		margin-inline-start: 10px;
 		transform: rotate(0deg);
-		transition: transform 0.2s ease-in-out;
 	}
 
 	.dropdown-header.open .icon {
@@ -112,16 +112,16 @@
 	}
 
 	.dropdown-list {
-		background-color: #f9f9f9;
-		border: 1px solid #ccc;
-		border-top: none;
+		background-color: var(--surface-muted);
+		border: 1px solid var(--border);
+		border-block-start: none;
 		border-radius: 0 0 5px 5px;
 		position: absolute;
-		top: 100%;
-		left: 0;
-		width: 100%;
+		inset-block-start: 100%;
+		inset-inline-start: 0;
+		inline-size: 100%;
 		overflow-y: auto;
-		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 3px 5px color-mix(in oklch, var(--ink) 20%, transparent);
 		z-index: 100;
 	}
 
@@ -131,19 +131,19 @@
 		font-size: 0.9rem;
 	}
 
-	.dropdown-list div:hover {
-		background-color: #f0f0f0;
-	}
+	.dropdown-list div:active { background: var(--border); }
+	@media (hover: hover) and (pointer: fine) { .dropdown-list div:hover { background: var(--border); } }
+	@media (prefers-reduced-motion: no-preference) { .dropdown-header .icon { transition: transform 200ms var(--ease-out); } }
 
 	/* Highlight selected option */
 	.dropdown-list .selected {
 		font-weight: bold;
-		background-color: #e0e0e0;
+		background-color: var(--border);
 	}
 
 	.checkmark {
-		color: green;
+		color: var(--success);
 		font-size: 1rem;
-		margin-left: 5px;
+		margin-inline-start: 5px;
 	}
 </style>

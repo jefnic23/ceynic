@@ -1,10 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/shared/Button.svelte';
-	import Checkbox from '$lib/components/shared/Checkbox.svelte';
-	import Tooltip from '$lib/components/shared/Tooltip.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import Table from '$lib/components/shared/Table.svelte';
-	import Dropzone from '$lib/components/Dropzone.svelte';
 	import Modal from '$lib/components/shared/Modal.svelte';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
 	import type { PageData } from './$types';
@@ -14,11 +11,10 @@
 	import { currencyFormatter } from '$lib/utils/formatters';
 	import ProductImage from '$lib/components/ProductImage.svelte';
 	import Icon from '@iconify/svelte';
-	import ScrollableInput from '$lib/components/shared/ScrollableInput.svelte';
-	import Dropdown from '$lib/components/shared/Dropdown.svelte';
 	import { enhance } from '$app/forms';
-	import Input from '$lib/components/shared/Input.svelte';
-	import TextArea from '$lib/components/shared/TextArea.svelte';
+	import ProductEditorFields from '$lib/components/admin/ProductEditorFields.svelte';
+	import PageContainer from '$lib/components/shared/PageContainer.svelte';
+	import StatusBadge from '$lib/components/shared/StatusBadge.svelte';
 	import Toast from '$lib/components/shared/Toast.svelte';
 	import { waitForMinimumDuration } from '$lib/utils/minimumDuration';
 	import { useDismissToast, useToast } from '$lib/state/toast';
@@ -110,9 +106,9 @@
 	}
 </script>
 
-<div class="container">
+<PageContainer max="100%">
 	<Card width="100%">
-		<div class="header">
+		<div class="section-header">
 			<h1>Products</h1>
 			<Button style={ButtonStyle.Info} onclick={openCreateModal}>
 				<div>Add New Product</div>
@@ -141,10 +137,10 @@
 						<td>{product.width}"</td>
 						<td>{product.medium?.name}</td>
 						<td>
-							<span class="status" class:enabled={product.enabled}>
+							<StatusBadge tone={product.enabled ? 'success' : 'error'}>
 								<Icon icon={product.enabled ? 'material-symbols:check-rounded' : 'material-symbols:close-rounded'} width={16} height={16} />
 								{product.enabled ? 'Enabled' : 'Disabled'}
-							</span>
+							</StatusBadge>
 						</td>
 						<td>
 							<div class="actions">
@@ -188,7 +184,7 @@
 			<div>Something went wrong: {error.message}</div>
 		{/await}
 	</Card>
-</div>
+</PageContainer>
 
 {#if showModal}
 	<Modal
@@ -211,7 +207,7 @@
 				method="POST" 
 				action={modalMode === 'create' ? '?/create' : '?/update'}
 				enctype="multipart/form-data" 
-				class="edit" 
+				class="form-stack edit" 
 				use:enhance={({ formData, cancel }) => {
 					const updating = modalMode === 'update';
 					if (updating && isUpdating) {
@@ -289,68 +285,9 @@
 				{#if modalMode === 'update'}
 					<input type="hidden" id="id" name="id" value={selectedProduct.id} />
 				{/if}
-				<div class="form-input">
-					<Input id="title" label="Title" bind:value={selectedProduct.title} />
-				</div>
-				<div class="form-input">
-					<TextArea id="description" label="Description" bind:value={selectedProduct.description as string}/>
-				</div>
+				<ProductEditorFields bind:product={selectedProduct} bind:files />
 
-				<div class="form-row">
-					<div class="form-input">
-						<ScrollableInput 
-							bind:value={selectedProduct.price as number} 
-							id={"price"} 
-							label={"Price"}
-							min={1.00}
-							step={0.01} 
-							className={"price"} 
-						/>
-					</div>
-
-					<div class="form-input">
-						<Dropdown id="medium_id" label="Medium" value={String(selectedProduct.mediumId)}>
-							<option value="1">Painting</option>
-							<option value="2">Print</option>
-						</Dropdown>
-					</div>
-				</div>
-
-				<div class="form-row">
-					<div class="form-input">
-						<ScrollableInput 
-							bind:value={selectedProduct.height} 
-							id={"height"} 
-							label={"Height"}
-							min={1} 
-							className={"size"} 
-						/>
-					</div>
-
-					<div class="form-input">
-						<ScrollableInput 
-							bind:value={selectedProduct.width} 
-							id={"width"} 
-							label={"Width"} 
-							min={1} 
-							className={"size"} 
-						/>
-					</div>
-				</div>
-
-				<div class="form-row">
-					<div class="checkbox-help">
-						<Checkbox name="enabled" label="Enabled" bind:checked={selectedProduct.enabled} />
-						<Tooltip
-							infoLabel="Enabled"
-							content="Controls whether the product is available for display on the site."
-						/>
-					</div>
-				</div>
-
-				<Dropzone previews={selectedProduct.images || []} bind:files={files} />
-
-				<div class="form-buttons">
+				<div class="form-actions">
 					<Button type="submit">
 						{modalMode === 'create' ? 'Add Product' : 'Update Product'}
 					</Button>
@@ -364,22 +301,6 @@
 {/if}
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-		min-width: 0;
-	}
-
-	.header {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
 	.thumbnail {
 		display: flex;
 	}
@@ -390,65 +311,17 @@
 		gap: 0.5rem;
 	}
 
-	.status {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 9999px;
-		background: #fef2f2;
-		color: #991b1b;
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-
-	.status.enabled {
-		background: #f0fdf4;
-		color: #166534;
-	}
-
 	.delete-form {
 		display: inline-block;
 	}
 
 	.edit {
-		display: flex;
-		flex-direction: column;
-		row-gap: 1rem;
-		width: 35em;
+		max-inline-size: 35em;
 	}
 
 	.form-toast {
-		width: min(100%, 35em);
-		margin-bottom: 1rem;
-	}
-
-	.form-row {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-between;
-		column-gap: 1rem;
-	}
-
-	.form-input {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-	}
-
-	.checkbox-help {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-	}
-
-	.form-buttons {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-end;
-		column-gap: 1rem;
+		inline-size: min(100%, 35em);
+		margin-block-end: 1rem;
 	}
 
 </style>

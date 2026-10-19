@@ -50,36 +50,17 @@
 
 <style>
 	.masonry-layout {
-		transition: all 0.5s ease-in-out;
 		column-gap: 13px;
 		column-fill: initial;
-		width: 100%;
+		columns: 3 24rem;
+		inline-size: 100%;
 	}
 
 	.masonry-skeleton-item {
-		margin-bottom: 34px;
-		width: 100%;
+		margin-block-end: 34px;
+		inline-size: 100%;
 		display: inline-block;
 		vertical-align: top;
 	}
 
-	/* Masonry on large screens */
-	@media only screen and (min-width: 992px) {
-		.masonry-layout {
-			column-count: 3;
-		}
-	}
-
-	/* Masonry on small screens */
-	@media only screen and (min-width: 768px) and (max-width: 991px) {
-		.masonry-layout {
-			column-count: 2;
-		}
-	}
-
-	@media only screen and (max-width: 767px) {
-		.masonry-layout {
-			column-count: 1;
-		}
-	}
 </style>

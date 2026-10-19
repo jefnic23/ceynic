@@ -12,17 +12,19 @@
     }: Props = $props();
 </script>
 
-<div class="card" style:width={width}>
+<div class="card" style:--card-width={width}>
     {@render children?.()}
 </div>
 
 <style>
     .card {
-        background: #fff;
+        background: var(--surface);
         box-sizing: border-box;
         padding: 21px;
         border-radius: 8px;
-        box-shadow: rgba(0, 0, 0, 0.13) 0px 3px 13px;
-        margin: 0 auto;
+        box-shadow: 0 3px 13px color-mix(in oklch, var(--ink) 13%, transparent);
+        inline-size: var(--card-width);
+        max-inline-size: 100%;
+        margin-inline: auto;
     }
 </style>

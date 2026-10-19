@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Button from '$lib/components/shared/Button.svelte';
-	import { cubicIn } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
 
 	interface Props {
 		showToast?: boolean;
@@ -31,7 +29,6 @@
 	<div
 		class="toast {type}"
 		role={type === 'warning' || type === 'error' ? 'alert' : 'status'}
-		out:fly={{ x: 20, duration: 200, easing: cubicIn }}
 	>
 		<div class="content">
 			<div class="header">
@@ -48,28 +45,27 @@
 
 <style>
 	.toast {
-		--toast-color: #1e90ff;
+		--toast-color: var(--info);
 		position: relative;
-		width: min(100%, 24rem);
-		background: white;
-		color: #333;
+		inline-size: min(100%, 24rem);
+		background: var(--surface);
+		color: var(--ink-muted);
 		border-radius: 0.5rem;
-		border-left: 0.5rem solid var(--toast-color);
-		box-shadow: 0 3px 13px rgba(0, 0, 0, 0.13);
-		overflow: hidden;
-		animation: toast-enter 250ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+		border-inline-start: 0.5rem solid var(--toast-color);
+		box-shadow: 0 3px 13px color-mix(in oklch, var(--ink) 13%, transparent);
+		overflow: clip;
 	}
 
 	.success {
-		--toast-color: #28a745;
+		--toast-color: var(--success);
 	}
 
 	.warning {
-		--toast-color: #ffcc00;
+		--toast-color: var(--warning);
 	}
 
 	.error {
-		--toast-color: #ff6347;
+		--toast-color: var(--danger);
 	}
 
 	.content {
@@ -90,28 +86,30 @@
 	:global(button.toast-close) {
 		border: 0;
 		background: none;
-		color: #333;
+		color: var(--ink-muted);
 		font-size: 1.5rem;
 		line-height: 1;
 		cursor: pointer;
 	}
 
 	p {
-		margin: 0.5rem 0 0;
+		margin-block: 0.5rem 0;
 		overflow-wrap: anywhere;
 	}
 
 	.timer {
 		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 0.25rem;
+		inset-block-end: 0;
+		inset-inline: 0;
+		block-size: 0.25rem;
 		background: var(--toast-color);
-		transform-origin: left;
-		animation-name: countdown;
+		transform-origin: 0% 50%;
 		animation-timing-function: linear;
 		animation-fill-mode: forwards;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.toast { animation: toast-enter 250ms var(--ease-out) backwards; }
+		.timer { animation-name: countdown; }
 	}
 
 	@keyframes countdown {

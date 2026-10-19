@@ -221,13 +221,13 @@
 	<input type="hidden" id="filesChanged" name="filesChanged" bind:value={filesChanged} />
 	<input
 		id="images"
+		class="file-input"
 		name="images"
 		type="file"
 		accept="image/*"
 		multiple
 		bind:this={fileInput}
 		onchange={handleSelect}
-		style="display: none;"
 	/>
 	<div class="image-preview">
 		{#if loadingPreviews}
@@ -279,19 +279,19 @@
 </div>
 
 <style>
+	.file-input { display: none; }
 	.dropzone {
-		border: 2px dashed #ccc;
+		border: 2px dashed var(--border);
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: background-color 0.2s var(--ease-out);
 	}
 
-	.dropzone:hover {
-		background-color: #f0f0f0;
-	}
+	.dropzone:active { background-color: var(--surface-muted); }
+	@media (hover: hover) and (pointer: fine) { .dropzone:hover { background-color: var(--surface-muted); } }
 
 	.instructions {
 		display: flex;
@@ -300,28 +300,26 @@
 	}
 
 	.preview-error {
-		color: #b91c1c;
+		color: var(--danger);
 	}
 
 	.image-preview {
 		display: flex;
 		flex-wrap: wrap;
-		margin-top: 10px;
+		margin-block-start: 10px;
 		justify-content: center;
 	}
 
 	.image-wrapper {
 		position: relative;
-		width: 150px;
-		height: 150px;
+		inline-size: 150px;
+		block-size: 150px;
 		margin: 5px;
 		cursor: grab;
 		border: 2px solid transparent;
 		border-radius: 8px;
-		overflow: hidden;
-		transition:
-			transform 150ms ease,
-			border-color 150ms ease;
+		overflow: clip;
+		transition: border-color 150ms var(--ease-out);
 	}
 
 	.sr-only {
@@ -345,54 +343,56 @@
 		transform: scale(0.95);
 		cursor: grabbing;
 	}
+	.image-wrapper:active { border-color: var(--link); }
 
 	.image-wrapper.hovered {
-		border-color: var(--accent, #0070f3);
-		box-shadow: 0 0 0 2px var(--accent, #0070f3);
+		border-color: var(--link);
+		box-shadow: 0 0 0 2px var(--link);
 	}
 
 	.image-wrapper img.image {
-		width: 100%;
-		height: 100%;
+		inline-size: 100%;
+		block-size: 100%;
 		object-fit: cover;
 	}
 
 	.image {
-		width: 150px;
-		height: 150px;
+		inline-size: 150px;
+		block-size: 150px;
 		object-fit: cover;
 	}
 
 	:global(button.remove-btn) {
 		position: absolute;
-		top: 5px;
-		right: 5px;
-		background: rgba(255, 255, 255, 0.7);
+		inset-block-start: 5px;
+		inset-inline-end: 5px;
+		background: color-mix(in oklch, var(--surface) 70%, transparent);
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
-		transition:
-			transform 0.2s ease,
-			background-color 0.2s ease;
+		transition: background-color 0.2s var(--ease-out);
 	}
 
-	:global(button.remove-btn:hover) {
-		transform: scale(1.2);
-		background-color: rgba(255, 0, 0, 0.8);
-		color: white;
+	:global(button.remove-btn:active) { background: var(--danger); color: var(--surface); }
+	@media (hover: hover) and (pointer: fine) {
+		:global(button.remove-btn:hover) { background: color-mix(in oklch, var(--danger) 80%, transparent); color: var(--surface); }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.image-wrapper { transition: transform 150ms var(--ease-out), border-color 150ms var(--ease-out); }
+		:global(button.remove-btn) { transition: transform 150ms var(--ease-out), background-color 150ms var(--ease-out); }
 	}
 
 	.thumbnail-indicator {
 		position: absolute;
-		bottom: 0;
-		left: 0;
-		background: rgba(0, 128, 0, 0.6);
-		color: white;
+		inset-block-end: 0;
+		inset-inline-start: 0;
+		background: color-mix(in oklch, var(--success) 60%, transparent);
+		color: var(--surface);
 		padding: 2px 5px;
 		font-size: 0.8em;
 	}
 
 	.image-wrapper.thumbnail {
-		border: 2px solid green;
+		border: 2px solid var(--success);
 	}
 </style>

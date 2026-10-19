@@ -2,7 +2,6 @@
     import Card from "$lib/components/shared/Card.svelte";
 	import ProductImage from '$lib/components/ProductImage.svelte';
 	import type { ProductOut } from "$lib/interfaces/ProductOut";
-	import { onMount } from "svelte";
 
     interface Props {
         product: ProductOut;
@@ -10,11 +9,6 @@
 
     let { product }: Props = $props();
 
-    let isMobile: boolean = $state(false)
-
-    onMount(() => {
-        isMobile = window.innerWidth <= 400;
-    });
 </script>
 
 <Card>
@@ -23,8 +17,8 @@
             <ProductImage
 				url={product.images?.[0]?.url}
                 alt={product.title} 
-                width={!isMobile ? 256 : 225}
-                height={!isMobile ? 256 : 225}
+                width={256}
+                height={256}
                 data-pin-nopin="true" 
             />
             <div class="title">{product.title}</div>
@@ -37,24 +31,26 @@
     a {
         display: grid;
         text-decoration: none;
-        color: initial;
+		color: var(--ink);
     }
+	a:active { opacity: 0.8; }
 
     .product{
         
-        width: 100%;
-        margin: auto;
+		inline-size: clamp(14.0625rem, 12rem + 7vw, 16rem);
+		max-inline-size: 100%;
+		margin-inline: auto;
     }
+	.product :global(img) { inline-size: 100%; aspect-ratio: 1; object-fit: cover; }
 
     .title {
-		width: 100%;
-		max-width: 256px;
-		overflow: hidden;
+		inline-size: 100%;
+		overflow: clip;
 		text-overflow: ellipsis;
 		display: inline-block;
 		white-space: nowrap;
 		font-style: italic;
-		color: rgb(112, 112, 112);
+		color: var(--ink-muted);
 	}
 
     .price {
@@ -62,13 +58,7 @@
     }
 
 	.sold {
-		color: #666;
-        margin-left: 5px;
-	}
-
-    @media only screen and (max-width: 400px) {
-		.title {
-			max-width: 225px;
-		}
+		color: var(--ink-muted);
+		margin-inline-start: 5px;
 	}
 </style>

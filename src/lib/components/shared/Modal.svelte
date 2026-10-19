@@ -63,23 +63,23 @@
 
 <style>
 	dialog {
-		max-width: 50em;
+		max-inline-size: min(50em, calc(100vw - 2rem));
+		max-block-size: 80dvh;
 		border-radius: 0.5em;
 		border: none;
 		padding: 0;
-		overflow: hidden;
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.3);
+		background: color-mix(in oklch, var(--ink) 30%, transparent);
 	}
 
 	dialog > div {
 		position: relative;
-		padding: 1em 1em 1em 1.34em;
-		transition:
-			max-height 0.3s ease,
-			height 0.3s ease;
+		padding-block: 1em;
+		padding-inline: 1.34em 1em;
 	}
 
 	.busy-overlay {
@@ -90,17 +90,17 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		background: rgba(255, 255, 255, 0.85);
+		background: color-mix(in oklch, var(--surface) 85%, transparent);
 	}
 
 	.busy-spinner {
 		width: 2rem;
 		height: 2rem;
-		border: 3px solid #cbd5e1;
-		border-top-color: #2196f3;
+		border: 3px solid var(--border);
+		border-block-start-color: var(--info);
 		border-radius: 50%;
-		animation: spin 0.7s linear infinite;
 	}
+	@media (prefers-reduced-motion: no-preference) { .busy-spinner { animation: spin 0.7s linear infinite; } }
 
 	@keyframes spin {
 		to {
@@ -108,8 +108,9 @@
 		}
 	}
 
-	dialog[open] {
-		animation: zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	@media (prefers-reduced-motion: no-preference) {
+		dialog[open] { animation: zoom 0.3s var(--ease-out); }
+		dialog[open]::backdrop { animation: fade 0.2s var(--ease-out); }
 	}
 
 	@keyframes zoom {
@@ -119,10 +120,6 @@
 		to {
 			transform: scale(1);
 		}
-	}
-
-	dialog[open]::backdrop {
-		animation: fade 0.2s ease-out;
 	}
 
 	@keyframes fade {
@@ -155,43 +152,37 @@
 		border: none;
 		font-size: 1.5em;
 		cursor: pointer;
-		color: #333;
-		transition:
-			transform 0.2s ease,
-			color 0.2s ease;
+		color: var(--ink-muted);
 	}
 
-	:global(button.close-button:hover) {
-		transform: scale(1.2);
-		color: #000;
-	}
+	:global(button.close-button:active) { color: var(--ink); }
+	@media (hover: hover) and (pointer: fine) { :global(button.close-button:hover) { color: var(--ink); } }
 
 	/* Colored bar on the left edge */
 	dialog::before {
 		content: '';
 		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 0.5em;
+		inset-inline-start: 0;
+		inset-block: 0;
+		inline-size: 0.5em;
 		border-radius: 0.5em 0 0 0.5em;
 		background-color: var(--modal-bar-color);
 	}
 
 	/* Modal types */
 	.info::before {
-		--modal-bar-color: #1e90ff; /* Blue for info */
+		--modal-bar-color: var(--info);
 	}
 
 	.success::before {
-		--modal-bar-color: #28a745; /* Green for success */
+		--modal-bar-color: var(--success);
 	}
 
 	.warning::before {
-		--modal-bar-color: #ffcc00; /* Yellow for warning */
+		--modal-bar-color: var(--warning);
 	}
 
 	.error::before {
-		--modal-bar-color: #ff6347; /* Red for error */
+		--modal-bar-color: var(--danger);
 	}
 </style>

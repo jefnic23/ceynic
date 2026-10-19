@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { marked } from "marked";
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
+	import PageContainer from '$lib/components/shared/PageContainer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -22,18 +23,10 @@
 	}
 </script>
 
-<div class="wrapper">
+<PageContainer>
 	{#await aboutContentPromise}
 		<Skeleton />
 	{:then aboutContent} 
 		{@html aboutContent}
 	{/await}
-</div>
-
-<style>
-	.wrapper {
-		width: 750px;
-		display: flex;
-		flex-direction: column;
-	}
-</style>
+</PageContainer>

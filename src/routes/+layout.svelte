@@ -41,9 +41,9 @@
 <style>
 	.toast-container {
 		position: fixed;
-		top: 1rem;
-		right: 1rem;
-		width: min(24rem, calc(100vw - 2rem));
+		inset-block-start: 1rem;
+		inset-inline-end: 1rem;
+		inline-size: min(24rem, calc(100vw - 2rem));
 		z-index: 1000;
 		view-transition-name: toast;
 	}

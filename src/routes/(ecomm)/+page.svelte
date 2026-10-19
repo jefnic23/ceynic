@@ -1,6 +1,7 @@
 <script lang="ts">
 	import MasonryLayout from '$lib/components/masonry/MasonryLayout.svelte';
 	import type { PageData } from './$types';
+	import PageContainer from '$lib/components/shared/PageContainer.svelte';
 
 	interface Props {
 		data: PageData;
@@ -9,24 +10,16 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="wrapper">
+<PageContainer max="2000px">
 	{#await data.products}
 		<MasonryLayout />
 	{:then products}
 		<MasonryLayout {products} />
 	{:catch error}
-		<p style="color: red">{error.message}</p>
+		<p class="error" role="alert">{error.message}</p>
 	{/await}
-</div>
+</PageContainer>
 
 <style>
-	.wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 100%;
-		max-width: 2000px;
-		margin-right: auto;
-		margin-left: auto;
-	}
+	.error { color: var(--danger); }
 </style>

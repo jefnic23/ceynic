@@ -117,7 +117,7 @@
 	}
 </script>
 
-<div class="container {className}">
+<div class="floating-field {className}">
     <label for={id}>{label}</label>
     <input
         id={id}
@@ -147,62 +147,31 @@
 </div>
 
 <style>
-	.container {
-		position: relative;
-		display: inline-block;
-		width: 100%;
-	}
-
-	.container label {
-		position: absolute;
-		top: 10px;
-		left: 13px;
-		transform: translateY(-100%);
-		background: white;
-		padding: 0 5px;
-		font-size: 0.8em;
-		transition: all 0.2s ease;
-	}
-
-	.container input {
-		width: 100%;
-		padding: 10px;
-		font-size: 1em;
-		box-sizing: border-box;
-	}
-
-	.container :global(input:focus + label),
-	.container :global(input:not(:placeholder-shown) + label) {
-		top: -10px;
-		font-size: 0.7em;
-		color: #007bff;
-	}
-
     .price input {
-		padding-left: 1rem; /* Add space for the dollar sign */
+		padding-inline-start: 1rem;
 	}
 
     .price::before {
 		content: '$';
 		position: absolute;
-		left: 0.5em; /* Adjust positioning as needed */
-		top: 50%;
+		inset-inline-start: 0.5em;
+		inset-block-start: 50%;
 		transform: translateY(-50%);
 		font-size: 1em;
 		font-weight: bold;
-		color: #333; /* Adjust color as needed */
+		color: var(--ink-muted);
 	}
 
 	.size::after {
 		content: 'in.';
 		position: absolute;
-		right: 2rem;
-		top: 50%;
+		inset-inline-end: 2rem;
+		inset-block-start: 50%;
 		transform: translateY(-50%);
 		line-height: normal;
 		font-size: 1em;
 		font-weight: bold;
-		color: #333;
+		color: var(--ink-muted);
 	}
 
 	@keyframes pulseLimit {
@@ -220,7 +189,7 @@
 		}
 	}
 
-	input.at-limit {
-		animation: pulseLimit 0.377s ease-out;
+	@media (prefers-reduced-motion: no-preference) {
+		input.at-limit { animation: pulseLimit 0.377s var(--ease-out); }
 	}
 </style>

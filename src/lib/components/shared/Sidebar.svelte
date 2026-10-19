@@ -24,36 +24,36 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		top: 0;
+		inset-block-start: 0;
 		position: sticky;
 		z-index: 9999;
-		height: 100vh;
-		background-color: #f9f9f9;
-		border-right: 1px solid #e0e0e0;
+		block-size: 100dvh;
+		background-color: var(--surface-muted);
+		border-inline-end: 1px solid var(--border);
 	}
 
 	.hamburger {
 		padding: 1rem;
-		width: 80px;
+		inline-size: 80px;
 		display: flex;
 		justify-content: center;
 	}
 
 	aside {
-		height: 100%;
-		width: 80px;
-		overflow: hidden;
-		transition: width 0.3s ease;
+		block-size: 100%;
+		inline-size: 80px;
+		overflow: clip;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
 	}
 
 	aside.open {
-		width: 200px;
+		inline-size: 200px;
 	}
 
 	aside:not(.open) :global(.label) {
 		display: none;
 	}
+	@media (prefers-reduced-motion: no-preference) { aside { transition: inline-size 250ms var(--ease-out); } }
 </style>

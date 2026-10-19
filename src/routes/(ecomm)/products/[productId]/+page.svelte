@@ -1,195 +1,27 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Tooltip from '$lib/components/shared/Tooltip.svelte';
-	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import { page } from '$app/state';
-	import ProductImages from '$lib/components/ProductImages.svelte';
-	import Button from '$lib/components/shared/Button.svelte';
-	import type { ProductOut } from '$lib/interfaces/ProductOut';
-	import { ButtonStyle } from '$lib/enums/buttonStyle';
-	import { cart } from '$lib/state/cart.svelte';
 	import Icon from '@iconify/svelte';
-	import { currencyFormatter } from '$lib/utils/formatters';
-	import { goto } from '$app/navigation';
+	import Skeleton from '$lib/components/shared/Skeleton.svelte';
+	import PageContainer from '$lib/components/shared/PageContainer.svelte';
+	import ProductDetail from '$lib/components/ecomm/ProductDetail.svelte';
 
-	interface Props {
-		data: PageData;
-	}
-
-	let { data }: Props = $props();
-
-    const returnsTooltipContent: string = `
-        You have 14 days from item delivery to ship this item back. Buyer is responsible for
-        return shipping costs. If the item is not returned in its original condition, the buyer
-        is responsible for any loss in value.
-    `;
-
-	function handleAddToCart(product: ProductOut) {
-		if (product.sold) return;
-		cart.current.products.push(product);
-		// todo: add toast message with redirect to cart
-		// console.log($state.snapshot(cart));
-	}
-
-	function handleViewInCart() {
-		goto('/cart');
-	}
-
-	function handleInquire(product: ProductOut) {
-		const message = `Hello, I'm interested in purchasing ${product.title}.`;
-		const searchParams = new URLSearchParams({ message, productId: String(product.id) });
-		const imageIndex = page.url.hash.slice(1);
-		if (/^\d+$/.test(imageIndex) && Number(imageIndex) < (product.images?.length ?? 0)) {
-			searchParams.set('imageIndex', imageIndex);
-		}
-		goto(`/contact?${searchParams}`);
-	}
+	let { data }: { data: PageData } = $props();
 </script>
 
-<div class="wrapper">
+<PageContainer max="1144px">
 	{#await data.product}
-		<div class="breadcrumb">
-			<a href="/products">Browse</a>
-			<Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />
-			...
-		</div>
-		<div class="product">
-			<div class="image">
-				<Skeleton />
-			</div>
-			<div class="details">
-				<Skeleton />
-			</div>
-		</div>
+		<div class="breadcrumb"><a href="/products">Browse</a><Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />...</div>
+		<Skeleton />
 	{:then product}
-		<div class="breadcrumb">
-			<a href="/products">Browse</a>
-			<Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />
-			{product.title}
-		</div>
-		<div class="product">
-			<ProductImages product={product} url={page.url} />
-			<div class="details">
-				<div>
-					<div class="title">{product.title}</div>
-					<div class="description">{product.description}</div>
-				</div>
-				<div>
-					<div class="price">{currencyFormatter.format(product.price as number)}</div>
-					<div class="shipping">+ <i>free shipping</i></div>
-				</div>
-				{#if product.sold}
-					<Button disabled={true} style={ButtonStyle.Neutral}>Sold</Button>
-				{:else if data.paymentProcessor === null}
-					<Button onclick={() => handleInquire(product)} style={ButtonStyle.Info}>
-						Inquire about this work
-					</Button>
-				{:else if cart.current.products.find(p => p.id === product.id) === undefined}
-					<Button onclick={() => handleAddToCart(product)} style={ButtonStyle.Info}>
-						Add to Cart
-					</Button>
-				{:else}
-					<Button onclick={handleViewInCart} style={ButtonStyle.Neutral}>
-						View in Cart
-					</Button>
-				{/if}
-				{#await data.location}
-					<div>Ships from: <div class="loader"></div></div>
-				{:then location}
-					<div>
-						Ships from: <b>{location.city ? `${location.city}, ${location.state}` : `${location.state}`}</b>
-					</div>
-				{/await}
-				<Tooltip content={returnsTooltipContent.trim()} position={'bottom'}>
-					<div>Returns & exchanges accepted within 14 days</div>
-				</Tooltip>
-			</div>
-		</div>
+		<div class="breadcrumb"><a href="/products">Browse</a><Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />{product.title}</div>
+		<ProductDetail {product} url={page.url} location={data.location} paymentProcessor={data.paymentProcessor} />
 	{/await}
-</div>
-
-
+</PageContainer>
 
 <style>
-	.wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		width: 100%;
-		column-gap: 1rem;
-		max-width: 1144px;
-	}
-
-	.breadcrumb {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		column-gap: 5px;
-		font-size: 0.9rem;
-		padding: 0 1rem;
-		color: #666;
-	}
-
-	.breadcrumb a {
-		text-decoration: none;
-		color: #0070f3; /* example link color */
-	}
-
-	.product {
-		display: flex;
-		flex-direction: row;
-		width: 100%;
-	}
-
-	.details {
-		flex: 3;
-		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		row-gap: 1rem;
-		align-items: center;
-	}
-
-	.title {
-		font-size: xx-large;
-		font-weight: bolder;
-		text-align: center;
-	}
-
-	.description {
-		text-align: justify;
-		hyphens: auto;
-		white-space: pre-line;
-	}
-
-	.price {
-		font-size: x-large;
-		font-weight: bold;
-		text-align: center;
-	}
-
-    .shipping {
-        text-align: center;
-    }
-
-    .loader {
-        display: inline-block;
-        width: 21px;
-        aspect-ratio: 4;
-        background: radial-gradient(circle closest-side,#000 90%,#0000) 0/calc(100%/3) 100% space;
-        clip-path: inset(0 100% 0 0);
-        animation: l1 1s steps(4) infinite;
-    }
-
-    @keyframes l1 {to{clip-path: inset(0 -34% 0 0)}}
-
-	@media only screen and (max-width: 1144px) {
-		.wrapper {
-			align-items: center;
-		}
-
-		.product {
-			flex-direction: column;
-		}
-	}
+	.breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; padding-inline: 1rem; color: var(--ink-muted); }
+	.breadcrumb a { text-decoration: none; color: var(--link); }
+	.breadcrumb a:active { text-decoration: underline; }
+	@media (hover: hover) and (pointer: fine) { .breadcrumb a:hover { text-decoration: underline; } }
 </style>

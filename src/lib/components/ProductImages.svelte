@@ -22,7 +22,7 @@
     let modalImage: ProductImageOut | null | undefined = $derived(modalIndex !== null ? product.images?.[modalIndex] : null);
 
     const [send, receive] = crossfade({
-		duration: 377,
+		duration: typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: no-preference)').matches ? 377 : 0,
 		easing: quintOut
 	});
 
@@ -138,7 +138,6 @@
                     alt={product.title}
                     width={selectedImage?.width}
                     height={selectedImage?.height}
-					style="width: 100%; height: 100%; object-fit: contain;"
 					data-pin-media={selectedImage?.url ? new URL(selectedImage.url, url).href : undefined}
 					data-pin-url={new URL(`/products/${product.id}`, url).href}
 					data-pin-description={product.title}
@@ -160,7 +159,6 @@
                 alt={product.title}
                 width={modalImage.width}
                 height={modalImage.height}
-				style="width: 100%; height: 100%; object-fit: contain;"
                 data-pin-nopin="true"
             />
 
@@ -206,6 +204,7 @@
 		width: 100%;
 		height: 100%;
 	}
+	li a:active { outline: 2px solid var(--link); }
 
     .image  {
         display: grid;
@@ -217,7 +216,7 @@
         cursor: sw-resize;
     }
 
-    .image > div {
+	.image > div {
         grid-area: 1 / 1;
 		display: flex;
 		justify-content: center;
@@ -227,6 +226,9 @@
 		min-width: 0;
 		min-height: 0;
     }
+	.image:active { opacity: 0.85; }
+	.image :global(img),
+	.modal-image :global(img) { inline-size: 100%; block-size: 100%; object-fit: contain; }
 
     .modal-image {
 		position: relative;
@@ -239,10 +241,10 @@
 
 	.arrow {
 		position: absolute;
-		top: 50%;
+		inset-block-start: 50%;
 		transform: translateY(-50%);
 		background: none;
-		color: black;
+		color: var(--ink);
 		border: none;
 		font-size: 2rem;
 		padding: 0.5rem 1rem;
@@ -251,17 +253,21 @@
 		transition: background 0.2s;
 		z-index: 10;
 	}
+	.arrow:active { background: color-mix(in oklch, var(--ink) 12%, transparent); }
+	@media (hover: hover) and (pointer: fine) {
+		.arrow:hover { background: color-mix(in oklch, var(--ink) 8%, transparent); }
+	}
 
 	/* .arrow:hover {
 		background: rgba(0, 0, 0, 0.7);
 	} */
 
 	.arrow.left {
-		left: 1rem;
+		inset-inline-start: 1rem;
 	}
 
 	.arrow.right {
-		right: 1rem;
+		inset-inline-end: 1rem;
 	}
 
     @media only screen and (max-width: 1144px) {

@@ -43,7 +43,7 @@
 			Copyright © {year}{copyright ? `, ${copyright}` : ""}. All rights reserved.
 		</div>
 		<div>
-			<a href="/admin" style:color="#666666" style:text-decoration="none" target="_blank">Administration</a>
+			<a class="admin-link" href="/admin" target="_blank">Administration</a>
 		</div>
 		<div>
 			Powered by <a href="https://github.com/jefnic23" target="_blank">ceynic.net</a>
@@ -58,8 +58,9 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1rem;
-		background-color: #f8f8f8;
-		border: 1px solid #e7e7e7;
+		background-color: var(--surface-muted);
+		border: 1px solid var(--border);
+		container-type: inline-size;
 	}
 
 	.icons {
@@ -73,20 +74,28 @@
 		display: flex;
 		flex-direction: row;
 		font-size: 12px;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	.copyright > div {
 		position: relative;
-		padding: 0 0.5rem;
+		padding-inline: 0.5rem;
 	}
 
 	.copyright > div:not(:last-child)::after {
 		content: "|";
 		position: absolute;
-		right: 0;
+			inset-inline-end: 0;
 	}
 
-	@media (max-width: 768px) {
+	.admin-link { color: var(--ink-muted); text-decoration: none; }
+	.admin-link:active { text-decoration: underline; }
+	.icons a:active { opacity: 0.65; }
+	@media (hover: hover) and (pointer: fine) {
+		.admin-link:hover, .copyright a:hover { text-decoration: underline; }
+	}
+	@container (width < 40rem) {
         .copyright {
             flex-direction: column;
 			text-align: center;

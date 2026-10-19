@@ -119,12 +119,13 @@
 		position: relative;
 		display: flex;
 		justify-content: center;
+		align-items: flex-start;
 		flex: 1;
-		padding: 2rem;
+		padding: var(--space-section);
 	}
 
 	.wrapper {
-		min-height: 100svh;
+		min-block-size: 100svh;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;

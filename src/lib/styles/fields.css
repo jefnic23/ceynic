@@ -1,0 +1,23 @@
+.floating-field {
+    position: relative;
+    display: inline-block;
+    inline-size: 100%;
+}
+
+.floating-field label {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 13px;
+    transform: translateY(-100%);
+    background: var(--surface);
+    padding-inline: 5px;
+    font-size: 0.8em;
+}
+
+.floating-field:focus-within label { color: var(--link); }
+
+.floating-field :is(input, select, textarea) {
+    inline-size: 100%;
+    padding: 10px;
+    font-size: 1em;
+}

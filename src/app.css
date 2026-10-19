@@ -1,15 +1,39 @@
+@import './lib/styles/patterns.css';
+@import './lib/styles/fields.css';
+
+:root {
+    --surface: oklch(1 0 none);
+    --surface-muted: oklch(0.98 0 none);
+    --ink: oklch(0 0 none);
+    --ink-muted: oklch(0.47 0 none);
+    --border: oklch(0.91 0 none);
+    --link: oklch(0.55 0.21 255);
+    --info: oklch(0.66 0.18 248);
+    --success: oklch(0.66 0.16 145);
+    --danger: oklch(0.64 0.22 27);
+    --warning: oklch(0.78 0.17 65);
+    --space-section: clamp(1rem, 0.75rem + 1vw, 2rem);
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    scrollbar-gutter: stable;
+    overflow-wrap: break-word;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 * {
     font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    box-sizing: border-box;
+}
+
+:focus-visible {
+    outline: max(2px, 0.08em) solid var(--link);
+    outline-offset: 0.25em;
 }
 
 body {
     margin: 0;
-    overflow-x: hidden;
+    overflow-x: clip;
     overflow-y: scroll;
     line-height: 1.5;
-}
-
-body.no-scroll {
-    overflow: hidden;
 }

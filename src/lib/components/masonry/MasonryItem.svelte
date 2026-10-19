@@ -21,7 +21,6 @@
 
 <div
 	class="masonry-item {loaded ? 'visible' : ''}"
-	style="opacity: {loaded ? 1 : 0};"
 >
 	{#if (product.images?.length as number) > 0}
 		<a href="/products/{product.id}" data-sveltekit-preload-data>
@@ -45,9 +44,9 @@
 <style>
 	.masonry-item {
 		position: relative;
-		margin-bottom: 13px;
+		margin-block-end: 13px;
 		display: inline-block;
-		width: 100%;
+		inline-size: 100%;
 		vertical-align: top;
 		opacity: 0;
 		transition: opacity 0.5s ease-in-out;

@@ -85,23 +85,23 @@
         text-underline-position: under;
 	}
 
-	.tooltip-container:not(.info) :global(> :first-child):hover {
-		cursor: help;
+	@media (hover: hover) and (pointer: fine) {
+		.tooltip-container:not(.info) :global(> :first-child):hover { cursor: help; }
+		.tooltip-container:not(.info):hover .tooltip { opacity: 1; transform: scale(1); pointer-events: none; }
+		.trigger:hover { color: var(--info); }
 	}
 	
 	.tooltip {
 		position: absolute;
-		background-color: #333;
-		color: white;
+		background-color: var(--ink-muted);
+		color: var(--surface);
 		padding: 0.5rem;
 		border-radius: 4px;
 		font-size: 0.875rem;
 		z-index: 100;
 		opacity: 0;
 		transform: scale(0.95);
-		transition:
-			opacity 0.2s,
-			transform 0.2s;
+		transition: opacity 0.2s var(--ease-out);
 		pointer-events: none;
         width: 100%;
 		max-width: 377px; /* Limit the width of the tooltip */
@@ -109,11 +109,7 @@
 		white-space: normal; /* Allow text to wrap */
 	}
 
-	.tooltip-container:not(.info):hover .tooltip {
-		opacity: 1;
-		transform: scale(1);
-        pointer-events: none;
-	}
+	@media (prefers-reduced-motion: no-preference) { .tooltip { transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out); } }
 
 	.tooltip[data-position='top'] {
 		bottom: 100%;
@@ -158,16 +154,14 @@
 		border: 0;
 		border-radius: 50%;
 		background: transparent;
-		color: #4b5563;
+		color: var(--ink-muted);
 		cursor: help;
 	}
 
-	.trigger:hover {
-		color: #1e88e5;
-	}
+	.trigger:active { color: var(--info); }
 
 	.trigger:focus-visible {
-		outline: 2px solid #1e88e5;
+		outline: 2px solid var(--info);
 		outline-offset: 2px;
 	}
 

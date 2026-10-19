@@ -16,42 +16,13 @@
 	}: Props = $props();
 </script>
 
-<div class="container">
+<div class="floating-field">
 	<label for={id}>{label}</label>
-	<select {id} name={id} bind:value style:padding="13px">
+	<select {id} name={id} bind:value>
         {@render children?.()}
     </select>
 </div>
 
 <style>
-	.container {
-		position: relative;
-		display: inline-block;
-		width: 100%;
-	}
-
-	.container label {
-		position: absolute;
-		top: 10px;
-		left: 13px;
-		transform: translateY(-100%);
-		background: white;
-		padding: 0 5px;
-		font-size: 0.8em;
-		transition: all 0.2s ease;
-	}
-
-	.container select {
-		width: 100%;
-		padding: 10px;
-		font-size: 1em;
-		box-sizing: border-box;
-	}
-
-	.container :global(select:focus + label),
-	.container :global(select:not(:placeholder-shown) + label) {
-		top: -10px;
-		font-size: 0.7em;
-		color: #007bff;
-	}
+	select { padding: 13px; }
 </style>

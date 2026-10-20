@@ -158,17 +158,31 @@
 		justify-content: center;
 	}
 
-	/* Close button styling */
-	:global(button.close-button) {
-		background: none;
-		border: none;
-		font-size: 1.5em;
-		cursor: pointer;
+	.header :global(button.close-button) {
+		inline-size: 2.75rem;
+		block-size: 2.75rem;
+		flex: none;
+		border-radius: 0.5rem;
+		font-size: 1.75rem;
 		color: var(--ink-muted);
 	}
 
-	:global(button.close-button:active) { color: var(--ink); }
-	@media (hover: hover) and (pointer: fine) { :global(button.close-button:hover) { color: var(--ink); } }
+	.header :global(button.close-button:focus-visible) {
+		outline: 2px solid var(--info);
+		outline-offset: 2px;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.header :global(button.close-button:hover) {
+			background: color-mix(in oklch, var(--ink) 8%, transparent);
+			color: var(--ink);
+		}
+	}
+
+	.header :global(button.close-button:active) {
+		background: color-mix(in oklch, var(--ink) 14%, transparent);
+		color: var(--ink);
+	}
 
 	/* Colored bar on the left edge */
 	dialog::before {

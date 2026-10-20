@@ -159,6 +159,7 @@
                 alt={product.title}
                 width={modalImage.width}
                 height={modalImage.height}
+                draggable={false}
                 data-pin-nopin="true"
             />
 
@@ -237,6 +238,7 @@
 		justify-content: center;
 		inline-size: min(calc(100dvw - 3rem), 72rem);
 		block-size: min(78dvh, 72rem);
+		user-select: none;
 	}
 
 	.arrow {

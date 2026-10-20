@@ -191,6 +191,7 @@
 		bind:showModal
 		busy={isUpdating}
 		busyLabel="Updating product…"
+		placement="top"
 		title={modalMode === 'create' ? 'Add New Product' : 'Edit Product'}
 	>
 		{#if loadingModal}

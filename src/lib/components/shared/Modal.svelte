@@ -10,6 +10,7 @@
 		busyLabel?: string;
 		type?: 'info' | 'success' | 'warning' | 'error' | 'none';
 		size?: 'default' | 'image';
+		placement?: 'center' | 'top';
 		title?: string;
 		children?: Snippet;
 	}
@@ -22,6 +23,7 @@
 		busyLabel = 'Loading…',
 		type = 'none',
 		size = 'default',
+		placement = 'center',
 		title = '',
 		children
 	}: Props = $props();
@@ -43,6 +45,7 @@
 	}}
 	class={type}
 	class:image-modal={size === 'image'}
+	class:top-aligned={placement === 'top'}
 >
 	<div>
 		<div inert={busy} aria-busy={busy}>
@@ -73,6 +76,12 @@
 		padding: 0;
 		overflow-y: auto;
 		overscroll-behavior: contain;
+	}
+
+	dialog.top-aligned {
+		inset-block: 0;
+		margin-block-start: clamp(1rem, 5dvh, 3rem);
+		margin-block-end: auto;
 	}
 
 	dialog.image-modal {

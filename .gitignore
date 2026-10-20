@@ -1,9 +1,7 @@
-.DS_Store
-node_modules
-/build
-/.svelte-kit
-/package
 .env
 .env.*
-vite.config.js.timestamp-*
-.vscode
+.vscode/
+graphify-out/
+/node_modules/
+/build/
+/.svelte-kit/

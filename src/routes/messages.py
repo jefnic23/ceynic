@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 
-from src.dependencies import verify_recaptcha
+from src.dependencies import SUBDOMAIN_DEPENDENCY, verify_recaptcha
 from src.services.messages_service import MessagesService
 
 router = APIRouter()
@@ -15,8 +15,9 @@ async def send_contact_email(
     name: Annotated[str, Form()],
     email: Annotated[EmailStr, Form()],
     message: Annotated[str, Form()],
+    subdomain: SUBDOMAIN_DEPENDENCY,
     messages_service: Annotated[MessagesService, Depends()],
 ) -> JSONResponse:
-    messages_service.send_contact_message(name, email, message)
+    await messages_service.send_contact_message(name, email, message, subdomain)
 
     return JSONResponse("Email sent.")

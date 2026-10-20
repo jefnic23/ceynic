@@ -2,22 +2,42 @@ from pathlib import Path
 from typing import Annotated
 from urllib.parse import urlencode
 
-from fastapi import BackgroundTasks, Depends
+from fastapi import BackgroundTasks, Depends, HTTPException, status
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
+from sqlmodel import select
 
 from src.config import Settings, get_settings
+from src.database import ASYNC_SESSION_DEPENDENCY
+from src.models.storefront import Storefront
+from src.models.user import User
 
 
 class MessagesService:
-    def __init__(self, settings: Annotated[Settings, Depends(get_settings)], background_tasks: BackgroundTasks):
+    def __init__(
+        self,
+        settings: Annotated[Settings, Depends(get_settings)],
+        background_tasks: BackgroundTasks,
+        session: ASYNC_SESSION_DEPENDENCY,
+    ):
         self._settings: Settings = settings
         self._background_tasks = background_tasks
+        self._session = session
 
-    def send_contact_message(self, name: str, email: str, message: str) -> None:
+    async def send_contact_message(self, name: str, email: str, message: str, subdomain: str) -> None:
+        statement = (
+            select(User.email)
+            .join(Storefront, User.storefront_id == Storefront.id)
+            .where(Storefront.subdomain == subdomain)
+        )
+        result = await self._session.exec(statement)
+        recipients = result.all()
+        if not recipients:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Storefront contact not found")
+
         fast_mail = self._get_fast_mail(from_email=email, from_name=name)
         mail_message = MessageSchema(
             subject=f"Message from {name}",
-            recipients=[self._settings.RECIPIENT_EMAIL],  # todo: pull this from DB storefront
+            recipients=recipients,
             template_body={"message": message},
             subtype=MessageType.html,
         )
@@ -45,11 +65,9 @@ class MessagesService:
             MAIL_PASSWORD=self._settings.MAILGUN_SMTP_PASSWORD,
             MAIL_PORT=self._settings.MAILGUN_SMTP_PORT,
             MAIL_SERVER=self._settings.MAILGUN_SMTP_SERVER,
-            MAIL_FROM=from_email,
-            MAIL_FROM_NAME=from_name,
             MAIL_STARTTLS=True,
             MAIL_SSL_TLS=False,
-            USE_CREDENTIALS=True,
-            VALIDATE_CERTS=True,
+            MAIL_FROM=from_email,
+            MAIL_FROM_NAME=from_name,
             TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
         )

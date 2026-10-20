@@ -62,15 +62,30 @@ def main() -> None:
         {"source_blob": {"url": source["get_url"], "version": commit}},
     )
     print(f"Building {args.directory} at {commit} for {args.app} ({build['id']})", flush=True)
+    release_id = None
     for _ in range(120):
-        status = api("GET", f"{args.app}/builds/{build['id']}", token)["status"]
-        if status in ("succeeded", "successful"):
-            print(f"Build completed for {args.app}")
-            return
-        if status == "failed":
+        result = api("GET", f"{args.app}/builds/{build['id']}", token)
+        if result["status"] == "succeeded":
+            release_id = (result.get("release") or {}).get("id")
+            if release_id:
+                break
+        if result["status"] == "failed":
             raise SystemExit(f"Heroku build failed for {args.app}: {build['output_stream_url']}")
         time.sleep(10)
-    raise SystemExit(f"Timed out waiting for the {args.app} build: {build['output_stream_url']}")
+    if not release_id:
+        raise SystemExit(f"Timed out waiting for the {args.app} build/release: {build['output_stream_url']}")
+
+    # The backend's Procfile runs Alembic in the release phase. A successful
+    # build alone does not mean the new version (or migration) was released.
+    for _ in range(120):
+        release = api("GET", f"{args.app}/releases/{release_id}", token)
+        if release["status"] == "succeeded":
+            print(f"Released {args.app} at {commit}")
+            return
+        if release["status"] in ("failed", "expired"):
+            raise SystemExit(f"Heroku release failed for {args.app}: {release['output_stream_url']}")
+        time.sleep(10)
+    raise SystemExit(f"Timed out waiting for the {args.app} release {release_id}")
 
 
 if __name__ == "__main__":

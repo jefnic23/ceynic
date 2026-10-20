@@ -212,7 +212,7 @@
 
 	@media (width <= 768px) {
 		.header { min-block-size: 58px; padding-block: 0; padding-inline: 1rem; }
-		.mobile-toggle { display: block; }
+		.mobile-toggle { display: flex; }
 		.header-text { font-size: xx-large; }
 		nav.mobile-menu {
 			position: absolute;

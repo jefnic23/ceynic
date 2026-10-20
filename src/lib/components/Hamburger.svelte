@@ -53,19 +53,19 @@
 	}
 
     :global(button.hamburger-button) span:nth-child(1) {
-        top: 0px;
+        top: 3px;
     }
 
     :global(button.hamburger-button) span:nth-child(2), :global(button.hamburger-button) span:nth-child(3) {
-        top: 8px;
+        top: 11px;
     }
 
     :global(button.hamburger-button) span:nth-child(4) {
-        top: 16px;
+        top: 19px;
     }
 
     :global(button.hamburger-button.open) span:nth-child(1) {
-        top: 8px;
+        top: 11px;
         width: 0%;
         left: 50%;
     }
@@ -85,7 +85,7 @@
     }
 
     :global(button.hamburger-button.open) span:nth-child(4) {
-        top: 8px;
+        top: 11px;
         width: 0%;
         left: 50%;
     }

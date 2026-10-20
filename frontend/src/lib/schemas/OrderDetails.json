@@ -300,6 +300,17 @@
                 "name": {
                     "type": "string"
                 },
+                "sku": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
                 "quantity": {
                     "type": "string"
                 },

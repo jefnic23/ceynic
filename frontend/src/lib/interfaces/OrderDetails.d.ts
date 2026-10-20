@@ -120,6 +120,7 @@ export interface Breakdown {
 }
 export interface Item {
   name: string;
+  sku?: string | null;
   quantity: string;
   unitAmount?: UnitAmount | null;
   tax?: Tax | null;

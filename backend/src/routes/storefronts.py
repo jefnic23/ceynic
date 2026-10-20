@@ -27,7 +27,7 @@ async def get_about(
     return await storefronts_service.get_about(subdomain)
 
 @router.get("/storefronts/name")
-async def get_about(
+async def get_name(
     subdomain: SUBDOMAIN_DEPENDENCY,
     storefronts_service: Annotated[StorefrontsService, Depends()],
     response: Response

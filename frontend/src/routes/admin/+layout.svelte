@@ -31,6 +31,7 @@
 		let timer: ReturnType<typeof setTimeout>;
 
 		function checkSession() {
+			if (expiresAt === null) return;
 			clearTimeout(timer);
 			if (Date.now() >= expiresAt) {
 				if (checking) return;

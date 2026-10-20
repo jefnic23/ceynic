@@ -1,41 +1,6 @@
-# create-svelte
+# Backend
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+FastAPI service for the Ceynic storefront. From this directory, run `uv sync` to install dependencies and `uv run uvicorn src.main:app --reload` to start a local server. Put local settings in `backend/.env`; deployment settings are managed separately on Heroku.
 
 ## Backend CLI
 
@@ -43,12 +8,13 @@ Install the uv environment, then generate JSON schemas and TypeScript models
 for classes marked with `@frontend`:
 
 ```bash
-uv install
+uv sync
 uv run ceynic generate-frontend-models
 ```
 
-The command requires `json-schema-to-typescript`'s `json2ts` executable to be
-available on `PATH`.
+Run `npm ci` in `frontend/` first to install the pinned `json-schema-to-typescript`
+CLI. Generated files are written to `frontend/src/lib/schemas` and
+`frontend/src/lib/interfaces`.
 
 ## Database migrations
 
@@ -57,7 +23,7 @@ environment (falling back to the project `.env`) and imports all table models
 through `src/models/registry.py`. Migrations are run explicitly, not at app startup.
 
 ```bash
-uv install
+uv sync
 uv run alembic upgrade head            # new, empty database
 uv run alembic revision --autogenerate -m "describe change"
 uv run alembic upgrade head

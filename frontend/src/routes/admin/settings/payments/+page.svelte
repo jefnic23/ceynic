@@ -7,7 +7,7 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-	let processor = $state(form?.processor ?? (data.processor === PaymentProcessor.PAYPAL ? PaymentProcessor.PAYPAL : 'None'));
+	let processor = $state((form && 'processor' in form && typeof form.processor === 'string' ? form.processor : undefined) ?? (data.processor === PaymentProcessor.PAYPAL ? PaymentProcessor.PAYPAL : 'None'));
 	const showToast = useToast();
 
 	$effect(() => {
@@ -32,7 +32,7 @@
 		{#if data.paypalConfigured}
 			<p>PayPal credentials are configured. Leave both fields blank to keep them, or enter both to replace them.</p>
 		{/if}
-		<Input id="client_id" label="PayPal client ID" autocomplete="off" value={form?.clientId ?? ''} required={!data.paypalConfigured} />
+		<Input id="client_id" label="PayPal client ID" autocomplete="off" value={form && 'clientId' in form && typeof form.clientId === 'string' ? form.clientId : ''} required={!data.paypalConfigured} />
 		<Input id="client_secret" label="PayPal client secret" type="password" autocomplete="new-password" value="" required={!data.paypalConfigured} />
 	{/if}
 	<Button type="submit">Save payment settings</Button>

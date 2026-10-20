@@ -1,0 +1,55 @@
+name: Check and deploy
+
+on:
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+    branches: [develop, staging, main]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      PUBLIC_API_URL: https://ceynic-api-staging-f8db8dfe3bb9.herokuapp.com
+      PUBLIC_MEASUREMENT_ID: placeholder
+      PUBLIC_RECAPTCHA_SITE_KEY: placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --no-sync ruff check src alembic
+
+  staging:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: heroku-staging
+      cancel-in-progress: false
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/deploy_heroku.py backend ceynic-api-staging
+      - run: python scripts/deploy_heroku.py frontend ceynic-staging

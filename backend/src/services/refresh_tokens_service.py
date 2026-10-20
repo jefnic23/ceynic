@@ -1,7 +1,4 @@
-from typing import Annotated
-from fastapi import Depends
 from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.database import ASYNC_SESSION_DEPENDENCY
 from src.models.refresh_token import RefreshToken

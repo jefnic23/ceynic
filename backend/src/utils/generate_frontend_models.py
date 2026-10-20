@@ -6,8 +6,9 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
-SCHEMA_DIR = PROJECT_ROOT.parent / "ceynic" / "src" / "lib" / "schemas"
-TYPES_DIR = PROJECT_ROOT.parent / "ceynic" / "src" / "lib" / "interfaces"
+FRONTEND_ROOT = PROJECT_ROOT.parent / "frontend"
+SCHEMA_DIR = FRONTEND_ROOT / "src" / "lib" / "schemas"
+TYPES_DIR = FRONTEND_ROOT / "src" / "lib" / "interfaces"
 
 
 def find_decorated_classes(file_path: Path) -> list[str]:
@@ -59,11 +60,10 @@ def generate_frontend_models(
     schema_dir: Path = SCHEMA_DIR,
     types_dir: Path = TYPES_DIR,
 ) -> None:
-    json2ts = shutil.which("json2ts")
+    json2ts = shutil.which("json2ts", path=str(FRONTEND_ROOT / "node_modules" / ".bin"))
     if json2ts is None:
         raise RuntimeError(
-            "json2ts must be installed. Instructions can be found here: "
-            "https://www.npmjs.com/package/json-schema-to-typescript"
+            "json2ts is missing. Run `npm ci` in frontend/ before generating models."
         )
     for py_file in src_dir.rglob("*.py"):
         decorated = find_decorated_classes(py_file)

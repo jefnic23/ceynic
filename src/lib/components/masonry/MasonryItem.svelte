@@ -44,10 +44,7 @@
 <style>
 	.masonry-item {
 		position: relative;
-		margin-block-end: 13px;
-		display: inline-block;
 		inline-size: 100%;
-		vertical-align: top;
 		opacity: 0;
 		transition: opacity 0.5s ease-in-out;
 	}

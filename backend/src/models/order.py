@@ -1,0 +1,47 @@
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, UniqueConstraint
+from sqlmodel import Field, Relationship
+
+from src.decorators import frontend
+from src.models.base import BaseModel
+from src.models.payment_processor_type import PaymentProcessorType
+
+if TYPE_CHECKING:
+    from src.models.order_product import OrderProduct
+    from src.models.storefront import Storefront
+
+
+class OrderBase(BaseModel):
+    order_id: str
+    authorization_id: str | None
+    capture_id: str | None
+    status: str
+    create_time: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+    storefront_id: int = Field(
+        sa_column=Column(
+            Integer, ForeignKey("storefronts.id", ondelete="CASCADE"), nullable=False
+        )
+    )
+
+
+class Order(OrderBase, table=True):
+    __tablename__ = "orders"
+    __table_args__ = (UniqueConstraint("storefront_id", "order_id", name="uq_orders_storefront_order_id"),)
+
+    id: int = Field(primary_key=True) 
+    payment_processor: str = Field(
+        sa_column=Column(PaymentProcessorType, nullable=False),
+    )
+    
+    storefront: "Storefront" = Relationship(back_populates="orders")
+    products: list["OrderProduct"] = Relationship(back_populates="order")
+
+
+@frontend
+class OrderOut(OrderBase):
+    id: int

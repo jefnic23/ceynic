@@ -1,0 +1,30 @@
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Field, Relationship
+
+from src.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from src.models.account_settings import AccountSettings
+    from src.models.content import Content
+    from src.models.order import Order
+    from src.models.product import Product
+    from src.models.social_media_link import SocialMediaLink
+    from src.models.user import User
+
+
+class Storefront(BaseModel, table=True):
+    __tablename__ = "storefronts"
+
+    id: int = Field(primary_key=True)
+    name: str
+    city: str
+    state: str = Field(nullable=False)
+    subdomain: str = Field(unique=True)
+
+    content: Optional["Content"] = Relationship(back_populates="storefront", sa_relationship_kwargs={"uselist": False})
+    account_settings: list["AccountSettings"] = Relationship(back_populates="storefront")
+    orders: list["Order"] = Relationship(back_populates="storefront")
+    products: list["Product"] = Relationship(back_populates="storefront")
+    social_media_links: list["SocialMediaLink"] = Relationship(back_populates="storefront")
+    users: list["User"] = Relationship(back_populates="storefront")

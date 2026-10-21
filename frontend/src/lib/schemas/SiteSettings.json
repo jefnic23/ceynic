@@ -1,0 +1,14 @@
+{
+    "additionalProperties": false,
+    "properties": {
+        "pinterestEnabled": {
+            "default": false,
+            "type": "boolean"
+        },
+        "sortAndFilterEnabled": {
+            "default": true,
+            "type": "boolean"
+        }
+    },
+    "type": "object"
+}

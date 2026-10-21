@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Backend (FastAPI)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["src.main:app", "--host", "127.0.0.1", "--port", "8000"],
+            "cwd": "${workspaceFolder}/backend",
+            "python": "${workspaceFolder}/backend/.venv/bin/python",
+            "windows": {
+                "python": "${workspaceFolder}/backend/.venv/Scripts/python.exe"
+            },
+            "envFile": "${workspaceFolder}/backend/.env",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Frontend (SvelteKit)",
+            "type": "pwa-node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev", "--", "--host", "127.0.0.1", "--port", "5173", "--strictPort"],
+            "cwd": "${workspaceFolder}/frontend",
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "action": "debugWithChrome",
+                "pattern": "Local:\\s+(https?://\\S+)",
+                "uriFormat": "%s"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Frontend + Backend",
+            "configurations": ["Backend (FastAPI)", "Frontend (SvelteKit)"],
+            "stopAll": true
+        }
+    ]
+}

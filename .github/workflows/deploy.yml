@@ -53,11 +53,25 @@ jobs:
     concurrency:
       group: heroku-staging
       cancel-in-progress: false
-    env:
-      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
       - name: Deploy backend (runs database migrations on release)
-        run: python scripts/deploy_heroku.py backend ceynic-api-staging
+        uses: akhileshns/heroku-deploy@v3.15.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_app_name: ceynic-api-staging
+          appdir: backend
+          dontautocreate: true
+      # Each invocation of the action uses a Git remote named "heroku".
+      - run: git remote remove heroku
       - name: Deploy frontend
-        run: python scripts/deploy_heroku.py frontend ceynic-staging
+        uses: akhileshns/heroku-deploy@v3.15.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_app_name: ceynic-staging
+          appdir: frontend
+          dontautocreate: true

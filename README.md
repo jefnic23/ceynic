@@ -13,8 +13,10 @@ To regenerate the frontend's JSON schemas and TypeScript interfaces after changi
 
 ## Branches and deployments
 
-Branch from `develop` for local work. Merge into `develop`, promote `develop` into `staging` for testing, then promote `staging` into `main` for production. Do not develop directly on `staging` or `main`.
+Branch from `develop` for local work. Merge into `develop`, promote `develop` into `staging` for testing, then promote `staging` into `main` when ready. Do not develop directly on `staging` or `main`.
 
-The [Heroku deployment workflow](.github/workflows/deploy.yml) checks both apps and deploys them independently on promotion to `staging`: `backend/` to `ceynic-api-staging` (including its Alembic release command) and `frontend/` to `ceynic-staging`. It needs a GitHub Actions repository secret named `HEROKU_API_KEY`. Each app retains its Heroku config vars and buildpack. `develop` does not deploy.
+The [GitHub Actions workflow](.github/workflows/deploy.yml) checks both apps on pull requests targeting `develop`, `staging`, or `main`, and on pushes to those branches. After both checks pass on a push to `staging`, it deploys `backend/` to `ceynic-api-staging` (including its Alembic release command), then `frontend/` to `ceynic-staging`. Pull requests and pushes to `develop` or `main` do not deploy.
 
-Production frontend is the existing `ceynic` Heroku app. No production backend app is currently available in the Heroku account; before enabling automated `main` deployment, identify its deployment target and configure it separately. Production remains on its current release until promotion is deliberately configured. The original `ceynic-api` repository is retained as a historical archive, not a deployment source.
+To enable staging deployments, add `HEROKU_API_KEY` under GitHub **Settings → Secrets and variables → Actions → Repository secrets**. Configure each staging Heroku app's buildpack and config vars. In particular, `ceynic-staging` needs `PUBLIC_API_URL` pointing to the staging backend, plus its `PUBLIC_MEASUREMENT_ID` and `PUBLIC_RECAPTCHA_SITE_KEY`. The frontend check uses CI-only values; the deployed frontend is built by Heroku using its own app config vars. A push to `staging` starts the workflow automatically; see the **Actions** tab for the check and deploy jobs.
+
+Production resources are not provisioned yet. `main` runs checks only; add production deployment after the frontend and backend Heroku apps and their config vars are ready. The original `ceynic-api` repository is retained as a historical archive, not a deployment source.

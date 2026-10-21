@@ -8,11 +8,13 @@ on:
 
 jobs:
   frontend:
+    name: Check frontend
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
     env:
+      # CI build values only; Heroku builds each deployed app with its own config vars.
       PUBLIC_API_URL: https://ceynic-api-staging-f8db8dfe3bb9.herokuapp.com
       PUBLIC_MEASUREMENT_ID: placeholder
       PUBLIC_RECAPTCHA_SITE_KEY: placeholder
@@ -28,6 +30,7 @@ jobs:
       - run: npm run build
 
   backend:
+    name: Check backend
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -37,12 +40,15 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
+          working-directory: backend
+      - run: uv python install
       - run: uv sync --frozen
       - run: uv run --no-sync ruff check src alembic
 
   staging:
+    name: Deploy staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
-    needs: [backend, frontend]
+    needs: [frontend, backend]
     runs-on: ubuntu-latest
     concurrency:
       group: heroku-staging
@@ -51,5 +57,7 @@ jobs:
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - run: python scripts/deploy_heroku.py backend ceynic-api-staging
-      - run: python scripts/deploy_heroku.py frontend ceynic-staging
+      - name: Deploy backend (runs database migrations on release)
+        run: python scripts/deploy_heroku.py backend ceynic-api-staging
+      - name: Deploy frontend
+        run: python scripts/deploy_heroku.py frontend ceynic-staging

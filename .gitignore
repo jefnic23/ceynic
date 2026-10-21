@@ -1,6 +1,7 @@
 .env
 .env.*
-.vscode/
+.vscode/*
+!.vscode/launch.json
 graphify-out/
 /node_modules/
 /build/

@@ -1,4 +1,4 @@
-import type { Address } from '$lib/interfaces/OrderDetails';
+import type { ShippingAddress } from '$lib/interfaces/OrderDetails';
 
 export const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -6,12 +6,12 @@ export const currencyFormatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2
 });
 
-export function formatAddress(address: Address): string {
+export function formatAddress(address: ShippingAddress): string {
     return [
         address.addressLine1,
         address.addressLine2,
-        address.adminArea2,
-        address.adminArea1,
+        address.city,
+        address.region,
         address.postalCode,
         address.countryCode
     ].filter(Boolean).join(', ');

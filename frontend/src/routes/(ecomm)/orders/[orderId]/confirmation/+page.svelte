@@ -4,12 +4,12 @@
 	import OrderLine from '$lib/components/shared/OrderLine.svelte';
 	import OrderSummary from '$lib/components/shared/OrderSummary.svelte';
 	import { formatAddress } from '$lib/utils/formatters';
-	import type { UnitAmount } from '$lib/interfaces/OrderDetails';
+	import type { Money } from '$lib/interfaces/OrderDetails';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	function formatAmount(amount: UnitAmount | undefined): string {
+	function formatAmount(amount: Money | null | undefined): string {
 		if (!amount) return '';
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -29,32 +29,26 @@
 	<p>Thank you for your order. Your order ID is <strong>{data.order.id}</strong>.</p>
 
 	<OrderSummary>
-		{#each data.order.purchaseUnits as unit}
-			{#each unit.items ?? [] as item}
-				<OrderLine>
-					<span>{item.name} × {item.quantity}</span>
-					{#if item.unitAmount}
-						<span>{formatAmount(item.unitAmount)} each</span>
-					{/if}
-				</OrderLine>
-			{/each}
-			{#if unit.amount}
-				<OrderLine total>
-					<strong>Total</strong>
-					<strong>{formatAmount(unit.amount)}</strong>
-				</OrderLine>
-			{/if}
+		{#each data.order.items as item}
+			<OrderLine>
+				<span>{item.name} × {item.quantity}</span>
+				{#if item.unitAmount}
+					<span>{formatAmount(item.unitAmount)} each</span>
+				{/if}
+			</OrderLine>
 		{/each}
+		{#if data.order.total}
+			<OrderLine total>
+				<strong>Total</strong>
+				<strong>{formatAmount(data.order.total)}</strong>
+			</OrderLine>
+		{/if}
 	</OrderSummary>
 
-	{#if data.order.purchaseUnits.some((unit) => unit.shipping?.address)}
+	{#if data.order.shippingAddress}
 		<Card width="100%">
 			<h2>Shipping address</h2>
-			{#each data.order.purchaseUnits as unit}
-				{#if unit.shipping?.address}
-					<p>{formatAddress(unit.shipping.address)}</p>
-				{/if}
-			{/each}
+			<p>{formatAddress(data.order.shippingAddress)}</p>
 		</Card>
 	{/if}
 

@@ -5,10 +5,8 @@ from src.dependencies import CURRENT_USER_DEPENDENCY, STOREFRONT_ID_DEPENDENCY
 from src.models.order import OrderOut
 from src.schemas.create_order_out import CreateOrderOut
 from src.schemas.create_order_request import CreateOrderRequest
-from src.schemas.paypal.authorize_payment_response import AuthorizePaymentResponse
-from src.schemas.paypal.capture_payment_response import CapturePaymentResponse
-from src.schemas.paypal.order_details import OrderDetails
-from src.schemas.paypal.payments import Authorization
+from src.schemas.order_details import OrderDetails
+from src.schemas.payment_result import OrderActionResult
 from src.services.orders_service import OrdersService
 
 router = APIRouter()
@@ -43,7 +41,7 @@ async def authorize_payment(
     create_order_request: CreateOrderRequest,
     orders_service: Annotated[OrdersService, Depends()],
     storefront_id: STOREFRONT_ID_DEPENDENCY,
-) -> AuthorizePaymentResponse:
+) -> OrderActionResult:
     return await orders_service.authorize_payment(
         storefront_id=storefront_id,
         order_id=order_id,
@@ -53,23 +51,23 @@ async def authorize_payment(
 
 @router.post("/orders/{id:int}/void")
 async def void_authorized_payment(
-    id: int, orders_service: Annotated[OrdersService, Depends()], storefront_id: STOREFRONT_ID_DEPENDENCY
-) -> Authorization:
+    id: int, orders_service: Annotated[OrdersService, Depends()], current_user: CURRENT_USER_DEPENDENCY
+) -> OrderActionResult:
     return await orders_service.void_payment(
-        storefront_id=storefront_id,
+        storefront_id=current_user.storefront_id,
         order_id=id,
     )
 
 
 @router.post("/orders/{id:int}/capture")
 async def capture_payment(
-    id: int, orders_service: Annotated[OrdersService, Depends()], storefront_id: STOREFRONT_ID_DEPENDENCY
-) -> CapturePaymentResponse:
-    return await orders_service.capture_payment(storefront_id=storefront_id, order_id=id)
+    id: int, orders_service: Annotated[OrdersService, Depends()], current_user: CURRENT_USER_DEPENDENCY
+) -> OrderActionResult:
+    return await orders_service.capture_payment(storefront_id=current_user.storefront_id, order_id=id)
 
 
 @router.post("/orders/{id:int}/refund")
 async def refund_payment(
-    id: int, orders_service: Annotated[OrdersService, Depends()], storefront_id: STOREFRONT_ID_DEPENDENCY
-):
-    return await orders_service.refund_payment(storefront_id=storefront_id, order_id=id)
+    id: int, orders_service: Annotated[OrdersService, Depends()], current_user: CURRENT_USER_DEPENDENCY
+) -> OrderActionResult:
+    return await orders_service.refund_payment(storefront_id=current_user.storefront_id, order_id=id)

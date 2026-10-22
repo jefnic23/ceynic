@@ -5,142 +5,37 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type OrderStatus =
+  "CREATED" | "SAVED" | "APPROVED" | "VOIDED" | "COMPLETED" | "PAYER_ACTION_REQUIRED" | "PENDING" | "REFUNDED";
+
 export interface OrderDetails {
   id: string;
-  status: string;
-  intent: string;
-  paymentSource: PaymentSource;
-  purchaseUnits: PurchaseUnit[];
-  payer: Payer;
   createTime: string;
-  links: Link[];
+  items: OrderItem[];
+  total?: Money | null;
+  customer: OrderCustomer;
+  shippingAddress?: ShippingAddress | null;
+  recordId: number;
+  status: OrderStatus;
 }
-export interface PaymentSource {
-  paypal: Paypal;
+export interface OrderItem {
+  name: string;
+  quantity: number;
+  unitAmount?: Money | null;
 }
-export interface Paypal {
-  name: Name;
-  emailAddress?: string | null;
-  accountId?: string | null;
-  accountStatus?: string | null;
-  address?: Address | null;
+export interface Money {
+  currencyCode: string;
+  value: string;
 }
-export interface Name {
-  givenName?: string | null;
-  surname?: string | null;
+export interface OrderCustomer {
+  name: string;
+  email: string;
 }
-export interface Address {
+export interface ShippingAddress {
   addressLine1?: string | null;
   addressLine2?: string | null;
-  adminArea2?: string | null;
-  adminArea1?: string | null;
+  city?: string | null;
+  region?: string | null;
   postalCode?: string | null;
   countryCode?: string | null;
-}
-export interface PurchaseUnit {
-  referenceId?: string | null;
-  payee?: Payee | null;
-  description?: string | null;
-  shipping?: Shipping | null;
-  payments?: Payments | null;
-  amount?: Amount | null;
-  items?: Item[] | null;
-}
-export interface Payee {
-  emailAddress: string;
-  merchantId: string;
-}
-export interface Shipping {
-  address: Address;
-}
-export interface Payments {
-  authorizations?: Authorization[] | null;
-  captures?: Capture[] | null;
-}
-export interface Authorization {
-  id: string;
-  status: string;
-  amount: UnitAmount;
-  sellerProtection: SellerProtection;
-  expirationTime?: string | null;
-  createTime?: string | null;
-  updateTime?: string | null;
-  links: Link[];
-}
-export interface UnitAmount {
-  currencyCode?: string;
-  value: string;
-}
-export interface SellerProtection {
-  status: string;
-  disputeCategories: string[];
-}
-export interface Link {
-  href: string;
-  rel: string;
-  method: string;
-}
-export interface Capture {
-  id: string;
-  status: string;
-  amount: UnitAmount;
-  sellerProtection: SellerProtection;
-  finalCapture: boolean;
-  disbursementMode?: string | null;
-  sellerReceivableBreakdown: SellerReceivableBreakdown;
-  createTime?: string | null;
-  updateTime?: string | null;
-  links: Link[];
-}
-export interface SellerReceivableBreakdown {
-  grossAmount: GrossAmount;
-  paypalFee: PaypalFee;
-  netAmount: NetAmount;
-}
-export interface GrossAmount {
-  currencyCode: string;
-  value: number | string;
-}
-export interface PaypalFee {
-  currencyCode: string;
-  value: number | string;
-}
-export interface NetAmount {
-  currencyCode: string;
-  value: number | string;
-}
-export interface Amount {
-  currencyCode?: string;
-  value: string;
-  breakdown: Breakdown;
-}
-export interface Breakdown {
-  itemTotal: UnitAmount;
-  shipping?: UnitAmount | null;
-}
-export interface Item {
-  name: string;
-  sku?: string | null;
-  quantity: string;
-  unitAmount?: UnitAmount | null;
-  tax?: Tax | null;
-  discount?: DiscountPercent | DiscountAmount | null;
-  description?: string | null;
-  unitOfMeasure?: string | null;
-}
-export interface Tax {
-  name?: string | null;
-  percent?: string | null;
-  taxNote?: string | null;
-}
-export interface DiscountPercent {
-  percent: string;
-}
-export interface DiscountAmount {
-  amount: UnitAmount;
-}
-export interface Payer {
-  name: Name;
-  emailAddress: string;
-  payerId: string;
 }

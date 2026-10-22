@@ -28,11 +28,21 @@ export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
 }
 
 export const actions: Actions = {
-    default: async ({ request, params, cookies }) => {
+    default: async ({ request, cookies }) => {
         const data = await request.formData();
         const action = data.get("action");
+        const recordId = data.get("recordId");
 
-        const response = await fetch(`${PUBLIC_API_URL}/orders/${params.orderId}/${action}`, {
+        if (
+            typeof recordId !== 'string' ||
+            !/^\d+$/.test(recordId) ||
+            typeof action !== 'string' ||
+            !['capture', 'void', 'refund'].includes(action)
+        ) {
+            error(400, 'Invalid order action.');
+        }
+
+        const response = await fetch(`${PUBLIC_API_URL}/orders/${recordId}/${action}`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${cookies.get("access")}`,

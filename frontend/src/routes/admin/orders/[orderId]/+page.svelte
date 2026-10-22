@@ -24,11 +24,7 @@
 	}
 
 	function getTotalAmount(order: OrderDetails): string {
-		return formatCurrency(
-			order.purchaseUnits?.reduce((sum, purchaseUnit) => {
-				return sum + (parseFloat(purchaseUnit?.amount?.value as string));
-			}, 0.0)
-		);
+		return order.total ? formatCurrency(Number(order.total.value), order.total.currencyCode) : '';
 	}
 
 </script>
@@ -40,18 +36,16 @@
 	{:then order}
 		<header>
 			<h1>Order #{order.id}</h1>
-			<p>Status: {order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === 'CREATED' ? 'Pending' : 'Captured'}</p>
+			<p>Status: {order.status}</p>
 		</header>
 		<OrderSummary>
-			{#each order.purchaseUnits as purchaseUnit}
-				{#each purchaseUnit.items ?? [] as item}
-					<OrderLine>
-						<span>{item.name} × {item.quantity}</span>
-						{#if item.unitAmount}
-							<span>{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
-						{/if}
-					</OrderLine>
-				{/each}
+			{#each order.items as item}
+				<OrderLine>
+					<span>{item.name} × {item.quantity}</span>
+					{#if item.unitAmount}
+						<span>{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
+					{/if}
+				</OrderLine>
 			{/each}
 			<OrderLine total>
 				<strong>Order total</strong>
@@ -62,10 +56,10 @@
 			<div class="details">
 				<h2>Customer details</h2>
 				<div>
-					<p>{order.payer.name.givenName} {order.payer.name.surname}</p>
-					<p>{order.payer.emailAddress}</p>
-					{#if order.purchaseUnits?.[0]?.shipping?.address}
-						<p>{formatAddress(order.purchaseUnits[0].shipping.address)}</p>
+					<p>{order.customer.name}</p>
+					<p>{order.customer.email}</p>
+					{#if order.shippingAddress}
+						<p>{formatAddress(order.shippingAddress)}</p>
 					{/if}
 				</div>
 			</div>
@@ -77,10 +71,11 @@
 			</div>
 		</Card>
 		<form method="POST" use:enhance>
-			{#if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CREATED"}
+			<input type="hidden" name="recordId" value={order.recordId} />
+			{#if order.status === 'PENDING'}
 				<Button name={"action"} value={"capture"}>Complete Order</Button>
 				<Button name={"action"} value={"void"} style={ButtonStyle.Cancel}>Void</Button>
-			{:else if order.purchaseUnits?.[0]?.payments?.authorizations?.[0]?.status === "CAPTURED"}
+			{:else if order.status === 'COMPLETED'}
 				<Button name={"action"} value={"refund"} style={ButtonStyle.Info}>Refund</Button>
 			{/if}
 		</form>

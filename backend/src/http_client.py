@@ -23,6 +23,8 @@ class HttpClient:
         ):
             if not res.ok:
                 await res.raise_for_status()
+            if res.status == 204:
+                return {}
             return await res.json()
 
     async def put_async(url: str, data: dict[str, any], headers: dict[str, any] | None = None) -> dict[str, any]:

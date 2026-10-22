@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-
+from fastapi import APIRouter, Depends
 from src.dependencies import CURRENT_USER_DEPENDENCY, STOREFRONT_ID_DEPENDENCY
 from src.models.order import OrderOut
 from src.schemas.create_order_out import CreateOrderOut
@@ -11,7 +10,6 @@ from src.schemas.paypal.capture_payment_response import CapturePaymentResponse
 from src.schemas.paypal.order_details import OrderDetails
 from src.schemas.paypal.payments import Authorization
 from src.services.orders_service import OrdersService
-from src.services.products_service import ProductsService
 
 router = APIRouter()
 
@@ -34,39 +32,22 @@ async def get_order(
 async def create_order(
     create_order_request: CreateOrderRequest,
     storefront_id: STOREFRONT_ID_DEPENDENCY,
-    products_service: Annotated[ProductsService, Depends()],
     orders_service: Annotated[OrdersService, Depends()],
 ) -> CreateOrderOut:
-    products = await products_service.get_for_order(
-        storefront_id=storefront_id, product_ids=create_order_request.product_ids
-    )
-    if (
-        not create_order_request.product_ids
-        or len(products) != len(create_order_request.product_ids)
-        or len(products) != len(set(create_order_request.product_ids))
-    ):
-        raise HTTPException(status_code=404, detail="Product(s) not found")
-    return await orders_service.create_order(storefront_id=storefront_id, products=products)
+    return await orders_service.create_order(storefront_id=storefront_id, product_ids=create_order_request.product_ids)
 
 
 @router.post("/orders/{order_id:str}/authorize")
 async def authorize_payment(
     order_id: str,
     create_order_request: CreateOrderRequest,
-    products_service: Annotated[ProductsService, Depends()],
     orders_service: Annotated[OrdersService, Depends()],
     storefront_id: STOREFRONT_ID_DEPENDENCY,
 ) -> AuthorizePaymentResponse:
-    product_ids = create_order_request.product_ids
-    if not product_ids or len(product_ids) != len(set(product_ids)):
-        raise HTTPException(status_code=400, detail="Invalid products")
-    products = await products_service.get_for_order(storefront_id=storefront_id, product_ids=product_ids)
-    if len(products) != len(product_ids):
-        raise HTTPException(status_code=404, detail="Product(s) not found")
     return await orders_service.authorize_payment(
         storefront_id=storefront_id,
         order_id=order_id,
-        products=products,
+        product_ids=create_order_request.product_ids,
     )
 
 

@@ -6,7 +6,6 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import col, select
-
 from src.database import ASYNC_SESSION_DEPENDENCY
 from src.enums.order_status import SOLD_ORDER_STATUSES, OrderStatus
 from src.enums.payment_processor import PaymentProcessorEnum
@@ -37,32 +36,19 @@ class OrdersService:
     def with_payment_processor(func):
         @wraps(func)
         async def wrapper(self: "OrdersService", *args, **kwargs):
-            # Get the function signature
             sig = inspect.signature(func)
             bound_args = sig.bind(self, *args, **kwargs)
             bound_args.apply_defaults()
 
-            # Try to find storefront_id in args or kwargs
             storefront_id = bound_args.arguments.get("storefront_id")
             if storefront_id is None:
                 raise ValueError(f"'storefront_id' must be provided to {func.__name__}")
 
-            # Authorization receives a PayPal order ID before there is a local
-            # order, so it must use PayPal even if the storefront has since
-            # changed its selected processor.
-            if func.__name__ == "authorize_payment":
-                processor_name = PaymentProcessorEnum.PAYPAL.value
-                payment_processor = self._payment_processor_factory.get_payment_processor(PaymentProcessorEnum.PAYPAL)
-            else:
-                payment_processor, processor_name = await self._get_payment_processor(
-                    storefront_id,
-                    None if func.__name__ == "create_order" else bound_args.arguments.get("order_id"),
-                )
+            payment_processor, _ = await self._get_payment_processor(
+                storefront_id, bound_args.arguments.get("order_id")
+            )
 
-            # Inject payment_processor into kwargs
             bound_args.arguments["payment_processor"] = payment_processor
-            if func.__name__ == "authorize_payment":
-                bound_args.arguments["processor_name"] = processor_name
 
             return await func(*bound_args.args, **bound_args.kwargs)
 
@@ -95,7 +81,7 @@ class OrdersService:
         if not order:
             return
 
-        update_data = updates.model_dump(exclude_unset=True)
+        update_data = updates.model_dump(mode="json", exclude_unset=True)
         if not update_data:
             return
 
@@ -110,31 +96,40 @@ class OrdersService:
     ) -> OrderDetails:
         return await payment_processor.get_order(storefront_id=storefront_id, order_id=order_id)
 
-    @with_payment_processor
     async def create_order(
         self,
         storefront_id: int,
-        products: list[ProductForOrder],
-        payment_processor: PaymentProcessorBase = None,
+        product_ids: list[int],
     ) -> CreateOrderOut:
+        if not product_ids or len(product_ids) != len(set(product_ids)):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product(s) not found")
+        products = await self._get_checkout_products(storefront_id, product_ids)
+        # This check is provisional: only authorization locks products until the order is recorded.
+        await self._ensure_products_unsold(storefront_id, product_ids)
+        payment_processor, _ = await self._get_payment_processor(storefront_id)
         return await payment_processor.create_order(storefront_id, products)
 
-    @with_payment_processor
     async def authorize_payment(
         self,
         storefront_id: int,
         order_id: str,
-        products: list[ProductForOrder],
-        payment_processor: PaymentProcessorBase = None,
-        processor_name: str | None = None,
+        product_ids: list[int],
     ) -> AuthorizePaymentResponse:
+        if not product_ids or len(product_ids) != len(set(product_ids)):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid products")
+
         existing = await self._session.exec(
             select(Order.id).where(Order.storefront_id == storefront_id, Order.order_id == order_id)
         )
         if existing.one_or_none() is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order already authorized")
 
-        await self._lock_available_products(storefront_id, [product.id for product in products])
+        await self._lock_available_products(storefront_id, product_ids)
+        products = await self._get_checkout_products(storefront_id, product_ids)
+        # An unrecorded PayPal order must still be authorized with PayPal even if
+        # the storefront has since selected another processor.
+        processor_name = PaymentProcessorEnum.PAYPAL.value
+        payment_processor = self._payment_processor_factory.get_payment_processor(PaymentProcessorEnum.PAYPAL)
 
         # The product IDs in the approval request are client-controlled. Check the
         # approved PayPal order against the storefront's products before authorizing.
@@ -166,7 +161,7 @@ class OrdersService:
             order_id=order_id,
             authorization_id=response.authorization_id,
             capture_id=None,
-            status=OrderStatus.PENDING,
+            status=OrderStatus.PENDING.value,
             create_time=response.create_time or datetime.now(UTC),
             storefront_id=storefront_id,
             payment_processor=processor_name,
@@ -251,11 +246,22 @@ class OrdersService:
 
         response = await payment_processor.refund_payment(storefront_id, capture_id=capture_id)
 
-        await self.update(storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status=OrderStatus.REFUNDED))
+        await self.update(
+            storefront_id=storefront_id, order_id=order_id, updates=OrderUpdate(status=OrderStatus.REFUNDED)
+        )
         await self._session.commit()
         return response
 
     # region Private Methods
+
+    async def _get_checkout_products(self, storefront_id: int, product_ids: list[int]) -> list[ProductForOrder]:
+        results = await self._session.exec(
+            select(Product).where(Product.storefront_id == storefront_id, col(Product.id).in_(product_ids))
+        )
+        products = results.all()
+        if len(products) != len(product_ids):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product(s) not found")
+        return [ProductForOrder.model_validate(product) for product in products]
 
     async def _lock_available_products(
         self, storefront_id: int, product_ids: list[int], excluded_order_id: int | None = None
@@ -273,6 +279,11 @@ class OrdersService:
             if locked.one_or_none() is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product(s) not found")
 
+        await self._ensure_products_unsold(storefront_id, product_ids, excluded_order_id)
+
+    async def _ensure_products_unsold(
+        self, storefront_id: int, product_ids: list[int], excluded_order_id: int | None = None
+    ) -> None:
         statement = (
             select(OrderProduct.product_id)
             .join(Order, Order.id == OrderProduct.order_id)

@@ -6,7 +6,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 from sqlmodel import col, select
-
 from src.database import ASYNC_SESSION_DEPENDENCY
 from src.dependencies import SETTINGS_DEPENDENCY
 from src.enums.order_status import SOLD_ORDER_STATUSES
@@ -16,7 +15,6 @@ from src.models.order import Order
 from src.models.order_product import OrderProduct
 from src.models.product import Product, ProductForCreate, ProductForUpdate, ProductOut
 from src.models.product_image import ProductImage
-from src.schemas.product_for_order import ProductForOrder
 from src.schemas.product_metadata import MediumCount, PriceRange, ProductMetadata, SizeRanges
 from src.schemas.product_query_params import ProductQueryParams
 from src.services.product_images_service import ProductImagesService
@@ -64,33 +62,6 @@ class ProductsService:
             )
         product, sold = row
         return self._product_out(product, sold)
-
-    @staticmethod
-    def _product_out(product: Product, sold: bool) -> ProductOut:
-        return ProductOut.model_validate(
-            {**product.model_dump(), "medium": product.medium, "images": product.images, "sold": sold}
-        )
-
-    async def get_for_order(self, storefront_id: int, product_ids: list[int]) -> list[ProductForOrder]:
-        # todo: consolidate this method with `get` above
-        statement = (
-            select(Product)
-            .where(Product.storefront_id == storefront_id)
-            .where(col(Product.id).in_(product_ids))
-            .options(selectinload(Product.medium), selectinload(Product.images))
-        )
-        results = await self._session.exec(statement=statement)
-        products = results.all()
-        if products:
-            sold_results = await self._session.exec(
-                select(Product.id)
-                .where(Product.storefront_id == storefront_id)
-                .where(col(Product.id).in_([product.id for product in products]))
-                .where(self.sold_expression())
-            )
-            if sold_results.first() is not None:
-                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Product is sold")
-        return products
 
     async def create(self, storefront_id: int, product_in: ProductForCreate) -> None:
         product = Product(**product_in.model_dump(exclude_unset=True), storefront_id=storefront_id)
@@ -279,6 +250,12 @@ class ProductsService:
             .where(OrderProduct.product_id == Product.id)
             .where(col(Order.status).in_(SOLD_ORDER_STATUSES))
             .exists()
+        )
+
+    @staticmethod
+    def _product_out(product: Product, sold: bool) -> ProductOut:
+        return ProductOut.model_validate(
+            {**product.model_dump(), "medium": product.medium, "images": product.images, "sold": sold}
         )
 
     # async def _get_product_images(self, storefront_id: int, product_id: int) -> list[ProductImage]:

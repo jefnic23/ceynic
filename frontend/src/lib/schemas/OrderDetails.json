@@ -1,5 +1,42 @@
 {
     "$defs": {
+        "AdminOrderItem": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "unitAmount": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Money"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "imageUrl": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": [
+                "name",
+                "quantity"
+            ],
+            "type": "object"
+        },
         "Money": {
             "properties": {
                 "currencyCode": {
@@ -27,32 +64,6 @@
             "required": [
                 "name",
                 "email"
-            ],
-            "type": "object"
-        },
-        "OrderItem": {
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "unitAmount": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/Money"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "default": null
-                }
-            },
-            "required": [
-                "name",
-                "quantity"
             ],
             "type": "object"
         },
@@ -153,7 +164,7 @@
         },
         "items": {
             "items": {
-                "$ref": "#/$defs/OrderItem"
+                "$ref": "#/$defs/AdminOrderItem"
             },
             "type": "array"
         },

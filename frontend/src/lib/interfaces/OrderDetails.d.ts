@@ -20,17 +20,18 @@ export type OrderStatus =
 export interface OrderDetails {
   id: string;
   createTime: string;
-  items: OrderItem[];
+  items: AdminOrderItem[];
   total?: Money | null;
   customer: OrderCustomer;
   shippingAddress?: ShippingAddress | null;
   recordId: number;
   status: OrderStatus;
 }
-export interface OrderItem {
+export interface AdminOrderItem {
   name: string;
   quantity: number;
   unitAmount?: Money | null;
+  imageUrl?: string | null;
 }
 export interface Money {
   currencyCode: string;

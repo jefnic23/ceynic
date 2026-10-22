@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from src.dependencies import CURRENT_USER_DEPENDENCY, STOREFRONT_ID_DEPENDENCY
 from src.models.order import OrderOut
 from src.schemas.create_order_out import CreateOrderOut
 from src.schemas.create_order_request import CreateOrderRequest
-from src.schemas.order_details import OrderDetails
+from src.schemas.order_details import OrderConfirmation, OrderDetails
 from src.schemas.payment_result import OrderActionResult
 from src.services.orders_service import OrdersService
 
@@ -22,8 +22,19 @@ async def get_orders(
 @router.get("/orders/{order_id:str}")
 async def get_order(
     order_id: str, storefront_id: STOREFRONT_ID_DEPENDENCY, orders_service: Annotated[OrdersService, Depends()]
+) -> OrderConfirmation:
+    return await orders_service.get_order_confirmation(storefront_id, order_id)
+
+
+@router.get("/admin/orders/{order_id:str}")
+async def get_admin_order(
+    order_id: str,
+    current_user: CURRENT_USER_DEPENDENCY,
+    orders_service: Annotated[OrdersService, Depends()],
+    response: Response,
 ) -> OrderDetails:
-    return await orders_service.get_order(storefront_id, order_id)
+    response.headers["Cache-Control"] = "private, no-store"
+    return await orders_service.get_admin_order(current_user.storefront_id, order_id)
 
 
 @router.post("/orders")

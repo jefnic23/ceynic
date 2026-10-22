@@ -16,6 +16,14 @@ class OrderItem(BaseSchema):
     unit_amount: Money | None = None
 
 
+class ProviderOrderItem(OrderItem):
+    sku: str | None = None
+
+
+class AdminOrderItem(OrderItem):
+    image_url: str | None = None
+
+
 class OrderCustomer(BaseSchema):
     name: str
     email: str
@@ -33,13 +41,22 @@ class ShippingAddress(BaseSchema):
 class ProviderOrderDetails(BaseSchema):
     id: str
     create_time: datetime
-    items: list[OrderItem]
+    items: list[ProviderOrderItem]
     total: Money | None = None
     customer: OrderCustomer
     shipping_address: ShippingAddress | None = None
 
 
 @frontend
+class OrderConfirmation(BaseSchema):
+    id: str
+    status: OrderStatus
+    items: list[OrderItem]
+    total: Money | None = None
+
+
+@frontend
 class OrderDetails(ProviderOrderDetails):
+    items: list[AdminOrderItem]
     record_id: int
     status: OrderStatus

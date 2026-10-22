@@ -14,7 +14,7 @@ from src.enums.payment_processor import PaymentProcessorEnum
 from src.http_client import HttpClient
 from src.models.account_settings import AccountSettings
 from src.schemas.create_order_out import CreateOrderOut
-from src.schemas.order_details import Money, OrderCustomer, OrderItem, ProviderOrderDetails, ShippingAddress
+from src.schemas.order_details import Money, OrderCustomer, ProviderOrderDetails, ProviderOrderItem, ShippingAddress
 from src.schemas.payment_result import AuthorizationResult, PaymentResult, PaymentState
 from src.schemas.paypal.auth_response import AuthResponse
 from src.schemas.paypal.authorize_payment_response import AuthorizePaymentResponse
@@ -84,8 +84,9 @@ class PayPalService(PaymentProcessorBase):
             id=details.id,
             create_time=details.create_time,
             items=[
-                OrderItem(
+                ProviderOrderItem(
                     name=item.name,
+                    sku=item.sku,
                     quantity=int(item.quantity),
                     unit_amount=(
                         Money(currency_code=item.unit_amount.currency_code, value=item.unit_amount.value)

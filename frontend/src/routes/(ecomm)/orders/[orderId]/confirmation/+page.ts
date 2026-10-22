@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { OrderDetails } from '$lib/interfaces/OrderDetails';
+import type { OrderConfirmation } from '$lib/interfaces/OrderConfirmation';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
@@ -9,5 +9,5 @@ export const load: PageLoad = async ({ fetch, params }) => {
 	if (response.status === 404) error(404, 'Order not found.');
 	if (!response.ok) error(502, 'Unable to load order details.');
 
-	return { order: (await response.json()) as OrderDetails };
+	return { order: (await response.json()) as OrderConfirmation };
 };

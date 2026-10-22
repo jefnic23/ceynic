@@ -1,13 +1,12 @@
 <script lang="ts">
-	import Card from '$lib/components/shared/Card.svelte';
 	import PageContainer from '$lib/components/shared/PageContainer.svelte';
 	import OrderLine from '$lib/components/shared/OrderLine.svelte';
 	import OrderSummary from '$lib/components/shared/OrderSummary.svelte';
-	import { formatAddress } from '$lib/utils/formatters';
-	import type { Money } from '$lib/interfaces/OrderDetails';
+	import type { Money } from '$lib/interfaces/OrderConfirmation';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	let isConfirmed = $derived(['PENDING', 'CAPTURE_PENDING', 'COMPLETED'].includes(data.order.status));
 
 	function formatAmount(amount: Money | null | undefined): string {
 		if (!amount) return '';
@@ -25,8 +24,8 @@
 
 <PageContainer>
 	<div class="confirmation">
-	<h1>Order confirmed!</h1>
-	<p>Thank you for your order. Your order ID is <strong>{data.order.id}</strong>.</p>
+	<h1>{isConfirmed ? 'Order confirmed!' : 'Order details'}</h1>
+	<p>{isConfirmed ? 'Thank you for your order. ' : ''}Your order ID is <strong>{data.order.id}</strong>.</p>
 
 	<OrderSummary>
 		{#each data.order.items as item}
@@ -44,13 +43,6 @@
 			</OrderLine>
 		{/if}
 	</OrderSummary>
-
-	{#if data.order.shippingAddress}
-		<Card width="100%">
-			<h2>Shipping address</h2>
-			<p>{formatAddress(data.order.shippingAddress)}</p>
-		</Card>
-	{/if}
 
 	<a href="/products">Continue shopping</a>
 	</div>

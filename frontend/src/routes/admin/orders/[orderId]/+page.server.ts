@@ -5,7 +5,7 @@ import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
     const fetchOrder = async (orderId: string): Promise<OrderDetails> => {
-        const response = await fetch(`${PUBLIC_API_URL}/orders/${orderId}`, {
+        const response = await fetch(`${PUBLIC_API_URL}/admin/orders/${encodeURIComponent(orderId)}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${cookies.get("access")}`,

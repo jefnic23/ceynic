@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import ProductImage from '$lib/components/ProductImage.svelte';
 	import Button from '$lib/components/shared/Button.svelte';
 	import Card from '$lib/components/shared/Card.svelte';
 	import { ButtonStyle } from '$lib/enums/buttonStyle';
@@ -42,9 +43,16 @@
 		<OrderSummary>
 			{#each order.items as item}
 				<OrderLine>
-					<span>{item.name} × {item.quantity}</span>
+					<div class="item-details">
+						{#if item.imageUrl}
+							<div class="item-image">
+								<ProductImage url={item.imageUrl} alt="" loading="lazy" />
+							</div>
+						{/if}
+						<span class="item-name">{item.name} × {item.quantity}</span>
+					</div>
 					{#if item.unitAmount}
-						<span>{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
+						<span class="item-price">{formatCurrency(Number(item.unitAmount.value), item.unitAmount.currencyCode)}</span>
 					{/if}
 				</OrderLine>
 			{/each}
@@ -132,6 +140,35 @@
 </PageContainer>
 
 <style>
+	.item-details {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-inline-size: 0;
+	}
+
+	.item-image {
+		flex: none;
+		inline-size: 3.5rem;
+		block-size: 3.5rem;
+	}
+
+	.item-image :global(img) {
+		inline-size: 100%;
+		block-size: 100%;
+		object-fit: contain;
+	}
+
+	.item-name {
+		overflow-wrap: break-word;
+		min-inline-size: 0;
+	}
+
+	.item-price {
+		flex: none;
+		font-variant-numeric: tabular-nums;
+	}
+
 	.order-page {
 		display: flex;
 		flex-direction: column;

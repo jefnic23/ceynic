@@ -12,8 +12,9 @@ from src.models.account_settings import AccountSettings
 from src.models.order import Order, OrderOut
 from src.models.order_product import OrderProduct
 from src.models.product import Product
+from src.models.product_image import ProductImage
 from src.schemas.create_order_out import CreateOrderOut
-from src.schemas.order_details import OrderDetails
+from src.schemas.order_details import OrderConfirmation, OrderDetails, ProviderOrderDetails
 from src.schemas.payment_result import OrderActionResult, PaymentState
 from src.schemas.product_for_order import ProductForOrder
 from src.services.base.payment_processor_base import PaymentProcessorBase
@@ -38,12 +39,31 @@ class OrdersService:
         results = await self._session.exec(statement=statement)
         return results.all()
 
-    async def get_order(self, storefront_id: int, order_id: str) -> OrderDetails:
-        order = await self._get_order_by_external_id(storefront_id, order_id)
-        if order.status == OrderStatus.CREATED.value:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
-        details = await self._processor_for_order(order).get_order_details(storefront_id, order_id)
-        return OrderDetails.model_validate({**details.model_dump(), "record_id": order.id, "status": order.status})
+    async def get_order_confirmation(self, storefront_id: int, order_id: str) -> OrderConfirmation:
+        order, details = await self._get_order_with_details(storefront_id, order_id)
+        return OrderConfirmation(
+            id=details.id, status=OrderStatus(order.status), items=details.items, total=details.total
+        )
+
+    async def get_admin_order(self, storefront_id: int, order_id: str) -> OrderDetails:
+        order, details = await self._get_order_with_details(storefront_id, order_id)
+        image_results = await self._session.exec(
+            select(ProductImage.product_id, ProductImage.url)
+            .join(OrderProduct, OrderProduct.product_id == ProductImage.product_id)
+            .join(Product, Product.id == OrderProduct.product_id)
+            .where(OrderProduct.order_id == order.id, Product.storefront_id == storefront_id, ProductImage.position == 1)
+        )
+        thumbnails = dict(image_results.all())
+        items = [
+            {
+                **item.model_dump(exclude={"sku"}),
+                "image_url": thumbnails.get(int(item.sku)) if item.sku and item.sku.isdecimal() else None,
+            }
+            for item in details.items
+        ]
+        return OrderDetails.model_validate(
+            {**details.model_dump(exclude={"items"}), "items": items, "record_id": order.id, "status": order.status}
+        )
 
     async def create_order(
         self,
@@ -156,6 +176,13 @@ class OrdersService:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order has no pending payment")
 
     # region Private Methods
+
+    async def _get_order_with_details(self, storefront_id: int, order_id: str) -> tuple[Order, ProviderOrderDetails]:
+        order = await self._get_order_by_external_id(storefront_id, order_id)
+        if order.status == OrderStatus.CREATED.value:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        details = await self._processor_for_order(order).get_order_details(storefront_id, order_id)
+        return order, details
 
     async def _settle_capture(self, storefront_id: int, order: Order) -> OrderActionResult:
         processor = self._processor_for_order(order)

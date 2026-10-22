@@ -1,0 +1,91 @@
+{
+    "$defs": {
+        "Money": {
+            "properties": {
+                "currencyCode": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "currencyCode",
+                "value"
+            ],
+            "type": "object"
+        },
+        "OrderItem": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "unitAmount": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Money"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": [
+                "name",
+                "quantity"
+            ],
+            "type": "object"
+        },
+        "OrderStatus": {
+            "enum": [
+                "CREATED",
+                "SAVED",
+                "APPROVED",
+                "VOIDED",
+                "COMPLETED",
+                "PAYER_ACTION_REQUIRED",
+                "PENDING",
+                "CAPTURE_PENDING",
+                "REFUND_PENDING",
+                "REFUNDED"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "status": {
+            "$ref": "#/$defs/OrderStatus"
+        },
+        "items": {
+            "items": {
+                "$ref": "#/$defs/OrderItem"
+            },
+            "type": "array"
+        },
+        "total": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/Money"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        }
+    },
+    "required": [
+        "id",
+        "status",
+        "items"
+    ],
+    "type": "object"
+}

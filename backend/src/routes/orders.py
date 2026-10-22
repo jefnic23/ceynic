@@ -38,14 +38,12 @@ async def create_order(
 @router.post("/orders/{order_id:str}/authorize")
 async def authorize_payment(
     order_id: str,
-    create_order_request: CreateOrderRequest,
     orders_service: Annotated[OrdersService, Depends()],
     storefront_id: STOREFRONT_ID_DEPENDENCY,
 ) -> OrderActionResult:
     return await orders_service.authorize_payment(
         storefront_id=storefront_id,
         order_id=order_id,
-        product_ids=create_order_request.product_ids,
     )
 
 
@@ -71,3 +69,10 @@ async def refund_payment(
     id: int, orders_service: Annotated[OrdersService, Depends()], current_user: CURRENT_USER_DEPENDENCY
 ) -> OrderActionResult:
     return await orders_service.refund_payment(storefront_id=current_user.storefront_id, order_id=id)
+
+
+@router.post("/orders/{id:int}/payment/refresh")
+async def refresh_payment(
+    id: int, orders_service: Annotated[OrdersService, Depends()], current_user: CURRENT_USER_DEPENDENCY
+) -> OrderActionResult:
+    return await orders_service.refresh_payment(storefront_id=current_user.storefront_id, order_id=id)

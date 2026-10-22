@@ -122,7 +122,10 @@
 		border-radius: 50%;
 		inline-size: 1em;
 		block-size: 1em;
-		animation: spin 0.6s linear infinite;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.spinner { animation: spin 0.6s linear infinite; }
 	}
 
 	@keyframes spin {

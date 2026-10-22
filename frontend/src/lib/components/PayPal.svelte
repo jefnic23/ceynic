@@ -51,11 +51,7 @@
 					},
 					onApprove: async (data) => {
 						const response = await fetch(`${PUBLIC_API_URL}/orders/${data.orderID}/authorize`, {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({ product_ids: productIds }) // todo: pass in object with quantity
+							method: 'POST'
 						});
 
 						if (!response.ok) {

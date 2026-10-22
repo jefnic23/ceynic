@@ -15,6 +15,7 @@
 	}
 
 	let { data }: Props = $props();
+	let pendingAction: string | null = $state(null);
 
 	function formatCurrency(amount: number, currency = 'USD'): string {
 		return new Intl.NumberFormat('en-US', {
@@ -70,13 +71,60 @@
 				<p>Order placed: {new Date(order.createTime).toLocaleString()}</p>
 			</div>
 		</Card>
-		<form method="POST" use:enhance>
+		<form method="POST" use:enhance={({ formData, cancel }) => {
+			if (pendingAction !== null) {
+				cancel();
+				return;
+			}
+
+			const action = formData.get('action');
+			pendingAction = typeof action === 'string' ? action : null;
+			return async ({ update }) => {
+				try {
+					await update();
+				} finally {
+					pendingAction = null;
+				}
+			};
+		}}>
 			<input type="hidden" name="recordId" value={order.recordId} />
 			{#if order.status === 'PENDING'}
-				<Button name={"action"} value={"capture"}>Complete Order</Button>
-				<Button name={"action"} value={"void"} style={ButtonStyle.Cancel}>Void</Button>
+				<Button
+					type="submit"
+					name="action"
+					value="capture"
+					loading={pendingAction === 'capture'}
+					disabled={pendingAction !== null}
+					aria-label={pendingAction === 'capture' ? 'Completing order' : undefined}
+				>Complete Order</Button>
+				<Button
+					type="submit"
+					name="action"
+					value="void"
+					style={ButtonStyle.Cancel}
+					loading={pendingAction === 'void'}
+					disabled={pendingAction !== null}
+					aria-label={pendingAction === 'void' ? 'Voiding order' : undefined}
+				>Void</Button>
 			{:else if order.status === 'COMPLETED'}
-				<Button name={"action"} value={"refund"} style={ButtonStyle.Info}>Refund</Button>
+				<Button
+					type="submit"
+					name="action"
+					value="refund"
+					style={ButtonStyle.Info}
+					loading={pendingAction === 'refund'}
+					disabled={pendingAction !== null}
+					aria-label={pendingAction === 'refund' ? 'Refunding order' : undefined}
+				>Refund</Button>
+			{:else if order.status === 'CAPTURE_PENDING' || order.status === 'REFUND_PENDING'}
+				<Button
+					type="submit"
+					name="action"
+					value="payment/refresh"
+					loading={pendingAction === 'payment/refresh'}
+					disabled={pendingAction !== null}
+					aria-label={pendingAction === 'payment/refresh' ? 'Refreshing payment status' : undefined}
+				>Refresh payment status</Button>
 			{/if}
 		</form>
 	{/await}

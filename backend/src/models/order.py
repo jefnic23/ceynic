@@ -37,6 +37,10 @@ class Order(OrderBase, table=True):
     payment_processor: str = Field(
         sa_column=Column(PaymentProcessorType, nullable=False),
     )
+    refund_id: str | None = None
+    capture_request_id: str | None = None
+    refund_request_id: str | None = None
+    payment_action_started_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     
     storefront: "Storefront" = Relationship(back_populates="orders")
     products: list["OrderProduct"] = Relationship(back_populates="order")

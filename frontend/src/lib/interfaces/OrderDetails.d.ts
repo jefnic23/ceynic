@@ -6,7 +6,16 @@
  */
 
 export type OrderStatus =
-  "CREATED" | "SAVED" | "APPROVED" | "VOIDED" | "COMPLETED" | "PAYER_ACTION_REQUIRED" | "PENDING" | "REFUNDED";
+  | "CREATED"
+  | "SAVED"
+  | "APPROVED"
+  | "VOIDED"
+  | "COMPLETED"
+  | "PAYER_ACTION_REQUIRED"
+  | "PENDING"
+  | "CAPTURE_PENDING"
+  | "REFUND_PENDING"
+  | "REFUNDED";
 
 export interface OrderDetails {
   id: string;

@@ -65,6 +65,8 @@
                 "COMPLETED",
                 "PAYER_ACTION_REQUIRED",
                 "PENDING",
+                "CAPTURE_PENDING",
+                "REFUND_PENDING",
                 "REFUNDED"
             ],
             "type": "string"

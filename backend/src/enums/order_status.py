@@ -9,8 +9,15 @@ class OrderStatus(Enum):
     COMPLETED = "COMPLETED"
     PAYER_ACTION_REQUIRED = "PAYER_ACTION_REQUIRED"
     PENDING = "PENDING"
+    CAPTURE_PENDING = "CAPTURE_PENDING"
+    REFUND_PENDING = "REFUND_PENDING"
     REFUNDED = "REFUNDED"
 
 
-SOLD_ORDER_STATUSES = (OrderStatus.PENDING.value, OrderStatus.COMPLETED.value)
+SOLD_ORDER_STATUSES = (
+    OrderStatus.PENDING.value,
+    OrderStatus.CAPTURE_PENDING.value,
+    OrderStatus.COMPLETED.value,
+    OrderStatus.REFUND_PENDING.value,
+)
     

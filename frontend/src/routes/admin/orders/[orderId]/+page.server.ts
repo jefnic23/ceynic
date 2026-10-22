@@ -37,7 +37,7 @@ export const actions: Actions = {
             typeof recordId !== 'string' ||
             !/^\d+$/.test(recordId) ||
             typeof action !== 'string' ||
-            !['capture', 'void', 'refund'].includes(action)
+            !['capture', 'void', 'refund', 'payment/refresh'].includes(action)
         ) {
             error(400, 'Invalid order action.');
         }
@@ -49,9 +49,12 @@ export const actions: Actions = {
             }
         });
 
-		if (response.status !== 200) {
-			console.log('Error capturing payment.');
-			error(500, "Error capturing payment.");
+		if (!response.ok) {
+			const result = await response.json().catch(() => null);
+			const message = typeof result?.detail === 'string'
+				? result.detail
+				: 'Unable to update payment. Check the order state before retrying.';
+			error(response.status, message);
 		}
 
 		const responseData = await response.json();

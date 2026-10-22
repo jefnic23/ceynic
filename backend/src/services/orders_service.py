@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -13,7 +14,7 @@ from src.models.order_product import OrderProduct
 from src.models.product import Product
 from src.schemas.create_order_out import CreateOrderOut
 from src.schemas.order_details import OrderDetails
-from src.schemas.payment_result import OrderActionResult
+from src.schemas.payment_result import OrderActionResult, PaymentState
 from src.schemas.product_for_order import ProductForOrder
 from src.services.base.payment_processor_base import PaymentProcessorBase
 from src.services.factories.payment_processor_factory import PaymentProcessorFactory
@@ -77,11 +78,7 @@ class OrdersService:
         self,
         storefront_id: int,
         order_id: str,
-        product_ids: list[int],
     ) -> OrderActionResult:
-        if not product_ids or len(product_ids) != len(set(product_ids)):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid products")
-
         order = await self._get_order_by_external_id(storefront_id, order_id)
         if order.status != OrderStatus.CREATED.value:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order already authorized")
@@ -89,9 +86,7 @@ class OrdersService:
         saved_products = await self._session.exec(
             select(OrderProduct.product_id).where(OrderProduct.order_id == order.id)
         )
-        if set(saved_products.all()) != set(product_ids):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order products do not match")
-
+        product_ids = saved_products.all()
         await self._lock_available_products(storefront_id, product_ids)
         products = await self._get_checkout_products(storefront_id, product_ids)
         response = await self._processor_for_order(order).authorize_order(storefront_id, order_id, products)
@@ -115,37 +110,100 @@ class OrdersService:
         await self._lock_available_products(storefront_id, product_ids.all(), excluded_order_id=order.id)
         response = await self._processor_for_order(order).reauthorize_payment(storefront_id, order.authorization_id)
         order.authorization_id = response.id
+        external_id = order.order_id
         await self._session.commit()
-        return OrderActionResult(order_id=order.order_id, status=OrderStatus.PENDING)
+        return OrderActionResult(order_id=external_id, status=OrderStatus.PENDING)
 
     async def void_payment(self, storefront_id: int, order_id: int) -> OrderActionResult:
         order = await self._require_order(storefront_id, order_id)
         self._require_status(order, OrderStatus.PENDING)
         await self._processor_for_order(order).void_payment(storefront_id, order.authorization_id)
         order.status = OrderStatus.VOIDED.value
+        external_id = order.order_id
         await self._session.commit()
-        return OrderActionResult(order_id=order.order_id, status=OrderStatus.VOIDED)
+        return OrderActionResult(order_id=external_id, status=OrderStatus.VOIDED)
 
     async def capture_payment(self, storefront_id: int, order_id: int) -> OrderActionResult:
         order = await self._require_order(storefront_id, order_id)
         self._require_status(order, OrderStatus.PENDING)
-        response = await self._processor_for_order(order).capture_payment(storefront_id, order.authorization_id)
-        order.capture_id = response.id
-        order.status = OrderStatus.COMPLETED.value
+        order.status = OrderStatus.CAPTURE_PENDING.value
+        order.capture_id = None
+        order.capture_request_id = str(uuid4())
+        order.payment_action_started_at = datetime.now(UTC)
         await self._session.commit()
-        return OrderActionResult(order_id=order.order_id, status=OrderStatus.COMPLETED)
+        order = await self._require_order(storefront_id, order_id)
+        return await self._settle_capture(storefront_id, order)
 
     async def refund_payment(self, storefront_id: int, order_id: int) -> OrderActionResult:
         order = await self._require_order(storefront_id, order_id)
         self._require_status(order, OrderStatus.COMPLETED)
         if order.capture_id is None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order has no capture")
-        await self._processor_for_order(order).refund_payment(storefront_id, order.capture_id)
-        order.status = OrderStatus.REFUNDED.value
+        order.status = OrderStatus.REFUND_PENDING.value
+        order.refund_id = None
+        order.refund_request_id = str(uuid4())
+        order.payment_action_started_at = datetime.now(UTC)
         await self._session.commit()
-        return OrderActionResult(order_id=order.order_id, status=OrderStatus.REFUNDED)
+        order = await self._require_order(storefront_id, order_id)
+        return await self._settle_refund(storefront_id, order)
+
+    async def refresh_payment(self, storefront_id: int, order_id: int) -> OrderActionResult:
+        order = await self._require_order(storefront_id, order_id)
+        if order.status == OrderStatus.CAPTURE_PENDING.value:
+            return await self._settle_capture(storefront_id, order)
+        if order.status == OrderStatus.REFUND_PENDING.value:
+            return await self._settle_refund(storefront_id, order)
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Order has no pending payment")
 
     # region Private Methods
+
+    async def _settle_capture(self, storefront_id: int, order: Order) -> OrderActionResult:
+        processor = self._processor_for_order(order)
+        if order.capture_id:
+            result = await processor.get_capture_result(storefront_id, order.capture_id)
+        else:
+            if not order.capture_request_id or not order.payment_action_started_at:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Capture has no recovery details")
+            result = await processor.capture_payment(
+                storefront_id, order.authorization_id, order.capture_request_id, order.payment_action_started_at
+            )
+
+        external_id = order.order_id
+        order.capture_id = result.id
+        if result.state == PaymentState.COMPLETED:
+            order.status = OrderStatus.COMPLETED.value
+        elif result.state == PaymentState.FAILED:
+            order.status = OrderStatus.PENDING.value
+            order.capture_request_id = None
+        if result.state != PaymentState.PENDING:
+            order.payment_action_started_at = None
+        status_value = OrderStatus(order.status)
+        await self._session.commit()
+        return OrderActionResult(order_id=external_id, status=status_value)
+
+    async def _settle_refund(self, storefront_id: int, order: Order) -> OrderActionResult:
+        processor = self._processor_for_order(order)
+        if order.refund_id:
+            result = await processor.get_refund_result(storefront_id, order.refund_id)
+        else:
+            if not order.refund_request_id or not order.payment_action_started_at:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Refund has no recovery details")
+            result = await processor.refund_payment(
+                storefront_id, order.capture_id, order.refund_request_id, order.payment_action_started_at
+            )
+
+        external_id = order.order_id
+        order.refund_id = result.id
+        if result.state == PaymentState.COMPLETED:
+            order.status = OrderStatus.REFUNDED.value
+        elif result.state == PaymentState.FAILED:
+            order.status = OrderStatus.COMPLETED.value
+            order.refund_request_id = None
+        if result.state != PaymentState.PENDING:
+            order.payment_action_started_at = None
+        status_value = OrderStatus(order.status)
+        await self._session.commit()
+        return OrderActionResult(order_id=external_id, status=status_value)
 
     async def _get_checkout_products(self, storefront_id: int, product_ids: list[int]) -> list[ProductForOrder]:
         results = await self._session.exec(

@@ -1,5 +1,6 @@
 import base64
 import json
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, TypeVar
 
@@ -14,7 +15,7 @@ from src.http_client import HttpClient
 from src.models.account_settings import AccountSettings
 from src.schemas.create_order_out import CreateOrderOut
 from src.schemas.order_details import Money, OrderCustomer, OrderItem, ProviderOrderDetails, ShippingAddress
-from src.schemas.payment_result import AuthorizationResult, CaptureResult
+from src.schemas.payment_result import AuthorizationResult, PaymentResult, PaymentState
 from src.schemas.paypal.auth_response import AuthResponse
 from src.schemas.paypal.authorize_payment_response import AuthorizePaymentResponse
 from src.schemas.paypal.base import Amount, Breakdown, UnitAmount
@@ -40,6 +41,8 @@ class PayPalService(PaymentProcessorBase):
     BASE_URL_AUTHORIZATIONS = "/v2/payments/authorizations"
     BASE_URL_CAPTURES = "/v2/payments/captures"
     BASE_URL_ORDERS = "/v2/checkout/orders"
+    # Limit unknown-outcome retries to a short window; PayPal does not retain IDs indefinitely.
+    _REPLAY_WINDOW = timedelta(minutes=15)
     T = TypeVar("T")
 
     def __init__(self, session: AsyncSession, settings: Settings, http_client: HttpClient):
@@ -183,36 +186,94 @@ class PayPalService(PaymentProcessorBase):
             response_model=Authorization,
         )
 
+        if response.status != "CREATED":
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Payment was not reauthorized")
         return AuthorizationResult(id=response.id, create_time=response.create_time)
 
     async def void_payment(self, storefront_id: int, authorization_id: str) -> None:
+        details = await self._send_request(
+            storefront_id=storefront_id,
+            method="GET",
+            path=f"{self.BASE_URL_AUTHORIZATIONS}/{authorization_id}",
+            response_model=PayPalPaymentResponse,
+        )
+        if details.status == "VOIDED":
+            return
+        if details.status != "CREATED":
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Payment cannot be voided")
         await self._send_request(
             storefront_id=storefront_id,
             method="POST",
             path=f"{self.BASE_URL_AUTHORIZATIONS}/{authorization_id}/void",
         )
 
-    async def capture_payment(self, storefront_id: int, authorization_id: str) -> CaptureResult:
+    async def capture_payment(
+        self, storefront_id: int, authorization_id: str, request_id: str, requested_at: datetime
+    ) -> PaymentResult:
+        self._require_replayable(requested_at)
         response = await self._send_request(
             storefront_id=storefront_id,
             method="POST",
             path=f"{self.BASE_URL_AUTHORIZATIONS}/{authorization_id}/capture",
-            headers={"Prefer": "return=representation"},
+            headers={"Prefer": "return=representation", "PayPal-Request-Id": request_id},
             response_model=PayPalPaymentResponse,
         )
-        if response.status != "COMPLETED":
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Payment was not captured")
-        return CaptureResult(id=response.id)
+        return self._payment_result(response)
 
-    async def refund_payment(self, storefront_id: int, capture_id: str) -> None:
-        await self._send_request(
+    async def get_capture_result(self, storefront_id: int, capture_id: str) -> PaymentResult:
+        response = await self._send_request(
+            storefront_id=storefront_id,
+            method="GET",
+            path=f"{self.BASE_URL_CAPTURES}/{capture_id}",
+            response_model=PayPalPaymentResponse,
+        )
+        return self._payment_result(response)
+
+    async def refund_payment(
+        self, storefront_id: int, capture_id: str, request_id: str, requested_at: datetime
+    ) -> PaymentResult:
+        self._require_replayable(requested_at)
+        response = await self._send_request(
             storefront_id=storefront_id,
             method="POST",
             path=f"{self.BASE_URL_CAPTURES}/{capture_id}/refund",
-            headers={"Prefer": "return=representation"},
+            headers={"Prefer": "return=representation", "PayPal-Request-Id": request_id},
+            response_model=PayPalPaymentResponse,
         )
+        return self._payment_result(response)
+
+    async def get_refund_result(self, storefront_id: int, refund_id: str) -> PaymentResult:
+        response = await self._send_request(
+            storefront_id=storefront_id,
+            method="GET",
+            path=f"/v2/payments/refunds/{refund_id}",
+            response_model=PayPalPaymentResponse,
+        )
+        return self._payment_result(response)
 
     # region Private Methods
+
+    @classmethod
+    def _require_replayable(cls, requested_at: datetime) -> None:
+        if datetime.now(UTC) - requested_at > cls._REPLAY_WINDOW:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Payment outcome needs manual review before retrying",
+            )
+
+    @staticmethod
+    def _payment_result(response: PayPalPaymentResponse) -> PaymentResult:
+        states = {
+            "PENDING": PaymentState.PENDING,
+            "COMPLETED": PaymentState.COMPLETED,
+            "DECLINED": PaymentState.FAILED,
+            "FAILED": PaymentState.FAILED,
+            "CANCELLED": PaymentState.FAILED,
+        }
+        state = states.get(response.status)
+        if state is None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Unknown payment state")
+        return PaymentResult(id=response.id, state=state)
 
     async def _get_credentials(self, storefront_id: int) -> PayPalCredentials:
         """

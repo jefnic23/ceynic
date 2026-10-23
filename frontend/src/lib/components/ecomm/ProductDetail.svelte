@@ -10,7 +10,7 @@
 	import { currencyFormatter } from '$lib/utils/formatters';
 	import { goto } from '$app/navigation';
 
-	let { product, location, paymentProcessor, url }: { product: ProductOut; location: Promise<Location>; paymentProcessor: PaymentProcessor | null; url: URL } = $props();
+	let { product, location, paymentProcessor, url, pinterestEnabled }: { product: ProductOut; location: Promise<Location>; paymentProcessor: PaymentProcessor | null; url: URL; pinterestEnabled: Promise<boolean> } = $props();
 	const returnsTooltipContent = 'You have 14 days from item delivery to ship this item back. Buyer is responsible for return shipping costs. If the item is not returned in its original condition, the buyer is responsible for any loss in value.';
 
 	function handleInquire() {
@@ -22,7 +22,7 @@
 </script>
 
 <div class="product-detail">
-	<div class="gallery"><ProductImages {product} {url} /></div>
+	<div class="gallery"><ProductImages {product} {url} {pinterestEnabled} /></div>
 	<div class="details">
 		<div><h1>{product.title}</h1><div class="description">{product.description}</div></div>
 		<div><div class="price">{currencyFormatter.format(product.price as number)}</div><div class="shipping">+ <i>free shipping</i></div></div>

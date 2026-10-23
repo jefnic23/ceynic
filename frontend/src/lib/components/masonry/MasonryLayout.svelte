@@ -2,13 +2,14 @@
 	import Skeleton from '$lib/components/shared/Skeleton.svelte';
 	import MasonryItem from '$lib/components/masonry/MasonryItem.svelte';
 	import type { ProductOut } from '$lib/interfaces/ProductOut';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		products?: ProductOut[];
+		pinterestEnabled?: Promise<boolean>;
 	}
 
-	let { products = [] }: Props = $props();
+	let { products = [], pinterestEnabled = Promise.resolve(false) }: Props = $props();
 	let layout: HTMLDivElement;
 	let columnCount = $state(3);
 	let productColumns = $derived(
@@ -19,8 +20,6 @@
 	const skeletonIndexes = Array.from({ length: 12 }, (_, index) => index);
 
 	onMount(() => {
-		if (products.length > 0) tick().then(() => window.PinUtils?.build());
-
 		const observer = new ResizeObserver(([entry]) => {
 			if (!entry) return;
 			const gap = 13;
@@ -62,6 +61,7 @@
 						{product}
 						loaded={loadedImages.has(product.id)}
 						load={handleImageLoad}
+						{pinterestEnabled}
 					/>
 				{/each}
 			{/if}

@@ -6,32 +6,11 @@
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import Footer from '$lib/components/Footer.svelte';
-	import { afterNavigate, onNavigate } from '$app/navigation';
+	import { onNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import EcommHeader from '$lib/components/ecomm/EcommHeader.svelte';
 	import GoogleAnalytics from '$lib/components/GoogleAnalytics.svelte';
 	import type { Snippet } from 'svelte';
-
-	onMount(() => {
-		data.pinterestEnabled.then((enabled) => {
-			if (!enabled) return;
-
-			// Pinterest injects scripts into the document; wait until Svelte has hydrated the head.
-			if (document.querySelector('script[src="https://assets.pinterest.com/js/pinit.js"]')) return;
-
-			const script = document.createElement('script');
-			script.src = 'https://assets.pinterest.com/js/pinit.js';
-			script.async = true;
-			script.dataset.pinHover = 'true';
-			script.dataset.pinSticky = 'false';
-			script.onload = () => window.PinUtils?.build();
-			document.body.appendChild(script);
-		});
-	});
-
-	afterNavigate(async () => {
-		if (await data.pinterestEnabled) window.PinUtils?.build();
-	});
 
 	onNavigate((navigation) => {
 		if (!document?.startViewTransition) return;

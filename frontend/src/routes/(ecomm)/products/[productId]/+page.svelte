@@ -15,7 +15,7 @@
 		<Skeleton />
 	{:then product}
 		<div class="breadcrumb"><a href="/products">Browse</a><Icon icon="material-symbols:arrow-forward-ios-rounded" width={16} height={16} />{product.title}</div>
-		<ProductDetail {product} url={page.url} location={data.location} paymentProcessor={data.paymentProcessor} />
+		<ProductDetail {product} url={page.url} location={data.location} paymentProcessor={data.paymentProcessor} pinterestEnabled={data.pinterestEnabled} />
 	{/await}
 </PageContainer>
 

@@ -1,19 +1,21 @@
 <script lang="ts">
 	import type { ProductImageOut, ProductOut } from "$lib/interfaces/ProductOut";
 	import ProductImage from '$lib/components/ProductImage.svelte';
+	import PinterestSave from '$lib/components/ecomm/PinterestSave.svelte';
 	import { quintOut } from "svelte/easing";
 	import { crossfade } from "svelte/transition";
 	import Modal from "$lib/components/shared/Modal.svelte";
-	import { onMount, tick } from "svelte";
+	import { onMount } from "svelte";
 	import Icon from "@iconify/svelte";
 	import { page } from "$app/state";
 
     interface Props {
 		product: ProductOut;
         url: URL;
+		pinterestEnabled: Promise<boolean>;
 	}
 
-	let { product, url }: Props = $props();
+	let { product, url, pinterestEnabled }: Props = $props();
 
     let selectedIndex: number = $state(0);
     let selectedImage: ProductImageOut | undefined = $derived(product.images?.[selectedIndex]);
@@ -76,10 +78,8 @@
         touchEndX = null;
     }
 
-    async function handleThumbnail(index: number) {
+	function handleThumbnail(index: number) {
         selectedIndex = index;
-        await tick();
-        window.PinUtils?.build();
     }
 
 		onMount(() => {
@@ -88,8 +88,6 @@
 		if (!isNaN(index) && index >= 0 && index < (product.images as ProductImageOut[]).length) {
 			selectedIndex = index;
 		}
-
-		tick().then(() => window.PinUtils?.build());
 
 		window.addEventListener('keydown', handleKeydown);
 		return () => window.removeEventListener('keydown', handleKeydown);
@@ -116,35 +114,40 @@
             {/each}
         </ul>
     {/if}
-    <div 
-        class="image" 
-        onclick={() => (modalIndex = selectedIndex, showModal = true)} 
-        onkeydown={(e) => { 
-            if (e.key !== "Enter" && e.key !== " ") return; 
-            e.preventDefault();
-            (e.target as HTMLElement).click();
-        }} 
-        role="button" 
-        tabindex="0" 
-        aria-pressed="false"
-    >
-        {#key selectedImage?.url}
-            <div 
-				in:receive={{ key: selectedImage?.url }}
-				out:send={{ key: selectedImage?.url }}
-            >
-                <ProductImage
-					url={selectedImage?.url}
-                    alt={product.title}
-                    width={selectedImage?.width}
-                    height={selectedImage?.height}
-					data-pin-media={selectedImage?.url ? new URL(selectedImage.url, url).href : undefined}
-					data-pin-url={new URL(`/products/${product.id}`, url).href}
-					data-pin-description={product.title}
-                />
-            </div>
-        {/key}
-    </div>
+	<div class="image-container pinterest-save-target">
+		<div
+			class="image"
+			onclick={() => (modalIndex = selectedIndex, showModal = true)}
+			onkeydown={(e) => {
+				if (e.key !== "Enter" && e.key !== " ") return;
+				e.preventDefault();
+				(e.target as HTMLElement).click();
+			}}
+			role="button"
+			tabindex="0"
+			aria-pressed="false"
+		>
+			{#key selectedImage?.url}
+				<div
+					in:receive={{ key: selectedImage?.url }}
+					out:send={{ key: selectedImage?.url }}
+				>
+					<ProductImage
+						url={selectedImage?.url}
+						alt={product.title}
+						width={selectedImage?.width}
+						height={selectedImage?.height}
+					/>
+				</div>
+			{/key}
+		</div>
+		<PinterestSave
+			enabled={pinterestEnabled}
+			imageUrl={selectedImage?.url ? new URL(selectedImage.url, url).href : undefined}
+			productUrl={new URL(`/products/${product.id}`, url).href}
+			description={product.title}
+		/>
+	</div>
 </div>
 
 {#if showModal && modalImage}
@@ -207,7 +210,13 @@
 	}
 	li a:active { outline: 2px solid var(--link); }
 
-    .image  {
+	.image-container {
+		position: relative;
+		flex: 1;
+		min-inline-size: 0;
+	}
+
+	.image {
         display: grid;
 		flex: 1;
 		width: 100%;
@@ -227,6 +236,7 @@
 		min-width: 0;
 		min-height: 0;
     }
+
 	.image:active { opacity: 0.85; }
 	.image :global(img),
 	.modal-image :global(img) { inline-size: 100%; block-size: 100%; object-fit: contain; }

@@ -14,7 +14,7 @@
 	{#await data.products}
 		<MasonryLayout />
 	{:then products}
-		<MasonryLayout {products} />
+		<MasonryLayout {products} pinterestEnabled={data.pinterestEnabled} />
 	{:catch error}
 		<p class="error" role="alert">{error.message}</p>
 	{/await}

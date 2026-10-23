@@ -18,7 +18,6 @@ declare global {
 			execute: (siteKey: string, options: { action: string }) => Promise<string>;
 		};
 		gtag?: (...args: unknown[]) => void;
-		PinUtils?: { build: () => void };
 	}
 }
 

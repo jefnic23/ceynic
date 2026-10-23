@@ -55,7 +55,7 @@
 		gap: 1.5rem;
 	}
 
-	h1, h2, p {
+	h1, p {
 		margin-block: 0;
 	}
 </style>

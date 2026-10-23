@@ -64,35 +64,6 @@
 
 						confirmOrder(data.orderID);
 					}
-					// onApprove: function(data, actions) {
-					// 	const CAPTURE_ORDER_URL = '{{ url_for("main.capture_order", order_id="order_id") }}'.replace('order_id', data.orderID);
-					// 	return fetch(CAPTURE_ORDER_URL, {
-					// 		method: "POST",
-					// 		headers: {
-					// 			'Content-Type': 'application/json'
-					// 		},
-					// 		body: JSON.stringify({
-					// 			'id': {{data.id}}
-					// 		})
-					// 	}).then((res) => {
-					// 		return res.json();
-					// 	}).then((orderData) => {
-					// 		var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-					// 		if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-					// 			return actions.restart();
-					// 		}
-
-					// 		if (errorDetail) {
-					// 			var msg = 'Sorry, your transaction could not be processed.';
-					// 			if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-					// 			if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-					// 			return alert(msg);
-					// 		}
-
-					// 		actions.redirect('{{ url_for("main.order_confirmation", purchase_id="purchase_id", _external=True) }}'.replace('purchase_id', orderData.purchase_id));
-					// 	});
-					// }
 				})
 				.render('#paypal-container-element');
 		} catch (error) {

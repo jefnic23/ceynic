@@ -3,11 +3,37 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Response, status
 from src.dependencies import CURRENT_USER_DEPENDENCY, SUBDOMAIN_DEPENDENCY
 from src.enums.payment_processor import PaymentProcessorEnum
-from src.schemas.payment_processor_selection import ConfiguredPaymentProcessors, PaymentProcessorSelection
+from src.schemas.about_content import AboutContent
+from src.schemas.payment_processor_selection import (
+    ConfiguredPaymentProcessors,
+    PaymentProcessorSelection,
+)
 from src.schemas.site_settings import SiteSettings
 from src.services.account_settings_service import AccountSettingsService
+from src.services.content_service import ContentService
 
 router = APIRouter(prefix="/settings", tags=["settings"])
+
+
+@router.get("/about", response_model=AboutContent)
+async def get_about_content(
+    current_user: CURRENT_USER_DEPENDENCY,
+    content_service: Annotated[ContentService, Depends()],
+    response: Response,
+) -> AboutContent:
+    response.headers["cache-control"] = "no-store"
+    return await content_service.get_about(current_user.storefront_id)
+
+
+@router.put("/about", response_model=AboutContent)
+async def update_about_content(
+    current_user: CURRENT_USER_DEPENDENCY,
+    content_service: Annotated[ContentService, Depends()],
+    about: AboutContent,
+    response: Response,
+) -> AboutContent:
+    response.headers["cache-control"] = "no-store"
+    return await content_service.update_about(current_user.storefront_id, about)
 
 
 @router.get("/siteSettings")

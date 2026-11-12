@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@milkdown/crepe": "7.21.0",
 		"@paypal/paypal-js": "^8.0.5",
 		"@sveltejs/adapter-node": "^5.2.9",
 		"jwt-decode": "^4.0.0",
